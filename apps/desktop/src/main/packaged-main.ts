@@ -126,6 +126,16 @@ export async function runDesktopMain(): Promise<void> {
   // 已修正的环境变量（基于源码验证）
   // 不展开 process.env — 避免 Electron 内部环境变量泄漏到 daemon
   // （如 ELECTRON_RUN_AS_NODE, PAPERCLIP_UI_DEV_MIDDLEWARE 等）
+  //
+  // 计算 bundled assets 的目录（daemon entry 的父目录 = paperclip-server/dist/ 的父 = paperclip-server/）
+  // 在打包后的结构中：
+  //   Resources/paperclip-server/dist/index.bundle.cjs  ← daemonEntry
+  //   Resources/paperclip-server/teams-catalog/          ← bundled teams
+  //   Resources/paperclip-server/skills-catalog/         ← bundled skills
+  //   Resources/paperclip-server/onboarding-assets/      ← bundled onboarding assets
+  const daemonDir = path.dirname(daemonEntry); // paperclip-server/dist/
+  const daemonRoot = path.dirname(daemonDir);  // paperclip-server/
+
   const serverEnv = {
     PATH: process.env.PATH,               // daemon 需要 PATH 来查找 npx / Node.js
     HOME: process.env.HOME,               // daemon 需要 HOME for ~/.paperclip
@@ -137,6 +147,10 @@ export async function runDesktopMain(): Promise<void> {
     PAPERCLIP_MIGRATION_AUTO_APPLY: "true",
     PAPERCLIP_OPEN_ON_LISTEN: "false",    // ← 新增：桌面端不打开浏览器
     HOST: "127.0.0.1",                    // ← 不继承 shell 的 HOST 环境变量（如 MacBook-Pro-M4.local），强制 loopback
+    // Bundled catalog paths — daemon uses these to find catalogs in the bundle
+    PAPERCLIP_TEAMS_CATALOG_DIR: path.join(daemonRoot, "teams-catalog"),
+    PAPERCLIP_SKILLS_CATALOG_DIR: path.join(daemonRoot, "skills-catalog"),
+    PAPERCLIP_ONBOARDING_ASSETS_DIR: path.join(daemonRoot, "onboarding-assets"),
   };
 
   console.log(`[PaperClip Desktop] Starting daemon on port ${serverPort}...`);

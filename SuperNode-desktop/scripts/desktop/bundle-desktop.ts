@@ -558,6 +558,30 @@ if (fs.existsSync(path.join(teamsCatalogDir, "generated"))) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// 8b. 复制 Skills Catalog
+// ═══════════════════════════════════════════════════════════════════
+console.log("[Bundle] Copying skills catalog...");
+const skillsCatalogDir = path.join(ROOT, "packages", "skills-catalog");
+if (fs.existsSync(path.join(skillsCatalogDir, "catalog"))) {
+  copyRecursive(path.join(skillsCatalogDir, "catalog"), path.join(bundledServer, "skills-catalog", "catalog"));
+}
+if (fs.existsSync(path.join(skillsCatalogDir, "generated"))) {
+  copyRecursive(path.join(skillsCatalogDir, "generated"), path.join(bundledServer, "skills-catalog", "generated"));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 8c. 复制 Onboarding Assets（default-agent-instructions.ts 需要）
+// ═══════════════════════════════════════════════════════════════════
+console.log("[Bundle] Copying onboarding assets...");
+const onboardingAssetsDir = path.join(ROOT, "server", "src", "onboarding-assets");
+if (fs.existsSync(onboardingAssetsDir)) {
+  copyRecursive(onboardingAssetsDir, path.join(bundledServer, "onboarding-assets"));
+  console.log("  onboarding-assets → bundledServer/onboarding-assets/");
+} else {
+  console.warn("  ⚠️ onboarding-assets not found at", onboardingAssetsDir);
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // 9. Plugins 目录
 // ═══════════════════════════════════════════════════════════════════
 fs.mkdirSync(path.join(bundledServer, "plugins"), { recursive: true });
