@@ -16,8 +16,7 @@
     "icons": "node --experimental-strip-types ../../SuperNode-desktop/scripts/desktop/generate-icons.ts"
   },
   "dependencies": {
-    "electron-updater": "^6.3.9",
-    "embedded-postgres": "^18.1.0-beta.16"
+    "electron-updater": "^6.3.9"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
