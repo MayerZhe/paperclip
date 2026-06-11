@@ -11,8 +11,8 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "bundle": "npx tsx ../../SuperNode-desktop/scripts/desktop/bundle-desktop.ts",
-    "pack": "electron-builder --config electron-builder.yml",
-    "dist": "pnpm build && pnpm pack",
+    "electron:pack": "electron-builder --config electron-builder.yml",
+    "dist": "pnpm build && pnpm bundle && pnpm electron:pack",
     "icons": "node --experimental-strip-types ../../SuperNode-desktop/scripts/desktop/generate-icons.ts"
   },
   "dependencies": {

@@ -60,3 +60,9 @@ tests/release-smoke/playwright-report/
 .superpowers/
 .claude/worktrees/
 .herenow
+
+# Desktop build derived files
+SuperNode-desktop/electron-builder.yml
+SuperNode-desktop/package.json
+SuperNode-desktop/paperclip-server
+SuperNode-desktop/resources/

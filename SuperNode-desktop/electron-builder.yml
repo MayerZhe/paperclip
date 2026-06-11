@@ -103,7 +103,7 @@ files:
 # 钩子
 # ═══════════════════════════════════════
 # Fix Helper .app Info.plist to prevent 4 icons in Dock/Launchpad
-afterPack: "../../SuperNode-desktop/scripts/desktop/fix-helper-plist.cjs"
+afterPack: "scripts/desktop/fix-helper-plist.cjs"
 
 # ═══════════════════════════════════════
 # 发布配置

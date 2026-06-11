@@ -94,10 +94,13 @@ extraResources:
     to: "paperclip-server"
 
 # 文件匹配模式
+# paperclip-server is extraResources (copied to Resources/paperclip-server/), not in dist/
+# Note: after bundle-desktop.ts syncs SuperNode-desktop/dist/ → apps/desktop/,
+# paperclip-server/ exists at apps/desktop/paperclip-server/ (top level)
 files:
   - "dist/**/*"
-  - "!dist/paperclip-server/**"
   - "package.json"
+  - "paperclip-server/**"
 
 # ═══════════════════════════════════════
 # 钩子

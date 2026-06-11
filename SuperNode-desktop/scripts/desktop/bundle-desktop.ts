@@ -684,7 +684,54 @@ if (!allPass) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// 13. 摘要
+// 13. Sync to apps/desktop/ — electron-builder runs from there
+//    Without this step, the daemon bundle (paperclip-server with
+//    node_modules) never reaches the packaged app.
+// ═══════════════════════════════════════════════════════════════════
+console.log("[Bundle] Syncing to apps/desktop/ for electron-builder...");
+
+// Clean old sync artifacts in apps/desktop/
+const appsDesktopPaperclipServer = path.join(APPS_DESKTOP, "paperclip-server");
+if (fs.existsSync(appsDesktopPaperclipServer)) {
+  fs.rmSync(appsDesktopPaperclipServer, { recursive: true, force: true });
+}
+const appsDesktopDist = path.join(APPS_DESKTOP, "dist");
+// Don't remove apps/desktop/dist entirely — it contains TypeScript build output
+// that was built before bundle. Only clean sub-paths we manage.
+for (const sub of ["main", "preload", "shared", "package.json"]) {
+  const p = path.join(appsDesktopDist, sub);
+  if (fs.existsSync(p)) {
+    fs.rmSync(p, { recursive: true, force: true });
+  }
+}
+
+// Sync daemon bundle (with node_modules from pnpm deploy)
+console.log("  paperclip-server → apps/desktop/paperclip-server");
+fs.cpSync(bundledServer, appsDesktopPaperclipServer, {
+  recursive: true,
+  dereference: false,  // Preserve pnpm symlinks
+  force: true,
+});
+
+// Sync Electron main/preload (from SuperNode-desktop/dist/)
+console.log("  dist/main → apps/desktop/dist/main");
+fs.cpSync(path.join(distDir, "main"), path.join(appsDesktopDist, "main"), { recursive: true, force: true });
+console.log("  dist/preload → apps/desktop/dist/preload");
+fs.cpSync(path.join(distDir, "preload"), path.join(appsDesktopDist, "preload"), { recursive: true, force: true });
+if (fs.existsSync(path.join(distDir, "shared"))) {
+  console.log("  dist/shared → apps/desktop/dist/shared");
+  fs.cpSync(path.join(distDir, "shared"), path.join(appsDesktopDist, "shared"), { recursive: true, force: true });
+}
+// Also copy dist/package.json to apps/desktop/dist/ so DESKTOP_VERSION reads work
+fs.copyFileSync(
+  path.join(distDir, "package.json"),
+  path.join(appsDesktopDist, "package.json"),
+);
+
+console.log("[Bundle] ✅ Synced to apps/desktop/");
+
+// ═══════════════════════════════════════════════════════════════════
+// 14. 摘要
 // ═══════════════════════════════════════════════════════════════════
 const totalSize = (() => {
   try {
