@@ -29,7 +29,7 @@ export async function ensureFirstRunConfig(options: OnboardOptions): Promise<voi
       `PAPERCLIP_HOME="${options.homeDir}" ` +
       `PAPERCLIP_INSTANCE_ID="${options.instanceId}" ` +
       `npx paperclipai onboard -y`,
-      { stdio: "inherit", timeout: 30000 },
+      { stdio: "inherit", timeout: 60000 },
     );
     console.log("[PaperClip Desktop] Config generated via paperclipai onboard");
     return;

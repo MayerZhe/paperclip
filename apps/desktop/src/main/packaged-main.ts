@@ -178,6 +178,7 @@ export async function runDesktopMain(): Promise<void> {
   // fork 创建轻量 Node.js 子进程（不加载 Chromium），使用 Electron 内嵌的 Node.js 运行时
   const daemon: ChildProcess = fork(daemonEntry, [], {
     env: serverEnv,
+    cwd: PAPERCLIP_HOME,  // Prevent ancestor config search from wrong CWD (Bug 25)
     silent: true, // 将 stdout/stderr 管道化（可用 daemon.stdout/.stderr 读取）
   });
 
