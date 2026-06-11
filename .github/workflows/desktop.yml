@@ -1,0 +1,172 @@
+name: Desktop Build
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "apps/desktop/**"
+      - "SuperNode-desktop/scripts/desktop/**"
+      - "server/**"
+      - "ui/**"
+      - "skills/**"
+      - ".github/workflows/desktop.yml"
+  pull_request:
+    paths:
+      - "apps/desktop/**"
+      - "SuperNode-desktop/scripts/desktop/**"
+      - ".github/workflows/desktop.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ═══════════════════════════════════════
+  # 多平台打包
+  # ═══════════════════════════════════════
+  build:
+    name: Package (${{ matrix.os }} ${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            arch: arm64
+          - os: macos-latest
+            arch: x64
+          - os: windows-latest
+            arch: x64
+          - os: ubuntu-latest
+            arch: x64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 9.15.4
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # ── 安装 monorepo 依赖（含 embedded-postgres 二进制） ──
+      - name: Install monorepo dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ── 构建 monorepo（server dist + UI dist + packages） ──
+      - name: Build monorepo
+        run: pnpm build
+
+      # ── 安装桌面端依赖（apps/desktop 不在 workspace 中，需独立安装） ──
+      - name: Install desktop dependencies
+        working-directory: apps/desktop
+        run: pnpm install --no-frozen-lockfile
+
+      # ── 编译桌面端 TypeScript ──
+      - name: Build desktop (TypeScript)
+        working-directory: apps/desktop
+        run: pnpm build
+
+      # ── 生成图标（如需要） ──
+      - name: Generate desktop icons
+        working-directory: apps/desktop
+        run: pnpm icons
+
+      # ── 打包 desktop bundle（daemon + UI + skills + PG binaries） ──
+      - name: Bundle desktop resources
+        run: npx tsx SuperNode-desktop/scripts/desktop/bundle-desktop.ts
+
+      # ── electron-builder 打包 ──
+      - name: Package with electron-builder
+        working-directory: apps/desktop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm pack --${{ matrix.arch }}
+
+      # ── 上传构建产物 ──
+      - name: Upload artifacts (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: paperclip-desktop-macos-${{ matrix.arch }}
+          path: |
+            apps/desktop/dist-electron/*.dmg
+            apps/desktop/dist-electron/*.zip
+          retention-days: 7
+
+      - name: Upload artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: paperclip-desktop-windows-${{ matrix.arch }}
+          path: |
+            apps/desktop/dist-electron/*.exe
+          retention-days: 7
+
+      - name: Upload artifacts (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: paperclip-desktop-linux-${{ matrix.arch }}
+          path: |
+            apps/desktop/dist-electron/*.AppImage
+            apps/desktop/dist-electron/*.deb
+          retention-days: 7
+
+  # ═══════════════════════════════════════
+  # 冒烟测试（验证产物文件存在）
+  # ═══════════════════════════════════════
+  smoke-test:
+    name: Smoke test (${{ matrix.os }})
+    needs: [build]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            artifact: paperclip-desktop-macos-x64
+          - os: windows-latest
+            artifact: paperclip-desktop-windows-x64
+          - os: ubuntu-latest
+            artifact: paperclip-desktop-linux-x64
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+
+      - name: Verify macOS artifact
+        if: matrix.os == 'macos-latest'
+        run: |
+          test -f *.dmg || test -f *.zip
+          echo "macOS artifact verified"
+
+      - name: Verify Windows artifact
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Filter "*.exe" | Select-Object -First 1
+          if (-not $exe) { throw "No .exe found" }
+          Write-Host "Windows artifact verified: $($exe.Name)"
+
+      - name: Verify Linux artifact
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          test -f *.AppImage || test -f *.deb
+          echo "Linux artifact verified"

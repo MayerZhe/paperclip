@@ -1,0 +1,81 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "PaperClip Dev (API + UI)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev"],
+      "port": 3100,
+      "env": {
+        "PAPERCLIP_MIGRATION_AUTO_APPLY": "true",
+        "PAPERCLIP_MIGRATION_PROMPT": "never"
+      }
+    },
+    {
+      "name": "PaperClip Server Only",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev:server"],
+      "port": 3100,
+      "env": {
+        "PAPERCLIP_MIGRATION_AUTO_APPLY": "true",
+        "PAPERCLIP_MIGRATION_PROMPT": "never"
+      }
+    },
+    {
+      "name": "PaperClip UI Dev (Vite)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev:ui"],
+      "port": 5173
+    },
+    {
+      "name": "PaperClip Storybook",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["storybook"],
+      "port": 6006
+    },
+    {
+      "name": "PaperClip Full Build",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["build"]
+    },
+    {
+      "name": "PaperClip Tests",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["test"]
+    },
+    {
+      "name": "PaperClip TypeCheck",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["typecheck"]
+    },
+    {
+      "name": "PaperClip E2E Tests",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["test:e2e"]
+    },
+    {
+      "name": "Desktop Dev (Electron) ⚠️ 待实现",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["desktop:dev"],
+      "port": 3100,
+      "env": {
+        "PAPERCLIP_HOME": "~/.paperclip",
+        "PAPERCLIP_INSTANCE_ID": "default",
+        "PAPERCLIP_MIGRATION_AUTO_APPLY": "true",
+        "PAPERCLIP_MIGRATION_PROMPT": "never",
+        "PAPERCLIP_OPEN_ON_LISTEN": "false",
+        "SERVE_UI": "true"
+      }
+    },
+    {
+      "name": "Desktop Bundle ⚠️ 待实现",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["desktop:bundle"]
+    },
+    {
+      "name": "Desktop Pack (electron-builder) ⚠️ 待实现",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["desktop:pack"]
+    }
+  ]
+}

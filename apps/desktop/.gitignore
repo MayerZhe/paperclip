@@ -1,0 +1,27 @@
+# PaperClip Desktop — gitignore
+
+# Build output
+dist/
+
+# Dependencies
+node_modules/
+
+# Electron artifacts
+*.dmg
+*.zip
+*.AppImage
+*.deb
+*.exe
+*.blockmap
+latest*.yml
+
+# macOS
+.DS_Store
+*.icns
+
+# IDE
+.vscode/
+.idea/
+
+# Testing
+coverage/
