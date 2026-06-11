@@ -24,10 +24,25 @@ import { setAutoLaunch } from "./login-item.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// 读取 apps/desktop/package.json 获取版本号（Sprint 3：不再硬编码）
-const DESKTOP_VERSION = JSON.parse(
-  fs.readFileSync(path.resolve(__dirname, "..", "..", "package.json"), "utf-8"),
-).version;
+// 读取版本号。在打包后，app.getVersion() 从 Electron 的 package.json 读取。
+// 在 monorepo dev 中，回退到读取 apps/desktop/package.json。
+// Path: dist/main/ → ../package.json (dist/package.json, copied by bundle-desktop.ts)
+//       or ../../package.json (apps/desktop/package.json, monorepo dev)
+const DESKTOP_VERSION = (() => {
+  try {
+    return app.getVersion();
+  } catch {
+    try {
+      return JSON.parse(
+        fs.readFileSync(path.resolve(__dirname, "..", "package.json"), "utf-8"),
+      ).version;
+    } catch {
+      return JSON.parse(
+        fs.readFileSync(path.resolve(__dirname, "..", "..", "package.json"), "utf-8"),
+      ).version;
+    }
+  }
+})();
 
 // ─── 常量 — 全部来自实际源码验证 ───
 const PAPERCLIP_HOME = path.resolve(os.homedir(), ".paperclip");
@@ -84,16 +99,23 @@ function resolveDaemonEntry(): string {
   // Prefer esbuild-bundled CJS file (compatible with Electron 33's Node 20)
   // Fall back to raw ESM entry for monorepo dev
   const candidates = [
-    // 打包后: Resources/app/dist/main/ → ../../.. → Resources/paperclip-server/dist/index.bundle.cjs
+    // ── Packaged app candidates ──
+    // Candidate 1: Resources/app/dist/main/ → ../../.. → Resources/paperclip-server/dist/index.bundle.cjs
+    //              In packaged app: dist/main/ in asar=false → ../../.. = Resources/ → ✅
     path.join(__dirname, "..", "..", "..", "paperclip-server", "dist", "index.bundle.cjs"),
-    // 打包后 fallback: index.bundle.mjs (ESM 格式，Node 20 fork 原生支持)
+    // Candidate 2: index.bundle.mjs (ESM fallback)
     path.join(__dirname, "..", "..", "..", "paperclip-server", "dist", "index.bundle.mjs"),
-    // 打包后 fallback: index.js (原始 ESM 入口)
+    // Candidate 3: index.js (raw ESM entry, fallback if no bundle exists)
     path.join(__dirname, "..", "..", "..", "paperclip-server", "dist", "index.js"),
-    // monorepo dev: apps/desktop/dist/main/ → ../../paperclip-server/dist/index.js (tsx dev)
-    path.join(__dirname, "..", "..", "paperclip-server", "dist", "index.js"),
-    // monorepo fallback: ../../../server/dist/index.js
+
+    // ── Monorepo dev candidates ──
+    // Candidate 4: ../../../server/dist/index.js (monorepo dev — live server build)
+    //              From apps/desktop/dist/main/ → ../../.. → repo root → server/dist/index.js ✅
     path.join(__dirname, "..", "..", "..", "server", "dist", "index.js"),
+    // Candidate 5: ../../paperclip-server/dist/index.js (post-bundle-sync in apps/desktop/)
+    //              Only exists after bundle-desktop.ts sync; may have stale daemon.
+    //              Checked AFTER the live server candidate to avoid using stale builds.
+    path.join(__dirname, "..", "..", "paperclip-server", "dist", "index.js"),
   ];
   for (const c of candidates) {
     if (fs.existsSync(c)) {
