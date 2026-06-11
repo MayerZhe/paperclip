@@ -124,8 +124,11 @@ export async function runDesktopMain(): Promise<void> {
   const serverPort = findAvailablePort(DEFAULT_SERVER_PORT);
 
   // 已修正的环境变量（基于源码验证）
+  // 不展开 process.env — 避免 Electron 内部环境变量泄漏到 daemon
+  // （如 ELECTRON_RUN_AS_NODE, PAPERCLIP_UI_DEV_MIDDLEWARE 等）
   const serverEnv = {
-    ...process.env,
+    PATH: process.env.PATH,               // daemon 需要 PATH 来查找 npx / Node.js
+    HOME: process.env.HOME,               // daemon 需要 HOME for ~/.paperclip
     PAPERCLIP_HOME,                       // ~/.paperclip（不是 instance root！）
     PAPERCLIP_INSTANCE_ID: "default",
     // 不传 DATABASE_URL → daemon 自管 PG
@@ -150,10 +153,12 @@ export async function runDesktopMain(): Promise<void> {
   daemon.stdout?.on("data", (data: Buffer) => {
     process.stdout.write(`[daemon] ${data}`);
   });
+  let daemonExited = false;
   daemon.stderr?.on("data", (data: Buffer) => {
     process.stderr.write(`[daemon] ${data}`);
   });
   daemon.on("exit", (code, signal) => {
+    daemonExited = true;
     console.log(`[PaperClip Desktop] Daemon exited (code=${code}, signal=${signal})`);
   });
 
@@ -177,35 +182,43 @@ export async function runDesktopMain(): Promise<void> {
     stopHeartbeat();
 
     try {
-      // 1. 通知 daemon 准备关闭
-      //    daemon 端的 shutdown handler 会：
-      //    - 标记 desktopFlag.shuttingDown = true
-      //    - clearInterval for heartbeat + backup
-      //    - 等待 databaseBackupInFlight 变为 false
-      //    - 停止 telemetry
-      //    - 调用 appShutdown()
-      //    - server.close()
-      //    - embeddedPostgres.stop()
-      //    - process.exit(0)
-      await fetch(`http://127.0.0.1:${serverPort}/api/desktop/shutdown`, {
-        method: "POST",
-      }).catch(() => {});
+      // Guard: if serverPort was never set (daemon failed before startup),
+      // skip the HTTP shutdown notification
+      if (serverPort && !daemonExited) {
+        // 1. 通知 daemon 准备关闭
+        //    daemon 端的 shutdown handler 会：
+        //    - 标记 desktopFlag.shuttingDown = true
+        //    - clearInterval for heartbeat + backup
+        //    - 等待 databaseBackupInFlight 变为 false
+        //    - 停止 telemetry
+        //    - 调用 appShutdown()
+        //    - server.close()
+        //    - embeddedPostgres.stop()
+        //    - process.exit(0)
+        await fetch(`http://127.0.0.1:${serverPort}/api/desktop/shutdown`, {
+          method: "POST",
+        }).catch(() => {});
+      }
 
-      // 2. 发送 SIGTERM
-      daemon.kill("SIGTERM");
+      // 2. 发送 SIGTERM (only if daemon is still running)
+      if (!daemonExited) {
+        daemon.kill("SIGTERM");
 
-      // 3. 等待 daemon 退出（最多 20s，给 PG 备份 + checkpoint 留时间）
-      await new Promise<void>((resolve) => {
-        const timeout = setTimeout(() => {
-          console.warn("[PaperClip Desktop] Daemon didn't exit in time, force killing");
-          daemon.kill("SIGKILL");
-          resolve();
-        }, 20000); // v3: 从 15s 增加到 20s
-        daemon.on("exit", () => {
-          clearTimeout(timeout);
-          resolve();
+        // 3. 等待 daemon 退出（最多 20s，给 PG 备份 + checkpoint 留时间）
+        await new Promise<void>((resolve) => {
+          const timeout = setTimeout(() => {
+            console.warn("[PaperClip Desktop] Daemon didn't exit in time, force killing");
+            daemon.kill("SIGKILL");
+            resolve();
+          }, 20000); // v3: 从 15s 增加到 20s
+          daemon.on("exit", () => {
+            clearTimeout(timeout);
+            resolve();
+          });
         });
-      });
+      } else {
+        console.log("[PaperClip Desktop] Daemon already exited, skipping SIGTERM + wait");
+      }
     } catch (err) {
       console.error("[PaperClip Desktop] Shutdown error:", err);
     }
@@ -229,6 +242,10 @@ export async function runDesktopMain(): Promise<void> {
   console.log("[PaperClip Desktop] Waiting for daemon...");
   const ready = await waitForServerReady(serverPort, 60000); // PG + 迁移可能较慢
   if (!ready) {
+    // Kill daemon before quitting — before-quit handler may not be registered yet
+    if (!daemonExited) {
+      daemon.kill("SIGTERM");
+    }
     dialog.showErrorBox(
       "Startup Failed",
       "PaperClip Server did not become ready within 60 seconds.\nPlease check ~/.paperclip/instances/default/logs/",
@@ -311,7 +328,10 @@ export async function runDesktopMain(): Promise<void> {
   // ═══════════════════════════════════════
   app.on("before-quit", (event) => {
     event.preventDefault();
-    void shutdown();
+    shutdown().finally(() => {
+      // Fallback: if shutdown() didn't call app.exit(0), force it
+      setTimeout(() => app.exit(0), 1000);
+    });
   });
 
   app.on("activate", () => mainWindow.show());
