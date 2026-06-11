@@ -6,7 +6,6 @@
 import { app, BrowserWindow, dialog, globalShortcut } from "electron";
 import path from "node:path";
 import fs from "node:fs";
-import net from "node:net";
 import os from "node:os";
 import { fork, type ChildProcess } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -68,15 +67,11 @@ async function waitForServerReady(port: number, timeout = 30000): Promise<boolea
 }
 
 // ─── 端口检测 ───
-function findAvailablePort(preferred: number): number {
-  try {
-    const server = net.createServer();
-    server.listen(preferred, "127.0.0.1");
-    server.close();
-    return preferred;
-  } catch {
-    return preferred; // fallback to daemon's own detect-port
-  }
+// Daemon uses detect-port internally and respects the PORT env var.
+// We always set PORT=3100; if the daemon can't bind to it, it will fail
+// and report to Electron (rather than silently using a different port).
+function findAvailablePort(): number {
+  return DEFAULT_SERVER_PORT;
 }
 
 // ─── Sidecar 消息处理 ───
@@ -143,7 +138,7 @@ export async function runDesktopMain(): Promise<void> {
   // ═══════════════════════════════════════
   // 关键：不传 DATABASE_URL → startServer() 自己启动嵌入式 PG
   const daemonEntry = resolveDaemonEntry();
-  const serverPort = findAvailablePort(DEFAULT_SERVER_PORT);
+  const serverPort = findAvailablePort();
 
   // 已修正的环境变量（基于源码验证）
   // 不展开 process.env — 避免 Electron 内部环境变量泄漏到 daemon
