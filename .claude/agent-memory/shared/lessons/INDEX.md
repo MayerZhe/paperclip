@@ -18,3 +18,5 @@ desktop, electron, shutdown, graceful-shutdown, express-router, anti-drift, env-
 
 tray, heartbeat, polling, notifications, electron-updater, window-state, login-item, auto-launch, diagnostics, packaging, electron-builder, icons, png, entitlements, sprite2 → story-sprint-2-desktop-experience-2026-06-11.md — Tray heartbeat polling, daemon status notifications, electron-updater, window state persistence, auto-launch, packaging infrastructure, programmatic icon generation
 
+desktop, build, bundle, electron-builder, esbuild, path-resolution, daemon, lifecycle, port-detection, env-vars, onboarding, dependencies, native-binaries, package.json → story-desktop-build-fix-all-2026-06-12.md — Systematic 35-bug repair across 9 fix groups; path sync, daemon lifecycle, esbuild asset resolution, build scripts, resolveDaemonEntry, port detection, config fix, dependency cleanup, native binary verification
+
