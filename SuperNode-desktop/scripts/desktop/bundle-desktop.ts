@@ -334,7 +334,17 @@ const esbuildBin = (() => {
   if (candidates.length === 0) {
     throw new Error("esbuild not found in monorepo node_modules. Run `pnpm install` first.");
   }
-  candidates.sort();
+  // Sort by semver, not lexicographic ("0.5.0" > "0.20.0" lexicographically but not semantically)
+  candidates.sort((a, b) => {
+    const va = a.match(/esbuild@(.+)$/)?.[1] ?? "0";
+    const vb = b.match(/esbuild@(.+)$/)?.[1] ?? "0";
+    const pa = va.split(".").map(Number);
+    const pb = vb.split(".").map(Number);
+    for (let i = 0; i < 3; i++) {
+      if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) - (pb[i] || 0);
+    }
+    return 0;
+  });
   return candidates[candidates.length - 1];
 })();
 		// ═══════════════════════════════════════════════════════════════════
