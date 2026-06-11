@@ -673,8 +673,9 @@ const checks: Array<{ p: string; label: string; critical: boolean }> = [
   { p: path.join(bundledServer, "dist", "index.js"), label: "Daemon entry (ESM src)", critical: false },
   { p: daemonBundled, label: "Daemon entry (CJS bundle)", critical: true },
   { p: path.join(bundledServer, "dist", "migrations"), label: "DB migrations", critical: true },
-  { p: path.join(bundledServer, "node_modules", "embedded-postgres"), label: "embedded-postgres", critical: true },
-  { p: path.join(bundledServer, "node_modules", "sharp"), label: "sharp", critical: true },
+  { p: path.join(bundledServer, "node_modules", "embedded-postgres"), label: "embedded-postgres (package)", critical: true },
+  { p: pgBinary ?? "/nonexistent", label: "embedded-postgres (binary)", critical: true },
+  { p: path.join(bundledServer, "node_modules", "sharp"), label: "sharp (package)", critical: true },
   { p: path.join(bundledServer, "ui-dist", "index.html"), label: "UI index.html", critical: true },
 ];
 
@@ -686,10 +687,13 @@ for (const { p, label, critical } of checks) {
   console.log(`[Verify] ${status} ${label}`);
 }
 
-// 检查原生二进制文件（非关键但建议修复）
-if (pgBinary) {
-  const binOk = fs.existsSync(pgBinary);
-  console.log(`[Verify] ${binOk ? "✅" : "⚠️"} Embedded PG binary${binOk ? "" : " (may need native rebuild)"}`);
+// Native binary was verified in critical checks list above.
+// If pgBinary is null, embedded-postgres native binary download failed during pnpm deploy.
+// This typically means .npmrc pmOnFail=ignore masked a download failure.
+if (!pgBinary) {
+  console.log("[Verify] ⚠️ Embedded PG binary search returned null — native download may have failed");
+  console.log("[Verify]    Check .npmrc: pmOnFail=ignore may be hiding the error.");
+  console.log("[Verify]    Try running: pnpm deploy --filter @paperclipai/server --prod --legacy <dest>");
 }
 
 // 检查 bundle 中关键动态 require 的 external 是否正确
