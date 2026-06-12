@@ -1177,9 +1177,9 @@ span.super-node-project-mention-chip {
   -webkit-user-select: none;
 }
 
-/* Light mode sidebar frosted glass (T023) */
+/* Light mode sidebar frosted glass (T023)
+   Uses --sidebar-bg which is rgba(255,255,255,0.72) in light mode via :root */
 .macos:not(.dark) [data-sidebar] {
-  background-color: var(--sidebar-bg-light, rgba(255, 255, 255, 0.72));
   backdrop-filter: var(--vibrancy-blur, blur(20px) saturate(180%));
   -webkit-backdrop-filter: var(--vibrancy-blur, blur(20px) saturate(180%));
 }
