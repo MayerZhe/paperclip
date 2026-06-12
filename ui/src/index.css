@@ -37,18 +37,22 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-display: "Space Grotesk", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
-  --radius-xl: 0;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 }
 
 :root {
   color-scheme: light;
-  --radius: 0;
+  --radius: 8px;
+  --titlebar-height: 52px;
+  --vibrancy-blur: blur(20px) saturate(180%);
+  --sidebar-bg: rgba(5, 5, 5, 0.75);
+  --sidebar-bg-light: rgba(255, 255, 255, 0.72);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -102,6 +106,10 @@
 .dark {
   --background: #050505;
   --foreground: #f0f0fa;
+  --titlebar-height: 52px;
+  --vibrancy-blur: blur(20px) saturate(180%);
+  --sidebar-bg: rgba(5, 5, 5, 0.75);
+  --sidebar-bg-light: rgba(255, 255, 255, 0.72);
 
   --card: #080808;
   --card-foreground: #f0f0fa;
@@ -253,29 +261,65 @@
   color-scheme: dark;
 }
 
+/* macOS native overlay scrollbars: hidden by default, appear on hover */
 .dark *::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 .dark *::-webkit-scrollbar-track {
-  background: #000000;
+  background: transparent;
 }
 
 .dark *::-webkit-scrollbar-thumb {
-  background: #333333;
+  background: transparent;
   border-radius: 3px;
 }
 
 .dark *::-webkit-scrollbar-thumb:hover {
-  background: #555555;
+  background: transparent;
+}
+
+/* Show scrollbar thumb on hover over scrollable container */
+.dark *:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.dark *:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.40);
+}
+
+/* Light mode overlay scrollbars */
+:root *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+:root *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:root *::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+}
+
+:root *:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+:root *:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.32);
 }
 
 /* Auto-hide scrollbar: thin, stable gutter with the thumb visible only on hover */
-.scrollbar-auto-hide {
+.scrollbar-auto-hide,
+body,
+main {
   scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
+  -webkit-overflow-scrolling: touch;
 }
 
 .scrollbar-auto-hide::-webkit-scrollbar {
