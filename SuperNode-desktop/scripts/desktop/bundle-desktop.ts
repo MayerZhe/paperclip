@@ -766,7 +766,21 @@ fs.copyFileSync(
   path.join(appsDesktopDist, "package.json"),
 );
 
-console.log("[Bundle] ✅ Synced to apps/desktop/");
+	// Sync browser/ assets (jsdom default-stylesheet.css RC-14 fix)
+	// In the .app, __dirname = Resources/paperclip-server/dist/
+	// jsdom does path.resolve(__dirname, "../../browser/") → Resources/browser/
+	// So browser/ must be at top-level in apps/desktop/ (added as extraResource)
+	const superBrowserDir = path.join(distDir, "browser");
+	if (fs.existsSync(superBrowserDir)) {
+	  const appsBrowserDir = path.join(APPS_DESKTOP, "browser");
+	  if (fs.existsSync(appsBrowserDir)) {
+	    fs.rmSync(appsBrowserDir, { recursive: true, force: true });
+	  }
+	  fs.cpSync(superBrowserDir, appsBrowserDir, { recursive: true, force: true });
+	  console.log("  browser/ → apps/desktop/browser/ (extraResource)");
+	}
+
+	console.log("[Bundle] ✅ Synced to apps/desktop/");
 
 // ═══════════════════════════════════════════════════════════════════
 // 14. 摘要

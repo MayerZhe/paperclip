@@ -92,18 +92,23 @@ linux:
 extraResources:
   - from: "paperclip-server"
     to: "paperclip-server"
+  - from: "browser"
+    to: "browser"
 
 # 文件匹配模式
+# paperclip-server is extraResources (copied to Resources/paperclip-server/), not in dist/
+# Note: after bundle-desktop.ts syncs SuperNode-desktop/dist/ → apps/desktop/,
+# paperclip-server/ exists at apps/desktop/paperclip-server/ (top level)
 files:
   - "dist/**/*"
-  - "!dist/paperclip-server/**"
   - "package.json"
+  - "paperclip-server/**"
 
 # ═══════════════════════════════════════
 # 钩子
 # ═══════════════════════════════════════
 # Fix Helper .app Info.plist to prevent 4 icons in Dock/Launchpad
-afterPack: "scripts/desktop/fix-helper-plist.cjs"
+afterPack: "../../SuperNode-desktop/scripts/desktop/fix-helper-plist.cjs"
 
 # ═══════════════════════════════════════
 # 发布配置

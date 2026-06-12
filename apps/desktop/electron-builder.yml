@@ -92,6 +92,8 @@ linux:
 extraResources:
   - from: "paperclip-server"
     to: "paperclip-server"
+  - from: "browser"
+    to: "browser"
 
 # 文件匹配模式
 # paperclip-server is extraResources (copied to Resources/paperclip-server/), not in dist/
