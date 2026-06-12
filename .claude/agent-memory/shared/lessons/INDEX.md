@@ -20,3 +20,5 @@ tray, heartbeat, polling, notifications, electron-updater, window-state, login-i
 
 desktop, build, bundle, electron-builder, esbuild, path-resolution, daemon, lifecycle, port-detection, env-vars, onboarding, dependencies, native-binaries, package.json → story-desktop-build-fix-all-2026-06-12.md — Systematic 35-bug repair across 9 fix groups; path sync, daemon lifecycle, esbuild asset resolution, build scripts, resolveDaemonEntry, port detection, config fix, dependency cleanup, native binary verification
 
+macos, native-chrome, electron, titlebar, hiddenInset, vibrancy, CSS, system-font, overlay-scrollbars, context-menu, preload, contextBridge, motion, animations, reduce-motion → story-001-macos-native-chrome-2026-06-12.md — Four-layer macOS native transformation: window chrome (hiddenInset+vibrancy), visual foundation (system font+rounded corners+overlay scrollbars+frosted glass), native context menu (preload bridge+Menu.buildFromTemplate), motion polish (CSS animations+spring sidebar+button feedback)
+
