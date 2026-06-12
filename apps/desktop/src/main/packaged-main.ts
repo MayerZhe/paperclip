@@ -20,6 +20,7 @@ import { SIDECAR_MESSAGES } from "../shared/sidecar-proto.js";
 import { ensureFirstRunConfig } from "./onboard.js";
 import { loadWindowState, registerWindowStateHandlers } from "./window-state.js";
 import { setAutoLaunch } from "./login-item.js";
+import { registerContextMenuHandler } from "./context-menu.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -352,6 +353,7 @@ export async function runDesktopMain(): Promise<void> {
   // ═══════════════════════════════════════
   // Phase 6: 桌面特性
   // ═══════════════════════════════════════
+  registerContextMenuHandler(); // US3: native context menu bridge
   createTray(mainWindow);
   createAppMenu(
     mainWindow,

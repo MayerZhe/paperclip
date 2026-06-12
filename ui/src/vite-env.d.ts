@@ -5,6 +5,12 @@ declare global {
     paperclip?: {
       platform: string;
       version: string;
+      showContextMenu?: (items: Array<{ label: string; action?: string; enabled?: boolean; separator?: boolean }>) => void;
+      showOpenDialog?: (options: {
+        title?: string;
+        filters?: Array<{ name: string; extensions: string[] }>;
+        properties?: Array<"openFile" | "openDirectory" | "multiSelections">;
+      }) => Promise<{ canceled: boolean; filePaths: string[] }>;
     };
   }
 }

@@ -358,6 +358,33 @@ export function Layout() {
     }
   }, []);
 
+  // Native context menu handler (US3 T029) — replaces browser default right-click menu
+  useEffect(() => {
+    const isMac = window.paperclip?.platform === "darwin";
+    if (!isMac || !window.paperclip?.showContextMenu) return;
+
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      const isInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+      window.paperclip!.showContextMenu!(
+        isInput
+          ? [
+              { label: "Cut", action: "cut" },
+              { label: "Copy", action: "copy" },
+              { label: "Paste", action: "paste" },
+              { label: "Select All", action: "selectAll" },
+            ]
+          : [
+              { label: "New Task", action: "newTask" },
+              { label: "New Project", action: "newProject" },
+            ],
+      );
+    };
+
+    document.addEventListener("contextmenu", handleContextMenu);
+    return () => document.removeEventListener("contextmenu", handleContextMenu);
+  }, []);
+
   return (
     <GeneralSettingsProvider value={{ keyboardShortcutsEnabled }}>
       <div
