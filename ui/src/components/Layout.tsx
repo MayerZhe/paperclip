@@ -91,6 +91,7 @@ export function Layout() {
   const [mobileNavVisible, setMobileNavVisible] = useState(true);
   const [instanceSettingsTarget, setInstanceSettingsTarget] = useState<string>(() => readRememberedInstanceSettingsPath());
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [isMacPlatform, setIsMacPlatform] = useState(false);
   const matchedCompany = useMemo(() => {
     if (!companyPrefix) return null;
     const requestedPrefix = companyPrefix.toUpperCase();
@@ -348,14 +349,31 @@ export function Layout() {
     resetNavigationScroll(mainContentRef.current);
   }, [location.pathname, navigationType]);
 
+  // Detect macOS platform for native chrome styling (T018)
+  useEffect(() => {
+    const platform = window.paperclip?.platform;
+    if (platform === "darwin") {
+      setIsMacPlatform(true);
+      document.documentElement.classList.add("macos");
+    }
+  }, []);
+
   return (
     <GeneralSettingsProvider value={{ keyboardShortcutsEnabled }}>
       <div
       className={cn(
         "bg-background text-foreground pt-[env(safe-area-inset-top)]",
         isMobile ? "min-h-dvh" : "flex h-dvh flex-col overflow-hidden",
+        isMacPlatform && "pt-[env(titlebar-area-height,52px)]",
       )}
       >
+      {/* macOS titlebar drag region — allows window dragging when titleBarStyle is hiddenInset (T016) */}
+      {isMacPlatform && !isMobile && (
+        <div
+          className="fixed top-0 left-0 right-0 z-50 h-[env(titlebar-area-height,52px)]"
+          style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
+        />
+      )}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[200] focus:rounded-none focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"

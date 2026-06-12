@@ -60,7 +60,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-full h-full min-h-0 border-r border-[#222222] bg-[#050505] flex flex-col">
+    <aside className="w-full h-full min-h-0 border-r border-[var(--sidebar-border-subtle)] bg-[var(--sidebar-bg)] backdrop-blur-xl backdrop-saturate-[180%] flex flex-col">
       {/* Top bar: Company name (bold) + Search — aligned with top sections (no visible border) */}
       <div className="flex items-center gap-1 px-3 h-12 shrink-0">
         <SidebarNodeOrgMenu />

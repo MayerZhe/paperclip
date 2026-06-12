@@ -51,8 +51,8 @@
   --radius: 8px;
   --titlebar-height: 52px;
   --vibrancy-blur: blur(20px) saturate(180%);
-  --sidebar-bg: rgba(5, 5, 5, 0.75);
-  --sidebar-bg-light: rgba(255, 255, 255, 0.72);
+  --sidebar-bg: rgba(255, 255, 255, 0.72);
+  --sidebar-border-subtle: rgba(0, 0, 0, 0.06);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -109,7 +109,7 @@
   --titlebar-height: 52px;
   --vibrancy-blur: blur(20px) saturate(180%);
   --sidebar-bg: rgba(5, 5, 5, 0.75);
-  --sidebar-bg-light: rgba(255, 255, 255, 0.72);
+  --sidebar-border-subtle: rgba(255, 255, 255, 0.08);
 
   --card: #080808;
   --card-foreground: #f0f0fa;
@@ -1155,4 +1155,31 @@ span.super-node-project-mention-chip {
 [class*="_toolbarButtonDropdownContainer_"],
 [class*="_toolbarNodeKindSelectContainer_"] {
   z-index: 81 !important;
+}
+
+/* ───────────────────────────────────────────
+   macOS native chrome: .macos class overrides
+   Applied via Layout.tsx when window.paperclip.platform === 'darwin'
+   ─────────────────────────────────────────── */
+
+/* T022: macOS rounded corner overrides — bump up smaller radii to avoid sharp edges */
+.macos .rounded-sm {
+  border-radius: var(--radius-md, 8px);
+}
+
+.macos .rounded {
+  border-radius: var(--radius-md, 8px);
+}
+
+/* Titlebar drag region: prevent text selection in the drag area */
+.macos [style*="WebkitAppRegion"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Light mode sidebar frosted glass (T023) */
+.macos:not(.dark) [data-sidebar] {
+  background-color: var(--sidebar-bg-light, rgba(255, 255, 255, 0.72));
+  backdrop-filter: var(--vibrancy-blur, blur(20px) saturate(180%));
+  -webkit-backdrop-filter: var(--vibrancy-blur, blur(20px) saturate(180%));
 }
