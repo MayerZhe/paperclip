@@ -306,6 +306,8 @@ export async function runDesktopMain(): Promise<void> {
   process.env.PAPERCLIP_DESKTOP_VERSION = DESKTOP_VERSION;
 
   const windowState = loadWindowState();
+  const isMac = process.platform === "darwin";
+
   const mainWindow = new BrowserWindow({
     x: windowState.x >= 0 ? windowState.x : undefined,
     y: windowState.y >= 0 ? windowState.y : undefined,
@@ -315,6 +317,14 @@ export async function runDesktopMain(): Promise<void> {
     minHeight: 600,
     title: "PaperClip",
     show: false,
+    ...(isMac && {
+      titleBarStyle: "hiddenInset",
+      titleBarOverlay: false,
+      vibrancy: "under-window",
+      visualEffectState: "active",
+      backgroundColor: "#00000000",
+      trafficLightPosition: { x: 12, y: 16 },
+    }),
     webPreferences: {
       preload: path.join(__dirname, "..", "preload", "index.js"),
       contextIsolation: true,
