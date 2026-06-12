@@ -366,6 +366,29 @@ main {
   transition: max-width 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* US4: Page transition — fade + slight slide up on route change */
+@keyframes page-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition-enter {
+  animation: page-fade-in 200ms ease-out both;
+}
+
+/* Disable page transition when user prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-enter {
+    animation: none;
+  }
+}
+
 /* Dashboard activity row entry motion */
 @keyframes dashboard-activity-enter {
   0% {
