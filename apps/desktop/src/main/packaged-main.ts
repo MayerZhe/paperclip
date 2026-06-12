@@ -91,17 +91,20 @@ function handleSidecarMessage(msg: Record<string, unknown>, shutdown: () => void
 
 // ─── 找到 daemon 入口 ───
 function resolveDaemonEntry(): string {
-  // Prefer esbuild-bundled CJS file (compatible with Electron 33's Node 20)
-  // Fall back to raw ESM entry for monorepo dev
+  // Prefer tsc-compiled ESM entry (dist/index.js) over esbuild bundle.
+  // esbuild bundle corrupts __dirname references in bundled packages (e.g. jsdom
+  // reads its own default-stylesheet.css from disk — __dirname resolves to dist/
+  // instead of node_modules/jsdom/lib/jsdom/browser/).  Using the tsc-compiled
+  // ESM with pnpm-deployed node_modules avoids this entirely.
   const candidates = [
     // ── Packaged app candidates ──
-    // Candidate 1: Resources/app/dist/main/ → ../../.. → Resources/paperclip-server/dist/index.bundle.cjs
+    // Candidate 1: Resources/app/dist/main/ → ../../.. → Resources/paperclip-server/dist/index.js
     //              In packaged app: dist/main/ in asar=false → ../../.. = Resources/ → ✅
-    path.join(__dirname, "..", "..", "..", "paperclip-server", "dist", "index.bundle.cjs"),
-    // Candidate 2: index.bundle.mjs (ESM fallback)
-    path.join(__dirname, "..", "..", "..", "paperclip-server", "dist", "index.bundle.mjs"),
-    // Candidate 3: index.js (raw ESM entry, fallback if no bundle exists)
     path.join(__dirname, "..", "..", "..", "paperclip-server", "dist", "index.js"),
+    // Candidate 2: index.bundle.cjs (esbuild bundle — fallback; has __dirname path issues)
+    path.join(__dirname, "..", "..", "..", "paperclip-server", "dist", "index.bundle.cjs"),
+    // Candidate 3: index.bundle.mjs (ESM bundle fallback)
+    path.join(__dirname, "..", "..", "..", "paperclip-server", "dist", "index.bundle.mjs"),
 
     // ── Monorepo dev candidates ──
     // Candidate 4: ../../../server/dist/index.js (monorepo dev — live server build)
