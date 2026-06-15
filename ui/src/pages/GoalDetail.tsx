@@ -159,14 +159,14 @@ export function GoalDetail() {
           value={goal.title}
           onSave={(title) => updateGoal.mutate({ title })}
           as="h2"
-          className="text-xl font-bold"
+          className="text-xs font-bold"
         />
 
         <InlineEditor
           value={goal.description ?? ""}
           onSave={(description) => updateGoal.mutate({ description })}
           as="p"
-          className="text-sm text-muted-foreground"
+          className="text-xs text-muted-foreground"
           placeholder="Add a description..."
           multiline
           imageUploadHandler={async (file) => {
@@ -176,8 +176,8 @@ export function GoalDetail() {
         />
       </div>
 
-      <Tabs defaultValue="children">
-        <TabsList>
+      <Tabs defaultValue="children" className="space-y-3">
+        <TabsList variant="line" className="w-full justify-start">
           <TabsTrigger value="children">
             Sub-Goals ({childGoals.length})
           </TabsTrigger>
@@ -186,7 +186,7 @@ export function GoalDetail() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="children" className="mt-4 space-y-3">
+        <TabsContent value="children" className="space-y-3">
           <div className="flex items-center justify-start">
             <Button
               size="sm"
@@ -204,7 +204,7 @@ export function GoalDetail() {
           )}
         </TabsContent>
 
-        <TabsContent value="projects" className="mt-4">
+        <TabsContent value="projects">
           {linkedProjects.length === 0 ? (
             <p className="text-sm text-muted-foreground">No linked projects.</p>
           ) : (

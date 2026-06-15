@@ -171,7 +171,7 @@ export function ApprovalDetail() {
           };
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       {showApprovedBanner && (
         <div className="border border-green-300 dark:border-green-700/40 bg-green-50 dark:bg-green-900/20 rounded-none px-4 py-3 animate-in fade-in zoom-in-95 duration-300">
           <div className="flex items-start justify-between gap-3">

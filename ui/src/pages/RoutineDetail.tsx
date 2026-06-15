@@ -775,13 +775,13 @@ export function RoutineDetail() {
       : "text-muted-foreground";
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6">
       {/* Header: editable title + actions */}
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1 space-y-2">
           <textarea
             ref={titleInputRef}
-            className="w-full resize-none overflow-hidden bg-transparent text-xl font-bold outline-none placeholder:text-muted-foreground/50"
+            className="w-full resize-none overflow-hidden bg-transparent text-xs font-bold outline-none placeholder:text-muted-foreground/50"
             placeholder="Routine title"
             rows={1}
             value={editDraft.title}
@@ -1100,7 +1100,7 @@ export function RoutineDetail() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3">
-        <TabsList variant="line" className="w-full justify-start gap-1">
+        <TabsList variant="line" className="w-full justify-start">
           <TabsTrigger value="triggers" className="gap-1.5">
             <Clock3 className="h-3.5 w-3.5" />
             Triggers

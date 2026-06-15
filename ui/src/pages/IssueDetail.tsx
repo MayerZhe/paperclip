@@ -449,7 +449,7 @@ function IssueDetailLoadingState({
   const identifier = headerSeed?.identifier ?? headerSeed?.id.slice(0, 8) ?? null;
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="space-y-6">
       <div className="space-y-3">
         <Skeleton className="h-3 w-40" />
 
@@ -493,7 +493,7 @@ function IssueDetailLoadingState({
 
         {headerSeed ? (
           <>
-            <h2 className="text-xl font-bold leading-tight">{headerSeed.title}</h2>
+            <h2 className="text-xs font-bold leading-tight">{headerSeed.title}</h2>
             <div className="space-y-2">
               <Skeleton className="h-4 w-full max-w-xl" />
               <Skeleton className="h-4 w-[72%]" />
@@ -3330,7 +3330,7 @@ export function IssueDetail() {
   );
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="space-y-6">
       {/* Parent chain breadcrumb */}
       {ancestors.length > 0 && (
         <nav className="flex items-center gap-1 text-xs text-muted-foreground flex-wrap">
@@ -3726,14 +3726,14 @@ export function IssueDetail() {
           value={issue.title}
           onSave={(title) => updateIssue.mutateAsync({ title })}
           as="h2"
-          className="text-xl font-bold"
+          className="text-xs font-bold"
         />
 
         <InlineEditor
           value={issue.description ?? ""}
           onSave={(description) => updateIssue.mutateAsync({ description })}
           as="p"
-          className="text-[15px] leading-7 text-foreground"
+          className="text-xs leading-7 text-foreground"
           placeholder="Add a description..."
           multiline
           foldable
@@ -3908,7 +3908,7 @@ export function IssueDetail() {
       <Separator />
 
       <Tabs value={detailTab} onValueChange={setDetailTab} className="space-y-3">
-        <TabsList variant="line" className="w-full justify-start gap-1">
+        <TabsList variant="line" className="w-full justify-start">
           <TabsTrigger value="chat" className="gap-1.5">
             <MessageSquare className="h-3.5 w-3.5" />
             Chat

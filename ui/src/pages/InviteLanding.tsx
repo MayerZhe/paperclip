@@ -38,7 +38,7 @@ function readNestedString(value: unknown, path: string[]): string | null {
 }
 
 const fieldClassName =
-  "w-full border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-ring";
+  "w-full border border-border bg-background px-3 py-2 text-xs text-foreground outline-none focus:border-ring";
 const panelClassName = "border border-border bg-background/95 p-6";
 const modeButtonBaseClassName =
   "flex-1 border px-3 py-2 text-sm transition-colors";

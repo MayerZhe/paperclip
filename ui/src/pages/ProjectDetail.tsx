@@ -84,7 +84,7 @@ function OverviewContent({
         onSave={(description) => onUpdate({ description })}
         nullable
         as="p"
-        className="text-sm text-muted-foreground"
+        className="text-xs text-muted-foreground"
         placeholder="Add a description..."
         multiline
         imageUploadHandler={imageUploadHandler}
@@ -771,7 +771,7 @@ export function ProjectDetail() {
             value={project.name}
             onSave={(name) => updateProject.mutate({ name })}
             as="h2"
-            className="text-xl font-bold"
+            className="text-xs font-bold"
           />
           {project.pauseReason === "budget" ? (
             <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-red-200">
