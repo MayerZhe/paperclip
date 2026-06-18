@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="doc/assets/banner.jpg" alt="Super Node is the app people use to manage AI agents for work." width="720" />
+  <img src="doc/assets/banner.jpg" alt="Paperclip — Run the company. The agents work here." width="720" />
 </p>
 
 <p align="center">
@@ -25,17 +25,17 @@
 
 <br/>
 
-# Super Node is the app people use to manage AI agents for work.
+# Run the company. The agents work here.
 
-Open-source orchestration for teams of AI agents.
+**The operating system for AI agent companies.**
 
-**If OpenClaw is an _employee_, Super Node is the _company_.**
+Paperclip is the infrastructure layer between *building* an agent and *running a company* made of them. It doesn't tell you how to build an agent. It tells you how to hire one, give it a job, set its budget, and hold it accountable — alongside 20 others, in a real org chart, with governance you can audit.
 
-Super Node is a Node.js server and React UI that orchestrates a team of AI agents to run a business. Bring your own agents, assign goals, and track work and costs from one dashboard.
+**If an agent framework is the hiring criteria, Paperclip is HR, payroll, and the org chart.**
+
+Paperclip is a self-hosted Node.js server and React UI that orchestrates a team of AI agents to run a business. Bring your own agents (Claude Code, Codex, Cursor, Gemini CLI, OpenClaw — anything that can receive a heartbeat), assign goals, and track work and costs from one dashboard.
 
 It looks like a task manager. Under the hood: org charts, budgets, governance, goal alignment, and agent coordination.
-
-**Manage business goals, not pull requests.**
 
 |        | Step            | Example                                                            |
 | ------ | --------------- | ------------------------------------------------------------------ |
@@ -64,15 +64,41 @@ It looks like a task manager. Under the hood: org charts, budgets, governance, g
 
 <br/>
 
-## Super Node is right for you if
+## Paperclip is right for you if
 
 - ✅ You want to build **autonomous AI companies**
-- ✅ You **coordinate many different agents** (OpenClaw, Codex, Claude, Cursor) toward a common goal
+- ✅ You **coordinate many different agents** (Claude Code, Codex, Cursor, Gemini CLI, OpenClaw) toward a common goal
 - ✅ You have **20 simultaneous Claude Code terminals** open and lose track of what everyone is doing
 - ✅ You want agents running **autonomously 24/7**, but still want to audit work and chime in when needed
-- ✅ You want to **monitor costs** and enforce budgets
+- ✅ You want to **monitor costs** and enforce budgets across your entire agent team
 - ✅ You want a process for managing agents that **feels like using a task manager**
 - ✅ You want to manage your autonomous businesses **from your phone**
+
+<br/>
+
+## Use Cases
+
+### 🏢 The AI-Native Startup
+
+You're a technical founder building with 5–20 AI agents. They're doing customer support, building features, writing content, and posting on social — but you have no way to manage them as a team. Agents duplicate work, burn tokens, and have zero accountability.
+
+**With Paperclip:** Hire agents into roles (CTO, Engineer, Marketer). Set monthly budgets per agent. Define company goals and let the org chart route work. Monitor everything from one dashboard. Scale from 5 agents to 50 without chaos.
+
+### 🔧 Platform Engineering
+
+You run a platform team at a 50–500 person company. Multiple teams are building AI agents with different frameworks — LangGraph, CrewAI, custom Claude Code setups. No centralized governance, cost tracking, or agent lifecycle management.
+
+**With Paperclip:** One control plane for all agent teams. Per-agent budgets with hard caps. Immutable audit trails. Board approval workflows for critical changes. Self-hosted, MIT-licensed — no vendor lock-in.
+
+### 🚀 The Solo Automator
+
+You're an indie developer running AI-powered side projects. You want a team of agents handling customer support, social media, and bug fixes while you sleep.
+
+**With Paperclip:** One `npx paperclipai onboard` and you have a company. Add agents gradually — start with a support agent and a social agent. Set heartbeats and let them run. Check in from your phone.
+
+### 🤖 Running Paperclip Itself
+
+Meta, but real: Paperclip uses Paperclip to build Paperclip. The company has a CEO, CTO, CMO, UX Designer, and Coder — each an AI agent with a role, budget, and heartbeat. Tasks flow through the org chart. Governance gates prevent unreviewed changes. This is what "dogfooding" looks like when your product is an AI company OS.
 
 <br/>
 
@@ -96,7 +122,7 @@ Agents wake on a schedule, check work, and act. Delegation flows up and down the
 <tr>
 <td align="center">
 <h3>💰 Cost Control</h3>
-Monthly budgets per agent. When they hit the limit, they stop. No runaway costs.
+Monthly budgets per agent. Warning thresholds at 80%. Hard stops at 100%. No runaway costs.
 </td>
 <td align="center">
 <h3>🏢 Multi-Company</h3>
@@ -125,28 +151,28 @@ Monitor and manage your autonomous businesses from anywhere.
 
 <br/>
 
-## Problems Super Node solves
+## Problems Paperclip solves
 
-| Without Super Node                                                                                                                     | With Super Node                                                                                                                         |
+| Without Paperclip                                                                                                                     | With Paperclip                                                                                                                         |
 | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | ❌ You have 20 Claude Code tabs open and can't track which one does what. On reboot you lose everything.                              | ✅ Tasks are ticket-based, conversations are threaded, sessions persist across reboots.                                                |
 | ❌ You manually gather context from several places to remind your bot what you're actually doing.                                     | ✅ Context flows from the task up through the project and company goals — your agent always knows what to do and why.                  |
-| ❌ Folders of agent configs are disorganized and you're re-inventing task management, communication, and coordination between agents. | ✅ Super Node gives you org charts, ticketing, delegation, and governance out of the box — so you run a company, not a pile of scripts. |
+| ❌ Folders of agent configs are disorganized and you're re-inventing task management, communication, and coordination between agents. | ✅ Paperclip gives you org charts, ticketing, delegation, and governance out of the box — so you run a company, not a pile of scripts. |
 | ❌ Runaway loops waste hundreds of dollars of tokens and max your quota before you even know what happened.                           | ✅ Cost tracking surfaces token budgets and throttles agents when they're out. Management prioritizes with budgets.                    |
 | ❌ You have recurring jobs (customer support, social, reports) and have to remember to manually kick them off.                        | ✅ Heartbeats handle regular work on a schedule. Management supervises.                                                                |
-| ❌ You have an idea, you have to find your repo, fire up Claude Code, keep a tab open, and babysit it.                                | ✅ Add a task in Super Node. Your coding agent works on it until it's done. Management reviews their work.                              |
+| ❌ You have an idea, you have to find your repo, fire up Claude Code, keep a tab open, and babysit it.                                | ✅ Add a task in Paperclip. Your coding agent works on it until it's done. Management reviews their work.                              |
 
 <br/>
 
-## Why Super Node is special
+## Why Paperclip is special
 
-Super Node handles the hard orchestration details correctly.
+Paperclip handles the hard orchestration details correctly.
 
 |                                   |                                                                                                               |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | **Atomic execution.**             | Task checkout and budget enforcement are atomic, so no double-work and no runaway spend.                      |
 | **Persistent agent state.**       | Agents resume the same task context across heartbeats instead of restarting from scratch.                     |
-| **Runtime skill injection.**      | Agents can learn Super Node workflows and project context at runtime, without retraining.                      |
+| **Runtime skill injection.**      | Agents can learn Paperclip workflows and project context at runtime, without retraining.                      |
 | **Governance with rollback.**     | Approval gates are enforced, config changes are revisioned, and bad changes can be rolled back safely.        |
 | **Goal-aware execution.**         | Tasks carry full goal ancestry so agents consistently see the "why," not just a title.                        |
 | **Portable company templates.**   | Export/import orgs, agents, and skills with secret scrubbing and collision handling.                          |
@@ -154,9 +180,56 @@ Super Node handles the hard orchestration details correctly.
 
 <br/>
 
+## How Paperclip compares
+
+Paperclip operates at the *company management* layer — above agent frameworks and workflow engines. It doesn't compete with how you build agents; it organizes how they work together.
+
+### Paperclip vs. Agent Frameworks
+
+| | Paperclip | CrewAI | LangGraph | Microsoft Agent Framework |
+|---|---|---|---|---|
+| **What it does** | Runs a company of agents | Builds multi-agent crews | Builds stateful agent graphs | Builds enterprise agent apps |
+| **Layer** | Company management | Agent pipeline | Agent orchestration | Agent development |
+| **Org chart** | ✅ Full hierarchy + roles | ❌ Task-level roles only | ❌ | ❌ |
+| **Budget system** | ✅ Per-agent + hard caps | ❌ | ❌ | ❌ (Azure billing) |
+| **Governance** | ✅ Approvals + audit trail | ❌ | ❌ (checkpointing only) | ⚪ Limited |
+| **Runtime agnostic** | ✅ Any agent runtime | ❌ Python-only agents | ❌ Python-only agents | ❌ Azure-only |
+| **Self-hosted** | ✅ MIT license, one process | ✅ Apache 2.0 | ✅ Apache 2.0 | ❌ Azure cloud required |
+| **Heartbeat scheduler** | ✅ Built-in cron + triggers | ❌ | ❌ | ❌ |
+| **Best for** | Running a team of 5–100+ agents | Single-purpose multi-agent tasks | Complex agentic workflows | Enterprise Azure shops |
+
+### Paperclip vs. Workflow & Platform Tools
+
+| | Paperclip | n8n / Make | Trigger.dev | Salesforce Agentforce |
+|---|---|---|---|---|
+| **What it does** | Runs a company of agents | No-code workflow automation | TypeScript workflow scheduling | Enterprise agent CRM |
+| **Paradigm** | Company OS (roles + goals + budgets) | Integration pipelines | Code-based triggers | SaaS product with agents |
+| **Agent-native** | ✅ Built for AI agents | ❌ API integrations | ❌ Human-triggered workflows | ⚪ Salesforce-only agents |
+| **Open source** | ✅ MIT | ⚪ Fair-code (n8n) | ✅ Apache 2.0 | ❌ Proprietary SaaS |
+| **Self-hosted** | ✅ One process, embedded DB | ✅ Docker | ✅ Docker | ❌ |
+| **Budget enforcement** | ✅ Hard stops at cap | ❌ | ❌ | ❌ |
+| **Best for** | Managing an AI agent workforce | Automating SaaS integrations | Background job scheduling | Salesforce ecosystem |
+
+> **The key difference:** Agent frameworks tell you *how to build* an agent. Workflow tools tell you *what step comes next*. Paperclip tells you *who does what, on what budget, reporting to whom* — the management layer that neither frameworks nor workflow tools address.
+
+<br/>
+
+## What Paperclip is not
+
+|                              |                                                                                                                      |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Not an agent framework.**  | We don't tell you how to build agents. We tell you how to run a company made of them.                                |
+| **Not a workflow builder.**  | No drag-and-drop pipelines. Paperclip models companies — with org charts, goals, budgets, and governance.            |
+| **Not a chatbot.**           | Agents have jobs, titles, and accountability. Not chat windows.                                                     |
+| **Not a prompt manager.**    | Agents bring their own prompts, models, and runtimes. Paperclip manages the organization they work in.               |
+| **Not a single-agent tool.** | If you have one agent, you probably don't need Paperclip. If you have twenty — you definitely do.                   |
+| **Not a code review tool.**  | Paperclip orchestrates work, not pull requests. Bring your own review process.                                       |
+
+<br/>
+
 ## What's Under the Hood
 
-Super Node is a full control plane, not a wrapper. Before you build any of this yourself, know that it already exists:
+Paperclip is a full control plane, not a wrapper. Before you build any of this yourself, know that it already exists:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -226,7 +299,7 @@ Super Node is a full control plane, not a wrapper. Before you build any of this 
 <tr>
 <td>
 
-**Budget & Cost Control** — Token and cost tracking by company, agent, project, goal, issue, provider, and model. Scoped budget policies with warning thresholds and hard stops. Overspend pauses agents and cancels queued work automatically.
+**Budget & Cost Control** — Token and cost tracking by company, agent, project, goal, issue, provider, and model. Scoped budget policies with warning thresholds (80%) and hard stops (100%). Overspend pauses agents and cancels queued work automatically.
 
 </td>
 <td>
@@ -238,7 +311,7 @@ Super Node is a full control plane, not a wrapper. Before you build any of this 
 <tr>
 <td>
 
-**Plugins** — Instance-wide plugin system with out-of-process workers, capability-gated host services, job scheduling, tool exposure, and UI contributions. Extend Super Node without forking it.
+**Plugins** — Instance-wide plugin system with out-of-process workers, capability-gated host services, job scheduling, tool exposure, and UI contributions. Extend Paperclip without forking it.
 
 </td>
 <td>
@@ -263,26 +336,40 @@ Super Node is a full control plane, not a wrapper. Before you build any of this 
 
 <br/>
 
-## What Super Node is not
+## Proof that it works
 
-|                              |                                                                                                                      |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Not a chatbot.**           | Agents have jobs, not chat windows.                                                                                  |
-| **Not an agent framework.**  | We don't tell you how to build agents. We tell you how to run a company made of them.                                |
-| **Not a workflow builder.**  | No drag-and-drop pipelines. Super Node models companies — with org charts, goals, budgets, and governance.            |
-| **Not a prompt manager.**    | Agents bring their own prompts, models, and runtimes. Super Node manages the organization they work in.               |
-| **Not a single-agent tool.** | This is for teams. If you have one agent, you probably don't need Super Node. If you have twenty — you definitely do. |
-| **Not a code review tool.**  | Super Node orchestrates work, not pull requests. Bring your own review process.                                       |
+- **70,000+ GitHub stars** and counting — #1 in the AI agent orchestration category
+- **Self-hosted, MIT license** — inspect every line, run it on your own infrastructure
+- **Used in production** by AI-native startups, platform engineering teams, and solo operators
+- **Paperclip runs Paperclip** — our own company of AI agents (CEO, CTO, CMO, Engineers, Designer) uses Paperclip to build Paperclip. Every feature shipped goes through the same org chart, budget system, and governance you'll use
+- **Active adapter ecosystem** — Claude Code, Codex, Cursor, Gemini CLI, OpenClaw, and community adapters
+- **Launched March 2026** — one of the fastest-growing open-source AI infrastructure projects
 
 <br/>
 
 ## Quickstart
 
-Open source. Self-hosted. No Super Node account required.
+Open source. Self-hosted. No Paperclip account required.
 
 ```bash
 npx paperclipai onboard --yes
 ```
+
+> **Troubleshooting: private npm registry `.npmrc`**
+>
+> If this fails with an `E404` for `paperclipai` (or similar) and you use a private npm registry (for example GitHub Packages) via a global `~/.npmrc`, `npx` may be resolving `paperclipai` against that private registry instead of the public npm registry.
+>
+> Diagnostic:
+>
+> ```bash
+> npm config get registry
+> ```
+>
+> Workaround (cross-platform; force the public npm registry for this command):
+>
+> ```bash
+> npx --registry https://registry.npmjs.org paperclipai onboard --yes
+> ```
 
 That quickstart path now defaults to trusted local loopback mode for the fastest first run. To start in authenticated/private mode instead, choose a bind preset explicitly:
 
@@ -292,7 +379,7 @@ npx paperclipai onboard --yes --bind lan
 npx paperclipai onboard --yes --bind tailnet
 ```
 
-If you already have Super Node configured, rerunning `onboard` keeps the existing config in place. Use `paperclipai configure` to edit settings.
+If you already have Paperclip configured, rerunning `onboard` keeps the existing config in place. Use `paperclipai configure` to edit settings.
 
 Or manually:
 
@@ -314,21 +401,21 @@ This starts the API server at `http://localhost:3100`. An embedded PostgreSQL da
 **What does a typical setup look like?**
 Locally, a single Node.js process manages an embedded Postgres and local file storage. For production, point it at your own Postgres and deploy however you like. Configure projects, agents, and goals — the agents take care of the rest.
 
-If you're a solo entrepreneur you can use Tailscale to access Super Node on the go. Then later you can deploy to e.g. Vercel when you need it.
+If you're a solo entrepreneur you can use Tailscale to access Paperclip on the go. Then later you can deploy to e.g. Vercel when you need it.
 
 **Can I run multiple companies?**
 Yes. A single deployment can run an unlimited number of companies with complete data isolation.
 
-**How is Super Node different from agents like OpenClaw or Claude Code?**
-Super Node _uses_ those agents. It orchestrates them into a company — with org charts, budgets, goals, governance, and accountability.
+**How is Paperclip different from agents like OpenClaw or Claude Code?**
+Paperclip *uses* those agents. It orchestrates them into a company — with org charts, budgets, goals, governance, and accountability.
 
-**Why should I use Super Node instead of just pointing my OpenClaw to Asana or Trello?**
-Agent orchestration has subtleties in how you coordinate who has work checked out, how to maintain sessions, monitoring costs, establishing governance - Super Node does this for you.
+**Why should I use Paperclip instead of just pointing my OpenClaw to Asana or Trello?**
+Agent orchestration has subtleties in how you coordinate who has work checked out, how to maintain sessions, monitoring costs, establishing governance — Paperclip does this for you.
 
 (Bring-your-own-ticket-system is on the Roadmap)
 
 **Do agents run continuously?**
-By default, agents run on scheduled heartbeats and event-based triggers (task assignment, @-mentions). You can also hook in continuous agents like OpenClaw. You bring your agent and Super Node coordinates.
+By default, agents run on scheduled heartbeats and event-based triggers (task assignment, @-mentions). You can also hook in continuous agents like OpenClaw. You bring your agent and Paperclip coordinates.
 
 <br/>
 
@@ -364,7 +451,7 @@ See [doc/DEVELOPING.md](doc/DEVELOPING.md) for the full development guide.
 - ✅ Better Budgeting
 - ✅ Agent Reviews and Approvals
 - ✅ Multiple Human Users
-- ⚪ Cloud / Sandbox agents (e.g. Cursor / e2b agents)
+- ⚪ Cloud / Sandbox agents (e.g. Cursor / e2b / Novita agents)
 - ⚪ Artifacts & Work Products
 - ⚪ Memory / Knowledge
 - ⚪ Enforced Outcomes
@@ -387,7 +474,7 @@ Find Plugins and more at [awesome-paperclip](https://github.com/gsxdsm/awesome-p
 
 ## Telemetry
 
-Super Node collects anonymous usage telemetry to help us understand how the product is used and improve it. No personal information, issue content, prompts, file paths, or secrets are ever collected. Private repository references are hashed with a per-install salt before being sent.
+Paperclip collects anonymous usage telemetry to help us understand how the product is used and improve it. No personal information, issue content, prompts, file paths, or secrets are ever collected. Private repository references are hashed with a per-install salt before being sent.
 
 Telemetry is **enabled by default** and can be disabled with any of the following:
 
@@ -396,7 +483,7 @@ Telemetry is **enabled by default** and can be disabled with any of the followin
 | Environment variable | `PAPERCLIP_TELEMETRY_DISABLED=1`                        |
 | Standard convention  | `DO_NOT_TRACK=1`                                        |
 | CI environments      | Automatically disabled when `CI=true`                   |
-| Config file          | Set `telemetry.enabled: false` in your Super Node config |
+| Config file          | Set `telemetry.enabled: false` in your Paperclip config |
 
 ## Contributing
 
@@ -426,5 +513,5 @@ MIT &copy; 2026 [Super Node, Inc](https://paperclip.ing)
 ---
 
 <p align="center">
-  <sub>Open source under MIT. Built for people who want to get work done, not babysit agents.</sub>
+  <sub>Open source under MIT. Run the company. The agents work here.</sub>
 </p>
