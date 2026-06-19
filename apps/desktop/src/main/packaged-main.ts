@@ -21,6 +21,7 @@ import { ensureFirstRunConfig, registerOnboardingIPC, type FirstRunResult } from
 import { loadWindowState, registerWindowStateHandlers } from "./window-state.js";
 import { setAutoLaunch } from "./login-item.js";
 import { registerContextMenuHandler } from "./context-menu.js";
+import { registerAgentBridgeIPC } from "./agent-bridge-ipc.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -423,6 +424,7 @@ export async function runDesktopMain(): Promise<void> {
   // ═══════════════════════════════════════
   registerOnboardingIPC();       // Story 1.6: mode selection IPC
   registerContextMenuHandler(); // US3: native context menu bridge
+  registerAgentBridgeIPC();     // Story 3.3: Agent → AgentHubs data bridge
   createTray(mainWindow);
   createAppMenu(
     mainWindow,
