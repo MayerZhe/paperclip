@@ -53,8 +53,24 @@ const VM_HOME = path.resolve(
 const VM_EXTRACT_DIR = path.join(VM_HOME, "agenthubs-local-vm");
 const DEFAULT_COMPOSE_PATH = path.join(VM_EXTRACT_DIR, "docker-compose.yml");
 
-/** 健康检查指数退避间隔 (ms) */
+/** 健康检查指数退避间隔 (ms) — 通用用途 */
 const HEALTH_CHECK_RETRIES = [120, 240, 480, 960, 1500, 2000, 3000];
+
+/** Docker Compose 健康检查退避间隔 (ms) — 容器已启动时更快响应 */
+const DOCKER_HEALTH_RETRIES = [80, 160, 320, 500, 750, 1000, 1500, 2000];
+
+/** 启动指标文件路径 */
+const STARTUP_METRICS_FILE = path.join(VM_HOME, "startup-metrics.json");
+/** 启动指标最大保留条数 */
+const MAX_STARTUP_METRICS = 5;
+
+/** 必需的 Docker 镜像名称 */
+const REQUIRED_DOCKER_IMAGES = [
+  "agenthubs-postgres",
+  "agenthubs-redis",
+  "agenthubs-cloud-api",
+  "agenthubs-paperclip",
+];
 
 /** 默认 docker compose down 超时 (秒) */
 const DEFAULT_STOP_TIMEOUT = 30;
@@ -119,9 +135,10 @@ function resolveComposePath(composePath?: string): string {
 async function waitForHealth(
   url: string,
   timeout = 30000,
+  retries: number[] = HEALTH_CHECK_RETRIES,
 ): Promise<boolean> {
   const start = Date.now();
-  for (const delay of HEALTH_CHECK_RETRIES) {
+  for (const delay of retries) {
     try {
       const res = await fetch(url);
       if (res.ok) return true;
@@ -184,6 +201,72 @@ async function checkTcpPort(port: number, timeout = 2000): Promise<boolean> {
   });
 }
 
+// ─── Docker 镜像预检查 ───
+
+/**
+ * 检查必需的 Docker 镜像是否已存在于本地
+ * @returns 缺失的镜像名称数组；如果全部存在则返回空数组
+ */
+function checkDockerImages(containerRuntime: string): string[] {
+  const missing: string[] = [];
+  for (const image of REQUIRED_DOCKER_IMAGES) {
+    try {
+      const result = execSync(
+        `${containerRuntime} images -q ${image}`,
+        { encoding: "utf-8", stdio: ["ignore", "pipe", "pipe"] },
+      );
+      if (!result.trim()) {
+        missing.push(image);
+      }
+    } catch {
+      missing.push(image);
+    }
+  }
+  return missing;
+}
+
+// ─── 启动指标 ───
+
+interface StartupMetric {
+  timestamp: string;
+  totalMs: number;
+  composeUpMs: number;
+  cloudApiMs: number;
+  paperclipMs: number;
+}
+
+/**
+ * 写入启动指标到 ~/.paperclip/vm/startup-metrics.json
+ * 失败静默忽略（非关键路径）
+ */
+function writeStartupMetrics(metric: StartupMetric): void {
+  try {
+    const dir = path.dirname(STARTUP_METRICS_FILE);
+    fs.mkdirSync(dir, { recursive: true });
+
+    let metrics: StartupMetric[] = [];
+    if (fs.existsSync(STARTUP_METRICS_FILE)) {
+      try {
+        const raw = fs.readFileSync(STARTUP_METRICS_FILE, "utf-8");
+        metrics = JSON.parse(raw);
+        if (!Array.isArray(metrics)) metrics = [];
+      } catch {
+        metrics = [];
+      }
+    }
+
+    metrics.push(metric);
+    // 只保留最近 N 条
+    if (metrics.length > MAX_STARTUP_METRICS) {
+      metrics = metrics.slice(-MAX_STARTUP_METRICS);
+    }
+
+    fs.writeFileSync(STARTUP_METRICS_FILE, JSON.stringify(metrics, null, 2), "utf-8");
+  } catch {
+    // 非关键路径，静默忽略
+  }
+}
+
 // ─── 健康检查 ───
 
 /**
@@ -222,19 +305,21 @@ export async function checkAgentHubsHealth(): Promise<HealthCheckResults> {
 /**
  * 启动 AgentHubs Mode — docker compose up -d
  *
- * 流程：
+ * 流程（优化后）：
  * 1. 检查 VM image 是否已下载
- * 2. 解析 composePath
- * 3. 确保共享目录存在
- * 4. docker compose up -d
- * 5. 等待 cloud-api :4000/health 就绪（指数退避）
- * 6. 等待 paperclip :3200/api/health 就绪（指数退避）
- * 7. 返回 AgentHubsModeState
+ * 2. 预检查必需 Docker 镜像是否存在
+ * 3. 解析 composePath
+ * 4. 确保共享目录存在
+ * 5. docker compose up -d（立即返回，不等健康检查）
+ * 6. 并行等待 cloud-api :4000/health + paperclip :3200/api/health 就绪
+ * 7. 记录启动指标
+ * 8. 返回 AgentHubsModeState
  */
 export async function startAgentHubsMode(
   config: StartAgentHubsConfig,
 ): Promise<AgentHubsModeState> {
   const { paperclipHome, containerRuntime, onProgress } = config;
+  const t0 = Date.now();
 
   onProgress?.("checking VM image...");
 
@@ -245,15 +330,24 @@ export async function startAgentHubsMode(
     );
   }
 
-  // 2. 解析 compose 文件路径
+  // 2. 预检查必需 Docker 镜像
+  const missingImages = checkDockerImages(containerRuntime);
+  if (missingImages.length > 0) {
+    throw new Error(
+      `Required Docker images not found: ${missingImages.join(", ")}. ` +
+        `Run download-vm-image first.`,
+    );
+  }
+
+  // 3. 解析 compose 文件路径
   const composePath = resolveComposePath(config.composePath);
   onProgress?.(`compose file: ${composePath}`);
 
-  // 3. 确保共享目录存在
+  // 4. 确保共享目录存在
   ensureSharedDir(paperclipHome);
   onProgress?.("shared directory ready");
 
-  // 4. 执行 docker compose up -d
+  // 5. 执行 docker compose up -d（立即返回）
   setState({
     status: "starting",
     composePath,
@@ -277,12 +371,32 @@ export async function startAgentHubsMode(
     throw new Error(`Failed to start AgentHubs containers: ${errorMsg}`);
   }
 
-  onProgress?.("containers started, waiting for cloud-api...");
+  const t1 = Date.now();
+  const composeUpMs = t1 - t0;
+  console.log(`[AgentHubs] docker compose up: ${composeUpMs}ms`);
 
-  // 5. 等待 cloud-api :4000/health 就绪
-  const cloudApiReady = await waitForHealth(
-    `http://127.0.0.1:${CLOUD_API_PORT}/health`,
-  );
+  onProgress?.("containers started, waiting for services...");
+
+  // 6. 并行等待 cloud-api :4000/health 和 paperclip :3200/api/health 就绪
+  const [cloudApiReady, paperclipReady] = await Promise.all([
+    waitForHealth(
+      `http://127.0.0.1:${CLOUD_API_PORT}/health`,
+      60000,
+      DOCKER_HEALTH_RETRIES,
+    ),
+    waitForHealth(
+      `http://127.0.0.1:${PAPERCLIP_HOST_PORT}/api/health`,
+      60000,
+      DOCKER_HEALTH_RETRIES,
+    ),
+  ]);
+
+  const t2 = Date.now();
+  const cloudApiMs = t2 - t0;
+  const paperclipMs = t2 - t0;
+  console.log(`[AgentHubs] cloud-api health: ${cloudApiMs}ms`);
+  console.log(`[AgentHubs] paperclip health: ${paperclipMs}ms`);
+
   if (!cloudApiReady) {
     setState({
       status: "error",
@@ -290,13 +404,6 @@ export async function startAgentHubsMode(
     });
     throw new Error(currentState?.error);
   }
-  onProgress?.("cloud-api ready");
-
-  // 6. 等待 paperclip :3200/api/health 就绪
-  const paperclipReady = await waitForHealth(
-    `http://127.0.0.1:${PAPERCLIP_HOST_PORT}/api/health`,
-    60000, // paperclip 启动较慢（PG + 迁移）
-  );
   if (!paperclipReady) {
     setState({
       status: "error",
@@ -304,10 +411,24 @@ export async function startAgentHubsMode(
     });
     throw new Error(currentState?.error);
   }
-  onProgress?.("paperclip ready");
+
+  onProgress?.("all services ready");
 
   // 7. 运行完整健康检查
   const health = await checkAgentHubsHealth();
+
+  const t3 = Date.now();
+  const totalMs = t3 - t0;
+  console.log(`[AgentHubs] Total startup: ${totalMs}ms`);
+
+  // 记录启动指标（非关键路径）
+  writeStartupMetrics({
+    timestamp: new Date().toISOString(),
+    totalMs,
+    composeUpMs,
+    cloudApiMs,
+    paperclipMs,
+  });
 
   setState({
     status: "running",

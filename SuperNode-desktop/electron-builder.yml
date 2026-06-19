@@ -1,0 +1,123 @@
+# PaperClip Desktop — electron-builder configuration
+# ADR-01: 不使用 asar，纯文件目录分发（PG 二进制无法从 asar 加载）
+# ADR-05: UI 通过 HTTP loadURL('http://localhost:3100')，不在 Electron 内
+# Sprint 3: 完善 Windows NSIS + Linux AppImage/deb 多平台配置
+
+appId: com.paperclipai.desktop
+productName: SuperNode
+copyright: Copyright © 2026 PaperClip Authors
+
+# Output directory (avoid recursive copy — dist/**/* is in files)
+directories:
+  output: dist-electron
+
+# 不打包为 asar（ADR-01）
+asar: false
+
+# ═══════════════════════════════════════
+# macOS
+# ═══════════════════════════════════════
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch:
+        - arm64
+        - x64
+    - target: zip
+      arch:
+        - arm64
+        - x64
+  # entitlements: build/entitlements.mac.plist
+  # entitlementsInherit: build/entitlements.mac.plist
+  # hardenedRuntime: true
+  icon: resources/icon.icns
+  minimumSystemVersion: "13.0"
+  # 公证配置（CI 注入或本地开发时注释）
+  # notarize:
+  #   teamId: ""
+  # appleId: ""
+  # appleIdPassword: ""
+
+# ═══════════════════════════════════════
+# Windows
+# ═══════════════════════════════════════
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  # electron-builder 从 512px PNG 自动生成 .ico
+  icon: resources/icon-512.png
+  # EV 代码签名（需采购证书，CI 注入）
+  # certificateFile: ""
+  # certificatePassword: ""
+  # rfc3161TimeStampServer: "http://timestamp.digicert.com"
+  # signingHashAlgorithms: ["sha256"]
+
+# NSIS 安装器配置（顶层键）
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: resources/icon-512.png
+  uninstallerIcon: resources/icon-512.png
+  installerHeaderIcon: resources/icon-512.png
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: PaperClip
+  deleteAppDataOnUninstall: false
+
+# ═══════════════════════════════════════
+# Linux
+# ═══════════════════════════════════════
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+        - arm64
+    - target: deb
+      arch:
+        - x64
+        - arm64
+  category: Development
+  # electron-builder 从 512px PNG 自动生成所需格式
+  icon: resources/icon-512.png
+  executableName: paperclip
+
+# ═══════════════════════════════════════
+# 打包资源
+# ═══════════════════════════════════════
+extraResources:
+  - from: "paperclip-server"
+    to: "paperclip-server"
+  - from: "browser"
+    to: "browser"
+  - from: "agenthubs-local-vm"
+    to: "agenthubs-local-vm"
+
+# 文件匹配模式
+# paperclip-server is extraResources (copied to Resources/paperclip-server/), not in dist/
+# Note: after bundle-desktop.ts syncs SuperNode-desktop/dist/ → apps/desktop/,
+# paperclip-server/ exists at apps/desktop/paperclip-server/ (top level)
+files:
+  - "dist/**/*"
+  - "package.json"
+  - "paperclip-server/**"
+  - "agenthubs-local-vm/**"
+
+# ═══════════════════════════════════════
+# 钩子
+# ═══════════════════════════════════════
+# Fix Helper .app Info.plist to prevent 4 icons in Dock/Launchpad
+afterPack: "../../SuperNode-desktop/scripts/desktop/fix-helper-plist.cjs"
+
+# ═══════════════════════════════════════
+# 发布配置
+# ═══════════════════════════════════════
+publish:
+  provider: github
+  owner: paperclipai
+  repo: paperclip
+  releaseType: draft
