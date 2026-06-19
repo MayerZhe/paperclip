@@ -17,7 +17,7 @@ import { createAppMenu } from "./menu.js";
 import { createUpdater, type Updater } from "./updater.js";
 import { showNotification } from "./notifications.js";
 import { SIDECAR_MESSAGES } from "../shared/sidecar-proto.js";
-import { ensureFirstRunConfig } from "./onboard.js";
+import { ensureFirstRunConfig, registerOnboardingIPC, type FirstRunResult } from "./onboard.js";
 import { loadWindowState, registerWindowStateHandlers } from "./window-state.js";
 import { setAutoLaunch } from "./login-item.js";
 import { registerContextMenuHandler } from "./context-menu.js";
@@ -197,10 +197,13 @@ export async function runDesktopMain(): Promise<void> {
   // ═══════════════════════════════════════
   // Phase 0: 首次启动 — 生成配置
   // ═══════════════════════════════════════
-  await ensureFirstRunConfig({
+  const firstRunResult: FirstRunResult = await ensureFirstRunConfig({
     homeDir: PAPERCLIP_HOME,
     instanceId: PAPERCLIP_INSTANCE_ID,
   });
+  console.log(
+    `[PaperClip Desktop] First run: ${firstRunResult.isFirstRun}, mode: ${firstRunResult.mode}, config: ${firstRunResult.configPath}`,
+  );
 
   // ═══════════════════════════════════════
   // Phase 1: 启动 PaperClip Server
@@ -418,6 +421,7 @@ export async function runDesktopMain(): Promise<void> {
   // ═══════════════════════════════════════
   // Phase 6: 桌面特性
   // ═══════════════════════════════════════
+  registerOnboardingIPC();       // Story 1.6: mode selection IPC
   registerContextMenuHandler(); // US3: native context menu bridge
   createTray(mainWindow);
   createAppMenu(
