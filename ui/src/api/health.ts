@@ -26,27 +26,35 @@ export type HealthStatus = {
   devServer?: DevServerHealthStatus;
 };
 
+import { getApiBase } from "./client.js";
+
+const HEALTH_BASE = getApiBase() + "/health";
+
 export const healthApi = {
   get: async (): Promise<HealthStatus> => {
-    const res = await fetch("/api/health", {
+    const res = await fetch(HEALTH_BASE, {
       credentials: "include",
       headers: { Accept: "application/json" },
     });
     if (!res.ok) {
-      const payload = await res.json().catch(() => null) as { error?: string } | null;
-      throw new Error(payload?.error ?? `Failed to load health (${res.status})`);
+      const payload = (await res.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(
+        payload?.error ?? `Failed to load health (${res.status})`,
+      );
     }
     return res.json();
   },
   requestDevServerRestart: async (): Promise<void> => {
-    const res = await fetch("/api/health/dev-server/restart", {
+    const res = await fetch(`${HEALTH_BASE}/dev-server/restart`, {
       method: "POST",
       credentials: "include",
       headers: { Accept: "application/json" },
     });
     if (!res.ok) {
-      const payload = await res.json().catch(() => null) as { error?: string } | null;
-      throw new Error(payload?.error ?? `Failed to request restart (${res.status})`);
+      const payload = (await res.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(
+        payload?.error ?? `Failed to request restart (${res.status})`,
+      );
     }
   },
 };

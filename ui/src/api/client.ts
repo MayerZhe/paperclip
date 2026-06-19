@@ -1,4 +1,12 @@
-const BASE = "/api";
+/** Detect if running behind console proxy (Integration/Production). */
+export function getApiBase(): string {
+  const match = window.location.pathname.match(
+    /^\/console\/(sn|hmo)\/[a-f0-9-]+/,
+  );
+  if (match) return match[0] + "/api";
+  return "/api";
+}
+const BASE = getApiBase();
 
 export class ApiError extends Error {
   status: number;
