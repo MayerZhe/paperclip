@@ -111,7 +111,7 @@ export function SidebarAccountMenu({
   const [internalOpen, setInternalOpen] = useState(false);
   const queryClient = useQueryClient();
   const { isMobile, setSidebarOpen } = useSidebar();
-  const { theme, toggleTheme } = useTheme();
+  const { resolved, toggleTheme } = useTheme();
   const open = controlledOpen ?? internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
   const { data: session } = useQuery({
@@ -180,7 +180,7 @@ export function SidebarAccountMenu({
                 </div>
                 <p className="truncate text-sm text-muted-foreground">{secondaryLabel}</p>
                 {version ? (
-                  <p className="mt-1 text-xs text-muted-foreground">Paperclip v{version}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Super Node v{version}</p>
                 ) : null}
               </div>
             </div>
@@ -209,16 +209,16 @@ export function SidebarAccountMenu({
               />
               <MenuAction
                 label="Documentation"
-                description="Open Paperclip docs in a new tab."
+                description="Open Super Node docs in a new tab."
                 icon={BookOpen}
                 href={DOCS_URL}
                 external
                 onClick={() => setOpen(false)}
               />
               <MenuAction
-                label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                label={resolved === "dark" ? "Switch to light mode" : "Switch to dark mode"}
                 description="Toggle the app appearance."
-                icon={theme === "dark" ? Sun : Moon}
+                icon={resolved === "dark" ? Sun : Moon}
                 onClick={() => {
                   toggleTheme();
                   setOpen(false);
@@ -254,3 +254,4 @@ export function SidebarAccountMenu({
     </div>
   );
 }
+

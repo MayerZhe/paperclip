@@ -1,0 +1,334 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Onboarding Page — AgentHubs Design System
+   Story 2.3: Unified onboarding flow (Welcome → Mode Select → Complete)
+
+   Design tokens mirror the existing --ah-* convention used across the
+   project, with always-dark AgentHubs styling.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── AgentHubs design tokens (always dark) ───────────────────────────────── */
+
+:root {
+  --ah-brand: oklch(0.54 0.19 265);
+  --ah-brand-secondary: oklch(0.696 0.17 162.48);
+  --ah-success: oklch(0.65 0.16 145);
+  --ah-surface: #1c1c1e;
+  --ah-surface-raised: #242426;
+  --ah-surface-hover: #2c2c2e;
+  --ah-border: #38383a;
+  --ah-border-hover: #555558;
+  --ah-fg: #f0f0fa;
+  --ah-fg-muted: #98989d;
+  --ah-fg-dim: #6e6e73;
+  --ah-radius-card: 16px;
+  --ah-radius-sm: 10px;
+}
+
+/* ── Root layout (full viewport, centered) ───────────────────────────────── */
+
+.ob-root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-width: 900px;
+  padding: 32px 24px;
+  background-color: #050505;
+  color: var(--ah-fg);
+  font-family: "Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont,
+    "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ob-container {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+/* ── Welcome step ────────────────────────────────────────────────────────── */
+
+.ob-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  animation: ob-fade-slide-up 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ob-welcome:focus-visible {
+  outline: 2px solid var(--ah-brand);
+  outline-offset: 8px;
+  border-radius: var(--ah-radius-card);
+}
+
+.ob-welcome__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ob-welcome__title {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 2.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ah-fg);
+}
+
+.ob-welcome__tagline {
+  margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--ah-fg-muted);
+  line-height: 1.6;
+}
+
+/* ── Mode-select step ────────────────────────────────────────────────────── */
+
+.ob-select {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  animation: ob-fade-slide-up 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ob-select__heading {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ah-fg);
+}
+
+.ob-select__subtitle {
+  margin: 0 0 16px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--ah-fg-muted);
+  line-height: 1.5;
+}
+
+/* ── Mode cards ──────────────────────────────────────────────────────────── */
+
+.ob-select__cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.ob-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 28px 24px;
+  border: 1px solid var(--ah-border);
+  border-radius: var(--ah-radius-card);
+  background: var(--ah-surface-raised);
+  color: var(--ah-fg);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 200ms ease;
+  will-change: transform;
+}
+
+.ob-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--ah-border-hover);
+  background: var(--ah-surface-hover);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.ob-card:focus-visible {
+  outline: 2px solid var(--ah-brand);
+  outline-offset: 2px;
+}
+
+.ob-card:active {
+  transform: translateY(0) scale(0.99);
+  transition: transform 80ms ease;
+}
+
+.ob-card__icon {
+  font-size: 2rem;
+  line-height: 1;
+  display: block;
+}
+
+.ob-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ob-card__title {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ah-fg);
+}
+
+.ob-card__desc {
+  margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--ah-fg-muted);
+  line-height: 1.55;
+}
+
+/* ── Skip link ───────────────────────────────────────────────────────────── */
+
+.ob-select__skip {
+  margin-top: 16px;
+}
+
+.ob-skip-link {
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--ah-fg-dim);
+  cursor: pointer;
+  border-radius: var(--ah-radius-sm);
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.ob-skip-link:hover {
+  color: var(--ah-fg-muted);
+  background: var(--ah-surface-hover);
+}
+
+.ob-skip-link:focus-visible {
+  outline: 2px solid var(--ah-brand);
+  outline-offset: 2px;
+}
+
+/* ── Complete step ───────────────────────────────────────────────────────── */
+
+.ob-complete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: ob-complete-enter 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.ob-complete__check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ob-complete__text {
+  margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--ah-fg-muted);
+  line-height: 1.6;
+}
+
+.ob-complete__text strong {
+  font-weight: 600;
+  color: var(--ah-fg);
+}
+
+/* ── Shared animations ───────────────────────────────────────────────────── */
+
+@keyframes ob-fade-slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ob-complete-enter {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-welcome,
+  .ob-select,
+  .ob-complete {
+    animation: none;
+  }
+
+  .ob-card {
+    transition: none;
+  }
+
+  .ob-card:hover {
+    transform: none;
+  }
+
+  .ob-card:active {
+    transform: none;
+  }
+}
+
+/* ── Responsive: Electron BrowserWindow min-width = 900px ────────────────── */
+
+@media (max-width: 940px) {
+  .ob-root {
+    min-width: 0;
+    padding: 24px 16px;
+  }
+
+  .ob-container {
+    max-width: 100%;
+  }
+
+  .ob-select__cards {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+  }
+
+  .ob-welcome__title {
+    font-size: 1.75rem;
+  }
+
+  .ob-select__heading {
+    font-size: 1.25rem;
+  }
+}

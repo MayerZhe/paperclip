@@ -1,0 +1,46 @@
+/* AgentHubs Design System — CSS Custom Properties (Tokens)
+   ==========================================================================
+   Incremental extension of the shadcn/ui theme. All tokens are prefixed
+   `--ah-` to avoid collisions with existing variables. Nothing in this file
+   replaces or removes any existing :root/.dark declaration — it only adds
+   new namespace tokens that components can opt into via className or
+   composable utility classes.
+   ========================================================================== */
+
+:root {
+  /* ── AgentHubs typography stack ──────────────────────────────────────── */
+  --ah-font-heading: 'Space Grotesk', system-ui, sans-serif;
+  --ah-font-body:    'Inter', system-ui, sans-serif;
+  --ah-font-mono:    'JetBrains Mono', monospace;
+
+  /* ── AgentHubs background palette (dark-mode-first) ──────────────────── */
+  --ah-bg-primary:   #050505;
+  --ah-bg-secondary: #0a0a0a;
+  --ah-bg-card:      #111111;
+  --ah-bg-hover:     #1a1a1a;
+
+  /* ── AgentHubs accent colors (purple, oklch-encoded) ─────────────────── */
+  --ah-accent:       oklch(0.65 0.2 265);
+  --ah-accent-hover: oklch(0.7 0.22 265);
+  --ah-accent-muted: oklch(0.35 0.08 265);
+  --ah-accent-foreground: #ffffff;
+
+  /* ── AgentHubs border radius (zero-radius = sharp corners) ───────────── */
+  --ah-radius:    0px;
+  --ah-radius-sm: 0px;
+  --ah-radius-md: 0px;
+
+  /* ── AgentHubs transitions ───────────────────────────────────────────── */
+  --ah-transition-fast:   150ms ease;
+  --ah-transition-normal: 250ms ease;
+
+  /* ── AgentHubs semantic surface tokens ───────────────────────────────── */
+  --ah-surface-primary:   var(--ah-bg-primary);
+  --ah-surface-secondary: var(--ah-bg-secondary);
+  --ah-surface-card:      var(--ah-bg-card);
+  --ah-surface-hover:     var(--ah-bg-hover);
+
+  /* ── AgentHubs border tokens ─────────────────────────────────────────── */
+  --ah-border-default: color-mix(in oklab, var(--ah-accent-muted) 40%, transparent);
+  --ah-border-hover:   var(--ah-accent);
+}

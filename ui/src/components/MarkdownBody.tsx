@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 import { cn } from "../lib/utils";
 import { Link } from "@/lib/router";
 import { useTheme } from "../context/ThemeContext";
-import { useOptionalCompany } from "../context/CompanyContext";
+import { useOptionalNodeOrg } from "../context/NodeOrgContext";
 import { mentionChipInlineStyle, parseMentionChipHref } from "../lib/mention-chips";
 import { issuesApi } from "../api/issues";
 import { queryKeys } from "../lib/queryKeys";
@@ -570,11 +570,11 @@ export function MarkdownBody({
   resolveImageSrc,
   onImageClick,
 }: MarkdownBodyProps) {
-  const { theme } = useTheme();
+  const { resolved } = useTheme();
   // Read company prefixes non-throwingly: MarkdownBody renders in surfaces that
-  // may lack a CompanyProvider. A null context (or no companies yet) leaves
+  // may lack a NodeOrgProvider. A null context (or no companies yet) leaves
   // knownPrefixes undefined, which keeps issue auto-linking permissive.
-  const company = useOptionalCompany();
+  const company = useOptionalNodeOrg();
   const knownPrefixes = company?.companies.length
     ? company.companies.map((c) => c.issuePrefix)
     : undefined;
@@ -624,7 +624,7 @@ export function MarkdownBody({
     pre: ({ node: _node, children: preChildren, ...preProps }) => {
       const mermaidSource = extractMermaidSource(preChildren);
       if (mermaidSource) {
-        return <MermaidDiagramBlock source={mermaidSource} darkMode={theme === "dark"} />;
+        return <MermaidDiagramBlock source={mermaidSource} darkMode={resolved === "dark"} />;
       }
       return <CodeBlock preProps={preProps}>{preChildren}</CodeBlock>;
     },
@@ -675,9 +675,9 @@ export function MarkdownBody({
           <a
             href={targetHref}
             className={cn(
-              "paperclip-mention-chip",
-              `paperclip-mention-chip--${parsed.kind}`,
-              parsed.kind === "project" && "paperclip-project-mention-chip",
+              "super-node-mention-chip",
+              `super-node-mention-chip--${parsed.kind}`,
+              parsed.kind === "project" && "super-node-project-mention-chip",
             )}
             data-mention-kind={parsed.kind}
             style={{ ...mergeWrapStyle(linkStyle as React.CSSProperties | undefined), ...mentionChipInlineStyle(parsed) }}
@@ -726,8 +726,8 @@ export function MarkdownBody({
   return (
     <div
       className={cn(
-        "paperclip-markdown prose prose-sm min-w-0 max-w-full break-words overflow-hidden",
-        theme === "dark" && "prose-invert",
+        "paperclip-markdown prose min-w-0 max-w-full break-words overflow-hidden !text-xs",
+        resolved === "dark" && "prose-invert",
         className,
       )}
       style={mergeWrapStyle(style)}
