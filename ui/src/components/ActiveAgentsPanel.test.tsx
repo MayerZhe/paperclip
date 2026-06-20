@@ -15,6 +15,7 @@ const mockIssuesApi = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/router", () => ({
+  useLocation: () => ({ pathname: '/', search: '', hash: '', state: null }),
   Link: ({ to, children, ...props }: { to: string; children: ReactNode }) => (
     <a href={to} {...props}>
       {children}

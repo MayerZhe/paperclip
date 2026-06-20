@@ -4,7 +4,7 @@ import {
   buildPortableAgentSlugMap,
   buildPortableProjectSlugMap,
   buildPortableSidebarOrder,
-} from "./company-portability-sidebar";
+} from "./node-org-portability-sidebar";
 
 function makeAgent(id: string, name: string): Agent {
   return {

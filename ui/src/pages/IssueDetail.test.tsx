@@ -139,8 +139,8 @@ vi.mock("@/lib/router", () => ({
   useParams: () => ({ issueId: "PAP-1" }),
 }));
 
-vi.mock("../context/CompanyContext", () => ({
-  useCompany: () => ({
+vi.mock("../context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({
     companies: [{ id: "company-1", name: "Paperclip", issuePrefix: "PAP", status: "active" }],
     selectedCompanyId: "company-1",
     selectedCompany: { id: "company-1", name: "Paperclip", issuePrefix: "PAP", status: "active" },

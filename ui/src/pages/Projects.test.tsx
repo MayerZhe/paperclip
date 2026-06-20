@@ -22,6 +22,7 @@ const mockOpenNewProject = vi.hoisted(() => vi.fn());
 const mockSetBreadcrumbs = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/router", () => ({
+  useLocation: () => ({ pathname: '/', search: '', hash: '', state: null }),
   Link: ({ children, to, ...props }: { children?: ReactNode; to: string }) => (
     <a href={to} {...props}>{children}</a>
   ),

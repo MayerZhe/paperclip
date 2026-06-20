@@ -22,6 +22,7 @@ vi.mock("../context/CompanyContext", () => ({
 }));
 
 vi.mock("@/lib/router", () => ({
+  useLocation: () => ({ pathname: '/', search: '', hash: '', state: null }),
   Link: ({ children, className, ...props }: ComponentProps<"a">) => (
     <a className={className} {...props}>{children}</a>
   ),

@@ -53,8 +53,8 @@ vi.mock("@/lib/router", () => ({
   useLocation: () => ({ pathname: "/PAP/projects/bravo/issues", search: "", hash: "", state: null }),
 }));
 
-vi.mock("../context/CompanyContext", () => ({
-  useCompany: () => ({
+vi.mock("../context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({
     selectedCompanyId: "company-1",
     selectedCompany: { id: "company-1", issuePrefix: "PAP" },
   }),

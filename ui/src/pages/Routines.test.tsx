@@ -28,8 +28,8 @@ vi.mock("@/lib/router", () => ({
   useSearchParams: () => [new URLSearchParams(currentSearch), vi.fn()],
 }));
 
-vi.mock("../context/CompanyContext", () => ({
-  useCompany: () => ({ selectedCompanyId: "company-1" }),
+vi.mock("../context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({ selectedCompanyId: "company-1" }),
 }));
 
 vi.mock("../context/BreadcrumbContext", () => ({

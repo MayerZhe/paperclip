@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { shouldSyncCompanySelectionFromRoute } from "./company-selection";
+import { shouldSyncCompanySelectionFromRoute } from "./node-org-selection";
 
 describe("shouldSyncCompanySelectionFromRoute", () => {
   it("does not resync when selection already matches the route", () => {

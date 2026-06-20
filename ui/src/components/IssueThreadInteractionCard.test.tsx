@@ -29,6 +29,7 @@ let container: HTMLDivElement | null = null;
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 vi.mock("@/lib/router", () => ({
+  useLocation: () => ({ pathname: '/', search: '', hash: '', state: null }),
   Link: ({ to, children, className }: { to: string; children: ReactNode; className?: string }) => (
     <a href={to} className={className}>{children}</a>
   ),

@@ -16,6 +16,7 @@ vi.mock("../api/issues", () => ({
 }));
 
 vi.mock("@/lib/router", () => ({
+  useLocation: () => ({ pathname: '/', search: '', hash: '', state: null }),
   Link: ({
     children,
     className,

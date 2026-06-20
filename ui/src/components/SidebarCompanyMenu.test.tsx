@@ -40,8 +40,8 @@ vi.mock("@/lib/router", () => ({
   useNavigate: () => mockNavigate,
 }));
 
-vi.mock("@/context/CompanyContext", () => ({
-  useCompany: () => ({
+vi.mock("@/context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({
     companies: [
       {
         id: "company-1",

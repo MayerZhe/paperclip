@@ -44,8 +44,8 @@ vi.mock("../api/companies", () => ({
   },
 }));
 
-vi.mock("@/context/CompanyContext", () => ({
-  useCompany: () => ({
+vi.mock("@/context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({
     selectedCompany: null,
     selectedCompanyId: null,
     companies: [],

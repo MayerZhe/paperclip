@@ -7,11 +7,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Company } from "@paperclipai/shared";
 import { queryKeys } from "../lib/queryKeys";
 import {
-  CompanyProvider,
+  NodeOrgProvider,
   resolveBootstrapCompanySelection,
   shouldClearStoredCompanySelection,
-  useCompany,
-} from "./CompanyContext";
+  useNodeOrg,
+} from "./NodeOrgContext";
 
 const mockCompaniesApi = vi.hoisted(() => ({
   list: vi.fn(),
@@ -53,7 +53,7 @@ function makeCompany(id: string): Company {
 }
 
 function Probe({ onSelectedCompanyId }: { onSelectedCompanyId: (companyId: string | null) => void }) {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   useEffect(() => {
     onSelectedCompanyId(selectedCompanyId);
   }, [onSelectedCompanyId, selectedCompanyId]);
@@ -125,7 +125,7 @@ describe("shouldClearStoredCompanySelection", () => {
   });
 });
 
-describe("CompanyProvider", () => {
+describe("NodeOrgProvider", () => {
   let container: HTMLDivElement;
   let root: Root;
   let queryClient: QueryClient;
@@ -160,9 +160,9 @@ describe("CompanyProvider", () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <CompanyProvider>
+          <NodeOrgProvider>
             <Probe onSelectedCompanyId={(companyId) => seen.push(companyId)} />
-          </CompanyProvider>
+          </NodeOrgProvider>
         </QueryClientProvider>,
       );
     });
@@ -182,9 +182,9 @@ describe("CompanyProvider", () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <CompanyProvider>
+          <NodeOrgProvider>
             <Probe onSelectedCompanyId={(companyId) => seen.push(companyId)} />
-          </CompanyProvider>
+          </NodeOrgProvider>
         </QueryClientProvider>,
       );
     });

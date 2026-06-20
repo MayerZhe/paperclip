@@ -26,8 +26,8 @@ vi.mock("@/components/AsciiArtAnimation", () => ({
 }));
 
 // The router's navigate wrapper reads the active company prefix from context.
-vi.mock("@/context/CompanyContext", () => ({
-  useCompany: () => ({
+vi.mock("@/context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({
     selectedCompany: null,
     selectedCompanyId: null,
     companies: [],

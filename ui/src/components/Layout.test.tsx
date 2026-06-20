@@ -155,8 +155,8 @@ vi.mock("../context/PanelContext", () => ({
   }),
 }));
 
-vi.mock("../context/CompanyContext", () => ({
-  useCompany: () => ({
+vi.mock("../context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({
     companies: mockCompanyState.companies,
     loading: false,
     selectedCompany: mockCompanyState.selectedCompany,

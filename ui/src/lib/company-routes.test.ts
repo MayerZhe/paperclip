@@ -4,7 +4,7 @@ import {
   extractCompanyPrefixFromPath,
   isBoardPathWithoutPrefix,
   toCompanyRelativePath,
-} from "./company-routes";
+} from "./node-org-routes";
 
 describe("company routes", () => {
   it("treats execution workspace paths as board routes that need a company prefix", () => {

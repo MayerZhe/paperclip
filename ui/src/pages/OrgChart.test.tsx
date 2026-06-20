@@ -12,11 +12,11 @@ const listMock = vi.fn();
 
 vi.mock("@/lib/router", () => ({
   Link: ({ to, children }: { to: string; children: React.ReactNode }) => <a href={to}>{children}</a>,
-  useNavigate: () => navigateMock,
+  useNavigate: () => navigateMock, useLocation:() => ({ pathname: "/", search: "", hash: "", state: null })
 }));
 
-vi.mock("../context/CompanyContext", () => ({
-  useCompany: () => ({ selectedCompanyId: "company-1" }),
+vi.mock("../context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({ selectedCompanyId: "company-1" }),
 }));
 
 vi.mock("../context/BreadcrumbContext", () => ({

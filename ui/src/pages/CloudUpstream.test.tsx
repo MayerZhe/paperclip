@@ -45,8 +45,8 @@ vi.mock("@/context/BreadcrumbContext", () => ({
   }),
 }));
 
-vi.mock("@/context/CompanyContext", () => ({
-  useCompany: () => ({
+vi.mock("@/context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({
     selectedCompany: mockCompanyState.selectedCompany,
     selectedCompanyId: mockCompanyState.selectedCompanyId,
   }),

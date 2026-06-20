@@ -34,8 +34,8 @@ const projectsApiMock = vi.hoisted(() => ({
   list: vi.fn(),
 }));
 
-vi.mock("../context/CompanyContext", () => ({
-  useCompany: () => companyState,
+vi.mock("../context/NodeOrgContext", () => ({
+  useNodeOrg: () => companyState,
 }));
 
 vi.mock("../context/BreadcrumbContext", () => ({
@@ -66,7 +66,7 @@ vi.mock("@/lib/router", async () => {
   const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
   return {
     ...actual,
-    useNavigate: () => navigateMock,
+    useNavigate: () => navigateMock, useLocation:() => ({ pathname: "/", search: "", hash: "", state: null })
   };
 });
 

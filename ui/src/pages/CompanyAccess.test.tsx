@@ -43,6 +43,7 @@ vi.mock("@/api/issues", () => ({
 }));
 
 vi.mock("@/lib/router", () => ({
+  useLocation: () => ({ pathname: '/', search: '', hash: '', state: null }),
   Link: ({ to, children }: { to: string; children: React.ReactNode }) => <a href={to}>{children}</a>,
   Navigate: ({ to, replace }: { to: string; replace?: boolean }) => {
     mockNavigate(to, replace);

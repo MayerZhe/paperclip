@@ -88,8 +88,8 @@ vi.mock("../api/projects", () => ({
   projectsApi: { list: apiMocks.projectsList },
 }));
 
-vi.mock("../context/CompanyContext", () => ({
-  useCompany: () => ({ selectedCompanyId: "company-1" }),
+vi.mock("../context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({ selectedCompanyId: "company-1" }),
 }));
 
 vi.mock("../context/BreadcrumbContext", () => ({

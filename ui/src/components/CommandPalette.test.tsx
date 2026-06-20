@@ -33,8 +33,8 @@ const mockProjectsApi = vi.hoisted(() => ({
   list: vi.fn(),
 }));
 
-vi.mock("../context/CompanyContext", () => ({
-  useCompany: () => companyState,
+vi.mock("../context/NodeOrgContext", () => ({
+  useNodeOrg: () => companyState,
 }));
 
 vi.mock("../context/DialogContext", () => ({
@@ -51,7 +51,7 @@ const navigateState = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/router", () => ({
-  useNavigate: () => navigateState.navigate,
+  useNavigate: () => navigateState.navigate, useLocation:() => ({ pathname: "/", search: "", hash: "", state: null })
 }));
 
 vi.mock("../api/issues", () => ({

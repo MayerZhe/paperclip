@@ -18,7 +18,7 @@ const pushToastMock = vi.hoisted(() => vi.fn());
 const clipboardWriteTextMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/router", () => ({
-  useNavigate: () => navigateMock,
+  useNavigate: () => navigateMock, useLocation:() => ({ pathname: "/", search: "", hash: "", state: null })
 }));
 
 vi.mock("../context/DialogContext", () => ({
@@ -29,8 +29,8 @@ vi.mock("../context/DialogContext", () => ({
   }),
 }));
 
-vi.mock("../context/CompanyContext", () => ({
-  useCompany: () => ({
+vi.mock("../context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({
     selectedCompanyId: "company-1",
   }),
 }));

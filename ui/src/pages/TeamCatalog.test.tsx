@@ -43,8 +43,8 @@ vi.mock("../context/ToastContext", () => ({
   useToastActions: () => ({ pushToast: mockPushToast }),
 }));
 
-vi.mock("../context/CompanyContext", () => ({
-  useCompany: () => ({ selectedCompanyId: "company-1" }),
+vi.mock("../context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({ selectedCompanyId: "company-1" }),
 }));
 
 // Drive the route deterministically: the team is preselected so the detail pane
@@ -53,7 +53,7 @@ let currentRoute = "team-no-deps";
 const mockSearchParams = new URLSearchParams();
 vi.mock("@/lib/router", () => ({
   useParams: () => ({ "*": currentRoute }),
-  useNavigate: () => mockNavigate,
+  useNavigate: () => mockNavigate, useLocation:() => ({ pathname: "/", search: "", hash: "", state: null })
   useSearchParams: () => [mockSearchParams, vi.fn()],
 }));
 

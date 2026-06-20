@@ -13,6 +13,7 @@ import { ToastProvider } from "../context/ToastContext";
 const retryNowMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/router", () => ({
+  useLocation: () => ({ pathname: '/', search: '', hash: '', state: null }),
   Link: ({ children, to, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { to: string }) => (
     <a href={to} {...props}>{children}</a>
   ),

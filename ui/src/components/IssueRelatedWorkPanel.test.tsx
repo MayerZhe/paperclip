@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { IssueRelatedWorkPanel } from "./IssueRelatedWorkPanel";
 
 vi.mock("@/lib/router", () => ({
+  useLocation: () => ({ pathname: '/', search: '', hash: '', state: null }),
   Link: ({ children, to, ...props }: ComponentProps<"a"> & { to: string }) => <a href={to} {...props}>{children}</a>,
 }));
 

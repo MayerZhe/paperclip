@@ -79,8 +79,8 @@ vi.mock("../context/ToastContext", () => ({
   }),
 }));
 
-vi.mock("../context/CompanyContext", () => ({
-  useCompany: () => ({
+vi.mock("../context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({
     companies: [{ id: "company-1", name: "Paperclip", issuePrefix: "PAP" }],
     selectedCompany: {
       id: "company-1",

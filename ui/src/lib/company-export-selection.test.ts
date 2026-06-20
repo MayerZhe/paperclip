@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildInitialExportCheckedFiles } from "./company-export-selection";
+import { buildInitialExportCheckedFiles } from "./node-org-export-selection";
 
 describe("buildInitialExportCheckedFiles", () => {
   it("checks non-task files and recurring task packages by default", () => {

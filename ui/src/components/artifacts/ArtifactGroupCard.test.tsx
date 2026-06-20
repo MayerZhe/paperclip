@@ -7,8 +7,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ArtifactGroupCard } from "./ArtifactGroupCard";
 import type { CompanyArtifact, CompanyArtifactGroup } from "@/api/artifacts";
 
-vi.mock("@/context/CompanyContext", () => ({
-  useCompany: () => ({ selectedCompany: null, selectedCompanyId: "company-1" }),
+vi.mock("@/context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({ selectedCompany: null, selectedCompanyId: "company-1" }),
 }));
 
 function sampleArtifact(overrides: Partial<CompanyArtifact> = {}): CompanyArtifact {

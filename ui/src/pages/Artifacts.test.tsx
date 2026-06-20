@@ -20,8 +20,8 @@ const artifactsApiMock = vi.hoisted(() => ({
   list: vi.fn(),
 }));
 
-vi.mock("../context/CompanyContext", () => ({
-  useCompany: () => companyState,
+vi.mock("../context/NodeOrgContext", () => ({
+  useNodeOrg: () => companyState,
 }));
 
 vi.mock("../context/BreadcrumbContext", () => ({

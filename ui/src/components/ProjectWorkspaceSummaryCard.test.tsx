@@ -9,6 +9,7 @@ import type { ProjectWorkspaceSummary } from "../lib/project-workspaces-tab";
 import { ProjectWorkspaceSummaryCard } from "./ProjectWorkspaceSummaryCard";
 
 vi.mock("@/lib/router", () => ({
+  useLocation: () => ({ pathname: '/', search: '', hash: '', state: null }),
   Link: ({ children, to, ...props }: ComponentProps<"a"> & { to: string }) => <a href={to} {...props}>{children}</a>,
 }));
 
