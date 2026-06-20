@@ -185,8 +185,8 @@ vi.mock("../hooks/useKeyboardShortcuts", () => ({
   useKeyboardShortcuts: () => undefined,
 }));
 
-vi.mock("../hooks/useCompanyPageMemory", () => ({
-  useCompanyPageMemory: () => undefined,
+vi.mock("../hooks/useNodeOrgPageMemory", () => ({
+  useNodeOrgPageMemory: () => undefined,
 }));
 
 vi.mock("../api/health", () => ({

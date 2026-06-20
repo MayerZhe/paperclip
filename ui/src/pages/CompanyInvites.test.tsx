@@ -136,7 +136,7 @@ describe("NodeOrgInvites", () => {
     await flushReact();
     await flushReact();
 
-    expect(container.textContent).toContain("Company Invites");
+    expect(container.textContent).toContain("Node Org Invites");
     expect(container.textContent).toContain("Invite a person");
     expect(container.textContent).not.toContain("Invite an agent");
     expect(container.textContent).not.toContain("Generate agent onboarding prompt");

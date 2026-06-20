@@ -28,8 +28,8 @@ vi.mock("@/context/BreadcrumbContext", () => ({
   }),
 }));
 
-vi.mock("@/context/CompanyContext", () => ({
-  useCompany: () => ({
+vi.mock("@/context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({
     selectedCompany: { id: "company-1", name: "Paperclip", issuePrefix: "PAP" },
     selectedCompanyId: "company-1",
   }),

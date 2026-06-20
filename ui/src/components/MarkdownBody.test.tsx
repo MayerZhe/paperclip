@@ -39,8 +39,8 @@ vi.mock("../api/issues", () => ({
 // path unchanged. Gating tests override the return value per-case.
 const mockUseOptionalCompany = vi.hoisted(() => vi.fn<() => { companies: Array<{ issuePrefix: string }> } | null>(() => null));
 
-vi.mock("../context/CompanyContext", () => ({
-  useOptionalCompany: mockUseOptionalCompany,
+vi.mock("../context/NodeOrgContext", () => ({
+  useOptionalNodeOrg: mockUseOptionalCompany,
 }));
 
 afterEach(() => {

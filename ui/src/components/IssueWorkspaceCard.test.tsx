@@ -17,8 +17,8 @@ vi.mock("@tanstack/react-query", async () => {
   };
 });
 
-vi.mock("../context/CompanyContext", () => ({
-  useCompany: () => ({ selectedCompanyId: "company-1" }),
+vi.mock("../context/NodeOrgContext", () => ({
+  useNodeOrg: () => ({ selectedCompanyId: "company-1" }),
 }));
 
 vi.mock("@/lib/router", () => ({
