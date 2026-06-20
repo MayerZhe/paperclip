@@ -1,26 +1,10 @@
-export {};
+// Type augmentation for Express Request — adds `actor` property set by actorMiddleware.
+// Declared as `any` to remain compatible with all downstream consumers (BoardActor,
+// AuthorizationActor, etc.) which narrow the shape themselves through parameter types.
 
-declare global {
-  namespace Express {
-    interface Request {
-      actor: {
-        type: "board" | "agent" | "none";
-        userId?: string;
-        userName?: string | null;
-        userEmail?: string | null;
-        agentId?: string;
-        companyId?: string;
-        companyIds?: string[];
-        memberships?: Array<{
-          companyId: string;
-          membershipRole?: string | null;
-          status?: string;
-        }>;
-        isInstanceAdmin?: boolean;
-        keyId?: string;
-        runId?: string;
-        source?: "local_implicit" | "session" | "board_key" | "agent_key" | "agent_jwt" | "cloud_tenant" | "none";
-      };
-    }
+declare namespace Express {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  interface Request {
+    actor: any;
   }
 }

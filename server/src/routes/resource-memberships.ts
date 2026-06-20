@@ -53,7 +53,7 @@ export function resourceMembershipRoutes(db: Db) {
     const companyId = req.params.companyId as string;
     const userId = requireBoardUserId(req, res);
     if (!userId) return;
-    res.json(await svc.listForUser(companyId, userId, req.actor));
+res.json(await svc.listForUser(companyId, userId, req.actor));
   });
 
   router.put(
@@ -69,6 +69,7 @@ export function resourceMembershipRoutes(db: Db) {
         projectId,
         userId,
         state: req.body.state,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         actor: req.actor,
       });
       if (result.changed) {
@@ -99,6 +100,7 @@ export function resourceMembershipRoutes(db: Db) {
         agentId,
         userId,
         state: req.body.state,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         actor: req.actor,
       });
       if (result.changed) {

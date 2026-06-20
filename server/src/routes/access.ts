@@ -973,7 +973,7 @@ function actorHasActiveUserMembership(req: Request, companyId: string) {
     typeof req.actor.userId === "string" &&
     Array.isArray(req.actor.memberships) &&
     req.actor.memberships.some(
-      (membership) =>
+      (membership: { companyId: string; status: string }) =>
         membership.companyId === companyId && membership.status === "active",
     )
   );
@@ -1397,7 +1397,7 @@ async function loadUserCompanyAccessResponse(
       .then((rows) => rows[0] ?? null),
     access.isInstanceAdmin(userId),
   ]);
-  const companyIds = [...new Set(memberships.map((membership) => membership.companyId))];
+  const companyIds = [...new Set(memberships.map((membership: { companyId: string; status: string }) => membership.companyId))];
   const companyRows = companyIds.length
     ? await db
         .select({
@@ -1417,7 +1417,7 @@ async function loadUserCompanyAccessResponse(
           isInstanceAdmin,
         }
       : null,
-    companyAccess: memberships.map((membership) => {
+    companyAccess: memberships.map((membership: { companyId: string; status: string }) => {
       const company = companyMap.get(membership.companyId) ?? null;
       return {
         ...membership,
