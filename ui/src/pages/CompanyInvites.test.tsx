@@ -5,7 +5,7 @@ import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CompanyInvites } from "./CompanyInvites";
+import { NodeOrgInvites } from "./NodeOrgInvites";
 import { queryKeys } from "@/lib/queryKeys";
 
 const listInvitesMock = vi.hoisted(() => vi.fn());
@@ -49,7 +49,7 @@ async function flushReact() {
   });
 }
 
-describe("CompanyInvites", () => {
+describe("NodeOrgInvites", () => {
   let container: HTMLDivElement;
   const inviteHistory = Array.from({ length: 25 }, (_, index) => {
     const inviteNumber = 25 - index;
@@ -128,7 +128,7 @@ describe("CompanyInvites", () => {
       root.render(
         <MemoryRouter>
           <QueryClientProvider client={queryClient}>
-            <CompanyInvites />
+            <NodeOrgInvites />
           </QueryClientProvider>
         </MemoryRouter>,
       );
@@ -262,7 +262,7 @@ describe("CompanyInvites", () => {
       root.render(
         <MemoryRouter>
           <QueryClientProvider client={queryClient}>
-            <CompanyInvites />
+            <NodeOrgInvites />
           </QueryClientProvider>
         </MemoryRouter>,
       );
@@ -305,7 +305,7 @@ describe("CompanyInvites", () => {
       root.render(
         <MemoryRouter>
           <QueryClientProvider client={queryClient}>
-            <CompanyInvites />
+            <NodeOrgInvites />
           </QueryClientProvider>
         </MemoryRouter>,
       );

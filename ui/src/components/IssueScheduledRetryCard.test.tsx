@@ -13,6 +13,7 @@ const retryNowMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/router", () => ({
   useLocation: () => ({ pathname: '/', search: '', hash: '', state: null }),
+  useNavigate: () => vi.fn(),
   Link: ({ children, to, ...props }: { children: ReactNode; to: string } & ComponentProps<"a">) => (
     <a href={to} {...props}>{children}</a>
   ),

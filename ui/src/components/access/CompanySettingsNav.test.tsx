@@ -3,7 +3,7 @@
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CompanySettingsNav, getCompanySettingsTab } from "./CompanySettingsNav";
+import { NodeOrgSettingsNav, getCompanySettingsTab } from "./NodeOrgSettingsNav";
 
 let currentPathname = "/company/settings";
 const navigateMock = vi.hoisted(() => vi.fn());
@@ -48,7 +48,7 @@ async function act(callback: () => void | Promise<void>) {
   await result;
 }
 
-describe("CompanySettingsNav", () => {
+describe("NodeOrgSettingsNav", () => {
   let container: HTMLDivElement;
 
   beforeEach(() => {
@@ -82,7 +82,7 @@ describe("CompanySettingsNav", () => {
     const root = createRoot(container);
 
     await act(async () => {
-      root.render(<CompanySettingsNav />);
+      root.render(<NodeOrgSettingsNav />);
     });
 
     expect(container.textContent).toContain("members");

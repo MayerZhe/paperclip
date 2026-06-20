@@ -3,7 +3,7 @@
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CompanySettingsSidebar } from "./CompanySettingsSidebar";
+import { NodeOrgSettingsSidebar } from "./NodeOrgSettingsSidebar";
 
 const sidebarNavItemMock = vi.hoisted(() => vi.fn());
 const mockSidebarBadgesApi = vi.hoisted(() => ({
@@ -89,7 +89,7 @@ async function flushReact() {
   }
 }
 
-describe("CompanySettingsSidebar", () => {
+describe("NodeOrgSettingsSidebar", () => {
   let container: HTMLDivElement;
 
   beforeEach(() => {
@@ -129,7 +129,7 @@ describe("CompanySettingsSidebar", () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <CompanySettingsSidebar />
+          <NodeOrgSettingsSidebar />
         </QueryClientProvider>,
       );
     });
@@ -198,7 +198,7 @@ describe("CompanySettingsSidebar", () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <CompanySettingsSidebar />
+          <NodeOrgSettingsSidebar />
         </QueryClientProvider>,
       );
     });
@@ -244,7 +244,7 @@ describe("CompanySettingsSidebar", () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <CompanySettingsSidebar />
+          <NodeOrgSettingsSidebar />
         </QueryClientProvider>,
       );
     });
@@ -276,7 +276,7 @@ describe("CompanySettingsSidebar", () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <CompanySettingsSidebar />
+          <NodeOrgSettingsSidebar />
         </QueryClientProvider>,
       );
     });

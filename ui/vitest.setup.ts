@@ -82,6 +82,26 @@ try {
   // vi.mock might fail in non-vitest environments — silently ignore.
 }
 
+// React 19.2.4 CJS builds do not export `act`. 57 test files import
+// `act` from "react" and call it to flush React state synchronously.
+// Mock the entire react module to preserve all original exports while
+// adding a compatible `act` helper that flushes microtasks + one tick.
+try {
+  vi.mock("react", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("react")>();
+    return {
+      ...actual,
+      act: async (callback: () => void | Promise<void>) => {
+        await callback();
+        await Promise.resolve();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      },
+    };
+  });
+} catch {
+  // vi.mock might fail in non-vitest environments — silently ignore.
+}
+
 // Global safe default for useTheme — prevents "useTheme must be used within
 // ThemeProvider" errors when tests render components that call useTheme()
 // without wrapping in ThemeProvider.

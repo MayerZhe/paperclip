@@ -34,6 +34,12 @@ const mockSidebarState = vi.hoisted(() => ({
 let currentPathname = "/PAP/dashboard";
 
 vi.mock("@/lib/router", () => ({
+  Link: ({ children, to, onClick }: { children: React.ReactNode; to: string; onClick?: () => void }) => (
+    <button type="button" data-to={to} onClick={onClick}>{children}</button>
+  ),
+  NavLink: ({ children, to }: { children: React.ReactNode; to: string }) => (
+    <a href={to}>{children}</a>
+  ),
   Outlet: () => <div>Outlet content</div>,
   useLocation: () => ({ pathname: currentPathname, search: "", hash: "", state: null }),
   useNavigate: () => mockNavigate,

@@ -53,7 +53,8 @@ let currentRoute = "team-no-deps";
 const mockSearchParams = new URLSearchParams();
 vi.mock("@/lib/router", () => ({
   useParams: () => ({ "*": currentRoute }),
-  useNavigate: () => mockNavigate, useLocation:() => ({ pathname: "/", search: "", hash: "", state: null })
+  useNavigate: () => mockNavigate,
+  useLocation: () => ({ pathname: "/", search: "", hash: "", state: null }),
   useSearchParams: () => [mockSearchParams, vi.fn()],
 }));
 

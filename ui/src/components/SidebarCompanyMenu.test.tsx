@@ -4,7 +4,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SidebarCompanyMenu } from "./SidebarCompanyMenu";
+import { SidebarNodeOrgMenu } from "./SidebarNodeOrgMenu";
 
 const mockAuthApi = vi.hoisted(() => ({
   getSession: vi.fn(),
@@ -105,7 +105,7 @@ async function flushReact() {
   });
 }
 
-describe("SidebarCompanyMenu", () => {
+describe("SidebarNodeOrgMenu", () => {
   let container: HTMLDivElement;
 
   beforeEach(() => {
@@ -146,7 +146,7 @@ describe("SidebarCompanyMenu", () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <SidebarCompanyMenu />
+          <SidebarNodeOrgMenu />
         </QueryClientProvider>,
       );
     });
@@ -198,7 +198,7 @@ describe("SidebarCompanyMenu", () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <SidebarCompanyMenu />
+          <SidebarNodeOrgMenu />
         </QueryClientProvider>,
       );
     });
@@ -255,7 +255,7 @@ describe("SidebarCompanyMenu", () => {
     await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
-          <SidebarCompanyMenu />
+          <SidebarNodeOrgMenu />
         </QueryClientProvider>,
       );
     });

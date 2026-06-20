@@ -16,6 +16,9 @@ const mockInstanceSettingsApi = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/router", () => ({
+  Link: ({ children, to, onClick }: { children: React.ReactNode; to: string; onClick?: () => void }) => (
+    <button type="button" data-to={to} onClick={onClick}>{children}</button>
+  ),
   useLocation: () => ({ pathname: '/', search: '', hash: '', state: null }),
   NavLink: ({ to, children, className, ...props }: {
     to: string;

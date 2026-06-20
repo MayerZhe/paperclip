@@ -4,7 +4,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CompanySettingsPluginPage } from "./CompanySettingsPluginPage";
+import { NodeOrgSettingsPluginPage } from "./NodeOrgSettingsPluginPage";
 
 const mockSetBreadcrumbs = vi.hoisted(() => vi.fn());
 const mockUsePluginSlots = vi.hoisted(() => vi.fn());
@@ -66,7 +66,7 @@ async function renderPage(container: HTMLDivElement) {
   await act(async () => {
     root.render(
       <QueryClientProvider client={queryClient}>
-        <CompanySettingsPluginPage />
+        <NodeOrgSettingsPluginPage />
       </QueryClientProvider>,
     );
   });
@@ -74,7 +74,7 @@ async function renderPage(container: HTMLDivElement) {
   return root;
 }
 
-describe("CompanySettingsPluginPage", () => {
+describe("NodeOrgSettingsPluginPage", () => {
   let container: HTMLDivElement;
 
   beforeEach(() => {
