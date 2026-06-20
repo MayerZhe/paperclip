@@ -16,7 +16,8 @@
     "icons": "node --experimental-strip-types ../../SuperNode-desktop/scripts/desktop/generate-icons.ts"
   },
   "dependencies": {
-    "electron-updater": "^6.3.9"
+    "electron-updater": "^6.3.9",
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

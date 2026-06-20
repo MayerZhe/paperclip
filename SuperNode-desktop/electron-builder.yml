@@ -94,6 +94,8 @@ extraResources:
     to: "paperclip-server"
   - from: "browser"
     to: "browser"
+  - from: "agenthubs-local-vm"
+    to: "agenthubs-local-vm"
 
 # 文件匹配模式
 # paperclip-server is extraResources (copied to Resources/paperclip-server/), not in dist/
@@ -103,6 +105,7 @@ files:
   - "dist/**/*"
   - "package.json"
   - "paperclip-server/**"
+  - "agenthubs-local-vm/**"
 
 # ═══════════════════════════════════════
 # 钩子

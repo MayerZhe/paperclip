@@ -36,4 +36,16 @@ contextBridge.exposeInMainWorld("paperclip", {
   showOpenDialog: (options: OpenDialogOptions): Promise<OpenDialogResult> => {
     return ipcRenderer.invoke("paperclip:open-dialog", options);
   },
+
+  // Story 3.3: Agent → AgentHubs data bridge
+  exportAgent: (data: {
+    name: string;
+    description: string;
+    adapterType: string;
+    adapterConfig: Record<string, string | number | boolean>;
+    skills: string[];
+    exportedAt: string;
+  }): Promise<{ success: boolean; filePath: string }> => {
+    return ipcRenderer.invoke("file-bridge:export-agent", data);
+  },
 });
