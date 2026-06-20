@@ -1035,10 +1035,10 @@ export function AgentDetail() {
           <AgentExportButton
             agent={{
               name: agent.name,
-              description: (agent as Record<string, unknown>).description as string ?? "",
+              description: (agent as unknown as Record<string, unknown>).description as string ?? "",
               adapterType: agent.adapterType,
               adapterConfig: agent.adapterConfig as Record<string, string | number | boolean>,
-              skills: ((agent as Record<string, unknown>).skills as Array<string | { key: string }>)?.map((s: string | { key: string }) => (typeof s === "string" ? s : s.key)) ?? [],
+              skills: ((agent as unknown as Record<string, unknown>).skills as Array<string | { key: string }>)?.map((s: string | { key: string }) => (typeof s === "string" ? s : s.key)) ?? [],
             }}
           />
         </div>
