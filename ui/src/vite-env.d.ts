@@ -11,6 +11,14 @@ declare global {
         filters?: Array<{ name: string; extensions: string[] }>;
         properties?: Array<"openFile" | "openDirectory" | "multiSelections">;
       }) => Promise<{ canceled: boolean; filePaths: string[] }>;
+      exportAgent?: (data: {
+        name: string;
+        description: string;
+        adapterType: string;
+        adapterConfig: Record<string, string | number | boolean>;
+        skills: string[];
+        exportedAt: string;
+      }) => Promise<{ success: boolean; filePath: string }>;
     };
   }
 }

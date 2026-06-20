@@ -19,6 +19,7 @@ import {
 import { Shield } from "lucide-react";
 import { cn, agentUrl } from "../lib/utils";
 import { roleLabels } from "../components/agent-config-primitives";
+import { AGENT_TEMPLATES, type AgentTemplate } from "../design-system/agent-templates";
 import {
   AgentConfigForm,
   AdapterEnvironmentResult,
@@ -217,6 +218,35 @@ export function NewAgent() {
         <p className="text-sm text-muted-foreground mt-1">
           Advanced agent configuration
         </p>
+      </div>
+
+      {/* F4: Template quick-start picker */}
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-muted-foreground">Quick Start from Template</p>
+        <div className="grid grid-cols-2 gap-2">
+          {AGENT_TEMPLATES.map((template: AgentTemplate) => (
+            <button
+              key={template.id}
+              type="button"
+              className="flex items-start gap-2 rounded-md border border-border p-2.5 text-left hover:bg-accent/50 transition-colors"
+              onClick={() => {
+                setName(template.name);
+                if (template.description) setTitle(template.description.slice(0, 80));
+                setConfigValues((prev) => ({
+                  ...prev,
+                  adapterType: template.adapterType as CreateConfigValues["adapterType"],
+                }));
+                setSelectedSkillKeys(template.suggestedSkills);
+              }}
+            >
+              <span className="text-lg shrink-0" aria-hidden="true">{template.icon}</span>
+              <div className="min-w-0">
+                <div className="text-sm font-medium truncate">{template.name}</div>
+                <div className="text-xs text-muted-foreground line-clamp-2">{template.description}</div>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="border border-border">

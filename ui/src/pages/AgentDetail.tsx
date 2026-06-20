@@ -39,6 +39,7 @@ import { MembershipAction } from "../components/MembershipAction";
 import { Identity } from "../components/Identity";
 import { PageSkeleton } from "../components/PageSkeleton";
 import { AgentActionButtons } from "../components/AgentActionButtons";
+import { AgentExportButton } from "../components/AgentExportButton";
 import { BudgetPolicyCard } from "../components/BudgetPolicyCard";
 import { TrustPresetSection } from "../components/TrustPresetSection";
 import { FileTree, buildFileTree } from "../components/FileTree";
@@ -1028,6 +1029,20 @@ export function AgentDetail() {
           )}
         </AgentActionButtons>
       </div>
+
+      {!urlRunId && (
+        <div className="flex items-center justify-end">
+          <AgentExportButton
+            agent={{
+              name: agent.name,
+              description: agent.description ?? "",
+              adapterType: agent.adapterType,
+              adapterConfig: agent.adapterConfig as Record<string, string | number | boolean>,
+              skills: agent.skills?.map((s) => (typeof s === "string" ? s : s.key)) ?? [],
+            }}
+          />
+        </div>
+      )}
 
       {!urlRunId && (
         <Tabs

@@ -18,6 +18,7 @@ import { MobileBottomNav } from "./MobileBottomNav";
 import { WorktreeBanner } from "./WorktreeBanner";
 import { DevRestartBanner } from "./DevRestartBanner";
 import { StandaloneBrowserControls } from "./StandaloneBrowserControls";
+import { ThemeToggle } from "./ThemeToggle";
 import { ResizableSidebarPane } from "./ResizableSidebarPane";
 import { SidebarAccountMenu } from "./SidebarAccountMenu";
 import { useDialogActions } from "../context/DialogContext";
@@ -471,7 +472,12 @@ export function Layout() {
             )}
           >
             <StandaloneBrowserControls mobile={isMobile} />
-            <BreadcrumbBar />
+            <div className="flex items-center justify-between">
+              <BreadcrumbBar />
+              <div className="pr-4">
+                <ThemeToggle />
+              </div>
+            </div>
             {isMobile && isCompanySettingsRoute ? (
               <div className="border-b border-border px-4 pb-3">
                 <NodeOrgSettingsNav />
