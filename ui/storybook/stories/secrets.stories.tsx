@@ -8,7 +8,7 @@ import { SecretBindingPicker, type SecretBindingValue } from "@/components/Secre
 import { EnvVarEditor } from "@/components/EnvVarEditor";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useCompany } from "@/context/CompanyContext";
+import { useNodeOrg } from "@/context/NodeOrgContext";
 import { queryKeys } from "@/lib/queryKeys";
 import { storybookCompanies, storybookSecrets } from "../fixtures/paperclipData";
 
@@ -24,7 +24,7 @@ function StorybookSecretsFixtures({ children }: { children: ReactNode }) {
   // Seed query caches synchronously so children hydrate from cache on first render.
   queryClient.setQueryData(queryKeys.secrets.list(COMPANY_ID), storybookSecrets);
 
-  const { selectedCompanyId, setSelectedCompanyId } = useCompany();
+  const { selectedCompanyId, setSelectedCompanyId } = useNodeOrg();
   useEffect(() => {
     if (selectedCompanyId !== COMPANY_ID) {
       setSelectedCompanyId(COMPANY_ID);

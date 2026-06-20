@@ -377,7 +377,7 @@ function mergeOptimisticFeedbackVote(
   ];
 }
 
-function ActorIdentity({ evt, agentMap, userProfileMap }: { evt: ActivityEvent; agentMap: Map<string, Agent>; userProfileMap?: Map<string, import("../lib/company-members").CompanyUserProfile> }) {
+function ActorIdentity({ evt, agentMap, userProfileMap }: { evt: ActivityEvent; agentMap: Map<string, Agent>; userProfileMap?: Map<string, import("../lib/node-org-members").CompanyUserProfile> }) {
   const id = evt.actorId;
   if (evt.actorType === "agent") {
     const agent = agentMap.get(id);
@@ -651,7 +651,7 @@ type IssueDetailChatTabProps = {
   agentMap: Map<string, Agent>;
   currentUserId: string | null;
   userLabelMap: ReadonlyMap<string, string> | null;
-  userProfileMap: ReadonlyMap<string, import("../lib/company-members").CompanyUserProfile> | null;
+  userProfileMap: ReadonlyMap<string, import("../lib/node-org-members").CompanyUserProfile> | null;
   draftKey: string;
   reassignOptions: Array<{ id: string; label: string; searchText?: string }>;
   currentAssigneeValue: string;
@@ -981,7 +981,7 @@ type IssueDetailActivityTabProps = {
   agentMap: Map<string, Agent>;
   hasLiveRuns: boolean;
   currentUserId: string | null;
-  userProfileMap: Map<string, import("../lib/company-members").CompanyUserProfile>;
+  userProfileMap: Map<string, import("../lib/node-org-members").CompanyUserProfile>;
   pendingApprovalAction: { approvalId: string; action: "approve" | "reject" } | null;
   onApprovalAction: (approvalId: string, action: "approve" | "reject") => void;
   onCheckMonitorNow: () => void;

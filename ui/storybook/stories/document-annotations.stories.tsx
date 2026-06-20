@@ -17,7 +17,7 @@ import { IssueDocumentsSection } from "@/components/IssueDocumentsSection";
 import { MarkdownBody } from "@/components/MarkdownBody";
 import { MarkdownEditor } from "@/components/MarkdownEditor";
 import { queryKeys } from "@/lib/queryKeys";
-import type { CompanyUserProfile } from "@/lib/company-members";
+import type { CompanyUserProfile } from "@/lib/node-org-members";
 
 const sampleMarkdown = `# Plan: Document Highlights And Comment Threads
 

@@ -16,7 +16,7 @@ import { NewGoalDialog } from "@/components/NewGoalDialog";
 import { NewIssueDialog } from "@/components/NewIssueDialog";
 import { NewProjectDialog } from "@/components/NewProjectDialog";
 import { PathInstructionsModal } from "@/components/PathInstructionsModal";
-import { useCompany } from "@/context/CompanyContext";
+import { useNodeOrg } from "@/context/NodeOrgContext";
 import { useDialog } from "@/context/DialogContext";
 import { queryKeys } from "@/lib/queryKeys";
 import type { Agent } from "@paperclipai/shared";
@@ -505,7 +505,7 @@ function clickButtonByText(text: string) {
 }
 
 function useOpenWhenCompanyReady(open: () => void) {
-  const { selectedCompanyId, setSelectedCompanyId } = useCompany();
+  const { selectedCompanyId, setSelectedCompanyId } = useNodeOrg();
   const didOpenRef = useRef(false);
 
   useLayoutEffect(() => {

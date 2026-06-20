@@ -23,7 +23,7 @@ import {
   SuccessRateChart,
 } from "@/components/ActivityCharts";
 import { AsciiArtAnimation } from "@/components/AsciiArtAnimation";
-import { CompanyPatternIcon } from "@/components/CompanyPatternIcon";
+import { NodeOrgPatternIcon } from "@/components/NodeOrgPatternIcon";
 import { EntityRow } from "@/components/EntityRow";
 import { FilterBar, type FilterValue } from "@/components/FilterBar";
 import { KanbanBoard } from "@/components/KanbanBoard";
@@ -553,7 +553,7 @@ function SwipeToArchiveDemo({ disabled = false }: { disabled?: boolean }) {
   );
 }
 
-function CompanyPatternIconMatrix() {
+function NodeOrgPatternIconMatrix() {
   const companies = [
     { name: "Paperclip Storybook", color: "#0f766e" },
     { name: "Research Bureau", color: "#2563eb" },
@@ -564,7 +564,7 @@ function CompanyPatternIconMatrix() {
 
   return (
     <StoryShell>
-      <Section eyebrow="CompanyPatternIcon" title="Generated company pattern icons by size">
+      <Section eyebrow="NodeOrgPatternIcon" title="Generated company pattern icons by size">
         <div className="grid gap-4 md:grid-cols-2">
           {companies.map((company) => (
             <Card key={company.name} className="shadow-none">
@@ -574,7 +574,7 @@ function CompanyPatternIconMatrix() {
               </CardHeader>
               <CardContent className="flex flex-wrap items-end gap-4">
                 {sizes.map((size) => (
-                  <CompanyPatternIcon
+                  <NodeOrgPatternIcon
                     key={size}
                     companyName={company.name}
                     brandColor={company.color}
@@ -744,9 +744,9 @@ export const SwipeToArchiveDisabled: Story = {
   render: () => <SwipeToArchiveDemo disabled />,
 };
 
-export const CompanyPatternIconSizes: Story = {
-  name: "CompanyPatternIcon / Sizes",
-  render: () => <CompanyPatternIconMatrix />,
+export const NodeOrgPatternIconSizes: Story = {
+  name: "NodeOrgPatternIcon / Sizes",
+  render: () => <NodeOrgPatternIconMatrix />,
 };
 
 export const AsciiArtAnimationPopulated: Story = {

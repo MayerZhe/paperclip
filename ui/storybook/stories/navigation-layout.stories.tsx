@@ -11,13 +11,13 @@ import {
 } from "lucide-react";
 import { BreadcrumbBar } from "@/components/BreadcrumbBar";
 import { CommandPalette } from "@/components/CommandPalette";
-import { CompanySwitcher } from "@/components/CompanySwitcher";
+import { NodeOrgSwitcher } from "@/components/NodeOrgSwitcher";
 import { KeyboardShortcutsCheatsheetContent } from "@/components/KeyboardShortcutsCheatsheet";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { PageTabBar } from "@/components/PageTabBar";
 import { Sidebar } from "@/components/Sidebar";
 import { SidebarAccountMenu } from "@/components/SidebarAccountMenu";
-import { SidebarCompanyMenu } from "@/components/SidebarCompanyMenu";
+import { SidebarNodeOrgMenu } from "@/components/SidebarNodeOrgMenu";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -262,11 +262,11 @@ function NavigationLayoutStories() {
             </div>
 
             <div className="h-[260px] overflow-hidden border border-border bg-background p-3">
-              <SidebarCompanyMenu open onOpenChange={() => undefined} />
+              <SidebarNodeOrgMenu open onOpenChange={() => undefined} />
             </div>
 
             <div className="h-[320px] overflow-hidden border border-border bg-background p-4">
-              <CompanySwitcher open onOpenChange={() => undefined} />
+              <NodeOrgSwitcher open onOpenChange={() => undefined} />
             </div>
           </div>
         </Section>
