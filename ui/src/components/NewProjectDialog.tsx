@@ -1,13 +1,13 @@
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDialog } from "../context/DialogContext";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { accessApi } from "../api/access";
 import { projectsApi } from "../api/projects";
 import { agentsApi } from "../api/agents";
 import { goalsApi } from "../api/goals";
 import { assetsApi } from "../api/assets";
-import { buildMarkdownMentionOptions } from "../lib/company-members";
+import { buildMarkdownMentionOptions } from "../lib/node-org-members";
 import { queryKeys } from "../lib/queryKeys";
 import {
   Dialog,
@@ -48,7 +48,7 @@ const projectStatuses = [
 
 export function NewProjectDialog() {
   const { newProjectOpen, closeNewProject } = useDialog();
-  const { selectedCompanyId, selectedCompany } = useCompany();
+  const { selectedCompanyId, selectedCompany } = useNodeOrg();
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -96,7 +96,7 @@ export function NewProjectDialog() {
 
   const uploadDescriptionImage = useMutation({
     mutationFn: async (file: File) => {
-      if (!selectedCompanyId) throw new Error("No company selected");
+      if (!selectedCompanyId) throw new Error("No node org selected");
       return assetsApi.uploadImage(selectedCompanyId, file, "projects/drafts");
     },
   });

@@ -7,7 +7,7 @@ import {
   type ArtifactGroupBy,
   type ArtifactKindFilter,
 } from "../api/artifacts";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
 import { EmptyState } from "../components/EmptyState";
@@ -62,7 +62,7 @@ export function artifactGroupByLabel(value: ArtifactGroupBy): string {
 }
 
 export function Artifacts() {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -138,7 +138,7 @@ export function Artifacts() {
 
   // Build a relative `To` that preserves the active filters/search while
   // changing only the grouping selection. A bare query string keeps the current
-  // pathname (the company-prefixed /artifacts route) and stays linkable.
+  // pathname (the node org-prefixed /artifacts route) and stays linkable.
   const buildTo = useCallback(
     (mutate: (next: URLSearchParams) => void): To => {
       const next = new URLSearchParams(searchParams);
@@ -227,7 +227,7 @@ export function Artifacts() {
   }, [setBreadcrumbs, viewingSelectedStack, selectedGroup]);
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={Package} message="Select a company to view artifacts." />;
+    return <EmptyState icon={Package} message="Select a Node Org to view artifacts." />;
   }
 
   const showGroupCards = viewingStackList;

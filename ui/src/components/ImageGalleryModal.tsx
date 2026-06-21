@@ -77,7 +77,7 @@ export function ImageGalleryModal({
               {current.originalFilename ?? "Image"}
             </span>
             <div className="flex items-center gap-4">
-              <span className="text-white/40 tabular-nums text-xs">
+              <span className="text-white/40 tabular-nums font-mono text-xs">
                 {currentIndex + 1} / {images.length}
               </span>
               <a

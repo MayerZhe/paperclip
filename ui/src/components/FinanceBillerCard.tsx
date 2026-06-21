@@ -18,7 +18,7 @@ export function FinanceBillerCard({ row }: FinanceBillerCardProps) {
             </CardDescription>
           </div>
           <div className="text-right">
-            <div className="text-lg font-semibold tabular-nums">{formatCents(row.netCents)}</div>
+            <div className="text-lg font-semibold tabular-nums font-mono">{formatCents(row.netCents)}</div>
             <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">net</div>
           </div>
         </div>
@@ -27,15 +27,15 @@ export function FinanceBillerCard({ row }: FinanceBillerCardProps) {
         <div className="grid gap-2 text-sm sm:grid-cols-3">
           <div className="border border-border p-3">
             <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">debits</div>
-            <div className="mt-1 font-medium tabular-nums">{formatCents(row.debitCents)}</div>
+            <div className="mt-1 font-medium tabular-nums font-mono">{formatCents(row.debitCents)}</div>
           </div>
           <div className="border border-border p-3">
             <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">credits</div>
-            <div className="mt-1 font-medium tabular-nums">{formatCents(row.creditCents)}</div>
+            <div className="mt-1 font-medium tabular-nums font-mono">{formatCents(row.creditCents)}</div>
           </div>
           <div className="border border-border p-3">
             <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">estimated</div>
-            <div className="mt-1 font-medium tabular-nums">{formatCents(row.estimatedDebitCents)}</div>
+            <div className="mt-1 font-medium tabular-nums font-mono">{formatCents(row.estimatedDebitCents)}</div>
           </div>
         </div>
       </CardContent>

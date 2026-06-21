@@ -171,14 +171,14 @@ export function InstanceSettings() {
           <h1 className="text-lg font-semibold">Scheduler Heartbeats</h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          Agents with a timer heartbeat enabled across all of your companies.
+          Agents with a timer heartbeat enabled across all of your node orgs.
         </p>
       </div>
 
       <div className="flex items-center gap-4 text-sm text-muted-foreground">
         <span><span className="font-semibold text-foreground">{activeCount}</span> active</span>
         <span><span className="font-semibold text-foreground">{disabledCount}</span> disabled</span>
-        <span><span className="font-semibold text-foreground">{grouped.length}</span> {grouped.length === 1 ? "company" : "companies"}</span>
+        <span><span className="font-semibold text-foreground">{grouped.length}</span> {grouped.length === 1 ? "node org" : "node orgs"}</span>
         {anyEnabled && (
           <Button
             variant="destructive"
@@ -240,7 +240,7 @@ export function InstanceSettings() {
                         <span className="hidden sm:inline text-muted-foreground truncate">
                           {humanize(agent.title ?? agent.role)}
                         </span>
-                        <span className="text-muted-foreground tabular-nums shrink-0">
+                        <span className="text-muted-foreground tabular-nums font-mono shrink-0">
                           {agent.intervalSec}s
                         </span>
                         <span

@@ -35,7 +35,7 @@ vi.mock("@/lib/router", () => ({
 vi.mock("@/context/NodeOrgContext", () => ({
   useNodeOrg: () => ({
     selectedCompanyId: "company-1",
-    selectedCompany: { id: "company-1", name: "Paperclip" },
+    selectedCompany: { id: "company-1", name: "Super Node" },
   }),
 }));
 
@@ -292,3 +292,4 @@ describe("NodeOrgSettingsSidebar", () => {
     });
   });
 });
+

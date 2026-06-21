@@ -305,7 +305,7 @@ export function DesignGuide() {
       <div>
         <h2 className="text-xl font-bold">Design Guide</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Every component, style, and pattern used across Paperclip.
+          Every component, style, and pattern used across Super Node.
         </p>
       </div>
 
@@ -866,7 +866,7 @@ export function DesignGuide() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="#">Paperclip App</BreadcrumbLink>
+              <BreadcrumbLink href="#">Super Node App</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -1241,7 +1241,7 @@ export function DesignGuide() {
       {/*  LOG VIEWER                                                   */}
       {/* ============================================================ */}
       <Section title="Log Viewer">
-        <div className="bg-neutral-950 rounded-lg p-3 font-mono text-xs max-h-80 overflow-y-auto">
+        <div className="bg-background rounded-lg p-3 font-mono text-xs max-h-80 overflow-y-auto">
           <div className="text-foreground">[12:00:01] INFO  Agent started successfully</div>
           <div className="text-foreground">[12:00:02] INFO  Processing task PAP-001</div>
           <div className="text-yellow-400">[12:00:05] WARN  Rate limit approaching (80%)</div>
@@ -1621,3 +1621,4 @@ export function DesignGuide() {
     </div>
   );
 }
+

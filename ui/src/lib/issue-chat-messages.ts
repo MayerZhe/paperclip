@@ -362,7 +362,7 @@ function authorNameForComment(
 ) {
   const authorAgentId = effectiveCommentAuthorAgentId(comment);
   if (authorAgentId) {
-    return agentMap?.get(authorAgentId)?.name ?? (options?.isSystemNotice ? "Paperclip" : authorAgentId.slice(0, 8));
+    return agentMap?.get(authorAgentId)?.name ?? (options?.isSystemNotice ? "Super Node" : authorAgentId.slice(0, 8));
   }
   const authorUserId = comment.authorUserId ?? null;
   if (!authorUserId) return "You";
@@ -999,3 +999,4 @@ export function buildIssueChatMessages(args: {
     })
     .map((entry) => entry.message);
 }
+

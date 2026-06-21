@@ -41,7 +41,7 @@ import { issuesApi } from "@/api/issues";
 import { projectsApi } from "@/api/projects";
 import {
   buildCompanyUserInlineOptions,
-} from "@/lib/company-members";
+} from "@/lib/node-org-members";
 import { collectLiveIssueIds } from "@/lib/liveIssueIds";
 import { useProjectOrder } from "@/hooks/useProjectOrder";
 import {
@@ -65,7 +65,7 @@ import { getRecentProjectIds, trackRecentProject } from "@/lib/recent-projects";
 /**
  * The global bridge registry shape.
  *
- * This is placed on `globalThis.__paperclipPluginBridge__` and consumed by
+ * This is placed on `globalThis.__superNodePluginBridge__` and consumed by
  * the plugin module loader to provide implementations for external imports.
  */
 export interface PluginBridgeRegistry {
@@ -76,7 +76,7 @@ export interface PluginBridgeRegistry {
 
 declare global {
   // eslint-disable-next-line no-var
-  var __paperclipPluginBridge__: PluginBridgeRegistry | undefined;
+  var __superNodePluginBridge__: PluginBridgeRegistry | undefined;
 }
 
 type PluginFileTreePathCollection = ReadonlySet<string> | readonly string[];
@@ -240,7 +240,7 @@ function PluginSdkIssuesList({
   companyId,
   projectId = null,
   filters,
-  viewStateKey = "paperclip:plugin-issues-view",
+  viewStateKey = "super-node:plugin-issues-view",
   initialSearch,
   createIssueLabel,
   searchWithinLoadedIssues = true,
@@ -499,7 +499,7 @@ function PluginSdkProjectPicker({
         null,
         createElement("span", {
           className: "h-3.5 w-3.5 shrink-0 rounded-sm",
-          style: { backgroundColor: selectedProject.color ?? "#6366f1" },
+          style: { backgroundColor: selectedProject.color ?? "#a855f7" },
         }),
         createElement("span", { className: "truncate" }, option.label),
       );
@@ -512,7 +512,7 @@ function PluginSdkProjectPicker({
         null,
         createElement("span", {
           className: "h-3.5 w-3.5 shrink-0 rounded-sm",
-          style: { backgroundColor: project?.color ?? "#6366f1" },
+          style: { backgroundColor: project?.color ?? "#a855f7" },
         }),
         createElement("span", { className: "truncate" }, option.label),
       );
@@ -649,7 +649,7 @@ class PluginSdkErrorBoundary extends Component<{ children: ReactNode; fallback?:
  * Initialize the plugin bridge global registry.
  *
  * Registers the host's React, ReactDOM, and SDK UI bridge implementations
- * on `globalThis.__paperclipPluginBridge__` so the plugin module loader
+ * on `globalThis.__superNodePluginBridge__` so the plugin module loader
  * can provide them to plugin bundles.
  *
  * @param react - The host's React module
@@ -659,7 +659,7 @@ export function initPluginBridge(
   react: typeof import("react"),
   reactDom: typeof import("react-dom"),
 ): void {
-  globalThis.__paperclipPluginBridge__ = {
+  globalThis.__superNodePluginBridge__ = {
     react,
     reactDom,
     sdkUi: {

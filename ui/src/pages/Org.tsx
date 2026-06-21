@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@/lib/router";
 import { useQuery } from "@tanstack/react-query";
 import { agentsApi, type OrgNode } from "../api/agents";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
 import { StatusBadge } from "../components/StatusBadge";
@@ -75,7 +75,7 @@ function OrgTreeNode({
                   ? "bg-amber-400"
                 : node.status === "error"
                   ? "bg-red-400"
-                  : "bg-neutral-400"
+                  : "bg-muted-foreground/50"
           )}
         />
         <span className="font-medium flex-1">{node.name}</span>
@@ -90,7 +90,7 @@ function OrgTreeNode({
 }
 
 export function Org() {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export function Org() {
   });
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={GitBranch} message="Select a company to view org chart." />;
+    return <EmptyState icon={GitBranch} message="Select a Node Org to view org chart." />;
   }
 
   if (isLoading) {

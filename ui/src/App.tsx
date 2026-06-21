@@ -6,7 +6,7 @@ import { OnboardingWizard } from "./components/OnboardingWizard";
 import { CloudAccessGate } from "./components/CloudAccessGate";
 import { Dashboard } from "./pages/Dashboard";
 import { DashboardLive } from "./pages/DashboardLive";
-import { Companies } from "./pages/Companies";
+import { NodeOrgs } from "./pages/NodeOrgs";
 import { Agents } from "./pages/Agents";
 import { AgentDetail } from "./pages/AgentDetail";
 import { Projects } from "./pages/Projects";
@@ -29,18 +29,18 @@ import { ApprovalDetail } from "./pages/ApprovalDetail";
 import { Costs } from "./pages/Costs";
 import { Activity } from "./pages/Activity";
 import { Inbox } from "./pages/Inbox";
-import { CompanySettings } from "./pages/CompanySettings";
-import { CompanyEnvironments } from "./pages/CompanyEnvironments";
+import { NodeOrgSettings } from "./pages/NodeOrgSettings";
+import { NodeOrgEnvironments } from "./pages/NodeOrgEnvironments";
 import { CloudUpstream } from "./pages/CloudUpstream";
 import { CloudUpstreamUxLab } from "./pages/CloudUpstreamUxLab";
 import { BootstrapSetupUxLab } from "./pages/BootstrapSetupUxLab";
-import { CompanySettingsPluginPage } from "./pages/CompanySettingsPluginPage";
+import { NodeOrgSettingsPluginPage } from "./pages/NodeOrgSettingsPluginPage";
 import { CompanyAccess, CompanyAccessLegacyRoute } from "./pages/CompanyAccess";
-import { CompanyInvites } from "./pages/CompanyInvites";
-import { CompanySkills } from "./pages/CompanySkills";
+import { NodeOrgInvites } from "./pages/NodeOrgInvites";
+import { NodeOrgSkills } from "./pages/NodeOrgSkills";
 import { Secrets } from "./pages/Secrets";
-import { CompanyExport } from "./pages/CompanyExport";
-import { CompanyImport } from "./pages/CompanyImport";
+import { NodeOrgExport } from "./pages/NodeOrgExport";
+import { NodeOrgImport } from "./pages/NodeOrgImport";
 import { DesignGuide } from "./pages/DesignGuide";
 import { InstanceGeneralSettings } from "./pages/InstanceGeneralSettings";
 import { InstanceAccess } from "./pages/InstanceAccess";
@@ -59,7 +59,7 @@ import { CliAuthPage } from "./pages/CliAuth";
 import { InviteLandingPage } from "./pages/InviteLanding";
 import { JoinRequestQueue } from "./pages/JoinRequestQueue";
 import { NotFoundPage } from "./pages/NotFound";
-import { useCompany } from "./context/CompanyContext";
+import { useNodeOrg } from "./context/NodeOrgContext";
 import { useDialogActions } from "./context/DialogContext";
 import { loadLastInboxTab } from "./lib/inbox";
 import { shouldRedirectCompanylessRouteToOnboarding } from "./lib/onboarding-route";
@@ -72,19 +72,19 @@ function boardRoutes() {
       <Route path="dashboard" element={<Dashboard />} />
       <Route path="dashboard/live" element={<DashboardLive />} />
       <Route path="onboarding" element={<OnboardingRoutePage />} />
-      <Route path="companies" element={<Companies />} />
-      <Route path="company/settings" element={<CompanySettings />} />
-      <Route path="company/settings/environments" element={<CompanyEnvironments />} />
+      <Route path="companies" element={<NodeOrgs />} />
+      <Route path="company/settings" element={<NodeOrgSettings />} />
+      <Route path="company/settings/environments" element={<NodeOrgEnvironments />} />
       <Route path="company/settings/cloud-upstream" element={<CloudUpstream />} />
       <Route path="company/settings/members" element={<CompanyAccess />} />
       <Route path="company/settings/access" element={<CompanyAccessLegacyRoute />} />
       <Route path="company/settings/cloud-upstream" element={<CloudUpstream />} />
-      <Route path="company/settings/invites" element={<CompanyInvites />} />
-      <Route path="company/export/*" element={<CompanyExport />} />
-      <Route path="company/import" element={<CompanyImport />} />
+      <Route path="company/settings/invites" element={<NodeOrgInvites />} />
+      <Route path="company/export/*" element={<NodeOrgExport />} />
+      <Route path="company/import" element={<NodeOrgImport />} />
       <Route path="company/settings/secrets" element={<Secrets />} />
-      <Route path="company/settings/:settingsRoutePath/*" element={<CompanySettingsPluginPage />} />
-      <Route path="skills/*" element={<CompanySkills />} />
+      <Route path="company/settings/:settingsRoutePath/*" element={<NodeOrgSettingsPluginPage />} />
+      <Route path="skills/*" element={<NodeOrgSkills />} />
       <Route path="settings" element={<LegacySettingsRedirect />} />
       <Route path="settings/*" element={<LegacySettingsRedirect />} />
       <Route path="plugins/:pluginId" element={<PluginPage />} />
@@ -163,7 +163,7 @@ function LegacySettingsRedirect() {
 }
 
 function OnboardingRoutePage() {
-  const { companies } = useCompany();
+  const { companies } = useNodeOrg();
   const { openOnboarding } = useDialogActions();
   const { companyPrefix } = useParams<{ companyPrefix?: string }>();
   const matchedCompany = companyPrefix
@@ -203,7 +203,7 @@ function OnboardingRoutePage() {
 }
 
 function CompanyRootRedirect() {
-  const { companies, selectedCompany, loading } = useCompany();
+  const { companies, selectedCompany, loading } = useNodeOrg();
   const location = useLocation();
 
   if (loading) {
@@ -228,7 +228,7 @@ function CompanyRootRedirect() {
 
 function UnprefixedBoardRedirect() {
   const location = useLocation();
-  const { companies, selectedCompany, loading } = useCompany();
+  const { companies, selectedCompany, loading } = useNodeOrg();
 
   if (loading) {
     return <div className="mx-auto max-w-xl py-10 text-sm text-muted-foreground">Loading...</div>;

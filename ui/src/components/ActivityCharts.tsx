@@ -23,7 +23,7 @@ function DateLabels({ days }: { days: string[] }) {
       {days.map((day, i) => (
         <div key={day} className="flex-1 text-center">
           {(i === 0 || i === 6 || i === 13) ? (
-            <span className="text-[9px] text-muted-foreground tabular-nums">{formatDayLabel(day)}</span>
+            <span className="text-[9px] text-muted-foreground tabular-nums font-mono">{formatDayLabel(day)}</span>
           ) : null}
         </div>
       ))}
@@ -107,7 +107,7 @@ export function RunActivityChart(props: RunChartProps) {
                 <div className="flex flex-col-reverse gap-px overflow-hidden" style={{ height: `${heightPct}%`, minHeight: 2 }}>
                   {entry.succeeded > 0 && <div className="bg-emerald-500" style={{ flex: entry.succeeded }} />}
                   {entry.failed > 0 && <div className="bg-red-500" style={{ flex: entry.failed }} />}
-                  {entry.other > 0 && <div className="bg-neutral-500" style={{ flex: entry.other }} />}
+                  {entry.other > 0 && <div className="bg-muted-foreground/30" style={{ flex: entry.other }} />}
                 </div>
               ) : (
                 <div className="bg-muted/30 rounded-sm" style={{ height: 2 }} />

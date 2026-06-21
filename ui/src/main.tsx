@@ -5,7 +5,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "@/lib/router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { App } from "./App";
-import { CompanyProvider, useCompany } from "./context/CompanyContext";
+import { NodeOrgProvider, useNodeOrg } from "./context/NodeOrgContext";
 import { LiveUpdatesProvider } from "./context/LiveUpdatesProvider";
 import { BreadcrumbProvider } from "./context/BreadcrumbContext";
 import { PanelProvider } from "./context/PanelContext";
@@ -37,8 +37,8 @@ const queryClient = new QueryClient({
   },
 });
 
-function CompanyAwareBreadcrumbProvider({ children }: { children: React.ReactNode }) {
-  const { selectedCompany } = useCompany();
+function OrgAwareBreadcrumbProvider({ children }: { children: React.ReactNode }) {
+  const { selectedCompany } = useNodeOrg();
   return <BreadcrumbProvider companyName={selectedCompany?.name ?? null}>{children}</BreadcrumbProvider>;
 }
 
@@ -47,12 +47,12 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <BrowserRouter>
-          <CompanyProvider>
+          <NodeOrgProvider>
             <EditorAutocompleteProvider>
               <ToastProvider>
                 <LiveUpdatesProvider>
                   <TooltipProvider>
-                    <CompanyAwareBreadcrumbProvider>
+                    <OrgAwareBreadcrumbProvider>
                       <SidebarProvider>
                         <PanelProvider>
                           <PluginLauncherProvider>
@@ -62,12 +62,12 @@ createRoot(document.getElementById("root")!).render(
                           </PluginLauncherProvider>
                         </PanelProvider>
                       </SidebarProvider>
-                    </CompanyAwareBreadcrumbProvider>
+                    </OrgAwareBreadcrumbProvider>
                   </TooltipProvider>
                 </LiveUpdatesProvider>
               </ToastProvider>
             </EditorAutocompleteProvider>
-          </CompanyProvider>
+          </NodeOrgProvider>
         </BrowserRouter>
       </ThemeProvider>
     </QueryClientProvider>

@@ -6,12 +6,12 @@ import { ApiError } from "@/api/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useBreadcrumbs } from "@/context/BreadcrumbContext";
-import { useCompany } from "@/context/CompanyContext";
+import { useNodeOrg } from "@/context/NodeOrgContext";
 import { useToast } from "@/context/ToastContext";
 import { queryKeys } from "@/lib/queryKeys";
 
 export function JoinRequestQueue() {
-  const { selectedCompany, selectedCompanyId } = useCompany();
+  const { selectedCompany, selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const { pushToast } = useToast();
   const queryClient = useQueryClient();
@@ -20,7 +20,7 @@ export function JoinRequestQueue() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { label: selectedCompany?.name ?? "Company", href: "/dashboard" },
+      { label: selectedCompany?.name ?? "Node Org", href: "/dashboard" },
       { label: "Inbox", href: "/inbox" },
       { label: "Join Requests" },
     ]);
@@ -56,7 +56,7 @@ export function JoinRequestQueue() {
   });
 
   if (!selectedCompanyId) {
-    return <div className="text-sm text-muted-foreground">Select a company to review join requests.</div>;
+    return <div className="text-sm text-muted-foreground">Select a node org to review join requests.</div>;
   }
 
   if (requestsQuery.isLoading) {
@@ -66,7 +66,7 @@ export function JoinRequestQueue() {
   if (requestsQuery.error) {
     const message =
       requestsQuery.error instanceof ApiError && requestsQuery.error.status === 403
-        ? "You do not have permission to review join requests for this company."
+        ? "You do not have permission to review join requests for this node org."
         : requestsQuery.error instanceof Error
           ? requestsQuery.error.message
           : "Failed to load join requests.";

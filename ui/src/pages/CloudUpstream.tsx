@@ -23,12 +23,12 @@ import { Input } from "@/components/ui/input";
 import { cloudUpstreamsApi } from "@/api/cloudUpstreams";
 import { instanceSettingsApi } from "@/api/instanceSettings";
 import { useBreadcrumbs } from "@/context/BreadcrumbContext";
-import { useCompany } from "@/context/CompanyContext";
-import { applyCompanyPrefix, extractCompanyPrefixFromPath } from "@/lib/company-routes";
+import { useNodeOrg } from "@/context/NodeOrgContext";
+import { applyCompanyPrefix, extractCompanyPrefixFromPath } from "@/lib/node-org-routes";
 import { Link, useLocation } from "@/lib/router";
 import { queryKeys } from "@/lib/queryKeys";
 
-const PENDING_CONNECTION_KEY = "paperclip-cloud-upstream-pending-connection";
+const PENDING_CONNECTION_KEY = "super-node-cloud-upstream-pending-connection";
 const STEPS: Array<{ key: CloudUpstreamStep; label: string }> = [
   { key: "connect", label: "Connect" },
   { key: "scan", label: "Scan" },
@@ -64,7 +64,7 @@ const ACTIVATION_CATEGORIES: Array<{
 ];
 
 export function CloudUpstream() {
-  const { selectedCompany, selectedCompanyId } = useCompany();
+  const { selectedCompany, selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const queryClient = useQueryClient();
   const location = useLocation();
@@ -76,7 +76,7 @@ export function CloudUpstream() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { label: selectedCompany?.name ?? "Company", href: "/dashboard" },
+      { label: selectedCompany?.name ?? "Node Org", href: "/dashboard" },
       { label: "Settings", href: "/company/settings" },
       { label: "Cloud upstream" },
     ]);
@@ -204,7 +204,7 @@ export function CloudUpstream() {
   }
 
   if (!selectedCompanyId || !selectedCompany) {
-    return <div className="text-sm text-muted-foreground">Select a company to configure cloud upstream.</div>;
+    return <div className="text-sm text-muted-foreground">Select a Node Org to configure cloud upstream.</div>;
   }
 
   if (experimentalQuery.isLoading) {
@@ -238,7 +238,7 @@ export function CloudUpstream() {
             <h1 className="text-lg font-semibold">Cloud upstream</h1>
           </div>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Push {selectedCompany.name} into a Paperclip Cloud stack. Automations stay paused until activation.
+            Push {selectedCompany.name} into a Super Node Cloud stack. Automations stay paused until activation.
           </p>
         </div>
         {connection?.target.origin ? (
@@ -299,7 +299,7 @@ export function CloudUpstream() {
                 value={remoteUrl}
                 onChange={(event) => setRemoteUrl(event.target.value)}
                 placeholder="https://paperclip.paperclip.app/PC521D/dashboard"
-                aria-label="Paperclip Cloud stack URL"
+                aria-label="Super Node Cloud stack URL"
               />
               <Button onClick={() => startMutation.mutate()} disabled={startMutation.isPending || !remoteUrl.trim()}>
                 {startMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CloudUpload className="h-4 w-4" />}
@@ -372,7 +372,7 @@ export function CloudUpstream() {
                   Run {latestRun.id.slice(0, 8)} · {latestRun.completedAt ? `completed ${formatDate(latestRun.completedAt)}` : "in progress"}
                 </div>
               </div>
-              <div className="text-sm tabular-nums">{latestRun.progressPercent}%</div>
+              <div className="text-sm tabular-nums font-mono">{latestRun.progressPercent}%</div>
             </div>
             <div className="mt-3 h-2 rounded-full bg-muted">
               <div className="h-2 rounded-full bg-primary" style={{ width: `${latestRun.progressPercent}%` }} />
@@ -466,7 +466,7 @@ function SummaryGrid({ summary }: { summary: CloudUpstreamPreview["summary"] }) 
     <div className="grid gap-2 sm:grid-cols-4">
       {summary.map((item) => (
         <div key={item.key} className="rounded-md border border-border px-3 py-2">
-          <div className="text-lg font-semibold tabular-nums">{item.count}</div>
+          <div className="text-lg font-semibold tabular-nums font-mono">{item.count}</div>
           <div className="text-xs text-muted-foreground">{item.label}</div>
         </div>
       ))}
@@ -640,7 +640,8 @@ function formatBytes(value: number) {
 function previewErrorMessage(error: unknown): string {
   const code = error instanceof Error ? error.message : null;
   if (code === "payload_too_large" || code === "bad_request") {
-    return "Local company is too large to preview as a single request. Click Push to continue (the Push step uploads in chunks), or see the docs for chunked-preview options.";
+    return "Local node org is too large to preview as a single request. Click Push to continue (the Push step uploads in chunks), or see the docs for chunked-preview options.";
   }
   return code ?? "Failed to preview push.";
 }
+

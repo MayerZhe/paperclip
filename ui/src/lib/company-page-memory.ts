@@ -2,7 +2,7 @@ import {
   extractCompanyPrefixFromPath,
   normalizeCompanyPrefix,
   toCompanyRelativePath,
-} from "./company-routes";
+} from "./node-org-routes";
 
 const GLOBAL_SEGMENTS = new Set(["auth", "invite", "board-claim", "cli-auth", "docs"]);
 

@@ -9,9 +9,9 @@ import { agentsApi } from "../api/agents";
 import { authApi } from "../api/auth";
 import { issuesApi } from "../api/issues";
 import { projectsApi } from "../api/projects";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { queryKeys } from "../lib/queryKeys";
-import { buildCompanyUserInlineOptions, buildCompanyUserLabelMap, isAgentTaskTarget } from "../lib/company-members";
+import { buildCompanyUserInlineOptions, buildCompanyUserLabelMap, isAgentTaskTarget } from "../lib/node-org-members";
 import { ISSUE_OVERRIDE_ADAPTER_TYPES, type IssueModelLane } from "../lib/issue-assignee-overrides";
 import { useProjectOrder } from "../hooks/useProjectOrder";
 import {
@@ -264,7 +264,7 @@ function RemovableIssueReferencePill({
       <span
         data-mention-kind="issue"
         className={cn(
-          "paperclip-mention-chip paperclip-mention-chip--issue group",
+          "super-node-mention-chip super-node-mention-chip--issue group",
           "inline-flex items-center gap-1 rounded-full border border-border py-0.5 pl-1 pr-2 text-xs",
         )}
         title={issue.title}
@@ -382,7 +382,7 @@ export function IssueProperties({
   onUpdate,
   inline,
 }: IssuePropertiesProps) {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const queryClient = useQueryClient();
   const companyId = issue.companyId ?? selectedCompanyId;
   const [assigneeOpen, setAssigneeOpen] = useState(false);
@@ -403,7 +403,7 @@ export function IssueProperties({
   const [assigneeOptionsOpen, setAssigneeOptionsOpen] = useState(false);
   const [labelSearch, setLabelSearch] = useState("");
   const [newLabelName, setNewLabelName] = useState("");
-  const [newLabelColor, setNewLabelColor] = useState("#6366f1");
+  const [newLabelColor, setNewLabelColor] = useState("#a855f7");
   const [monitorAtInput, setMonitorAtInput] = useState(() => toDateTimeLocalValue(issue.executionPolicy?.monitor?.nextCheckAt));
   const [monitorNotesInput, setMonitorNotesInput] = useState(issue.executionPolicy?.monitor?.notes ?? "");
   const [monitorServiceInput, setMonitorServiceInput] = useState(issue.executionPolicy?.monitor?.serviceName ?? "");
@@ -1471,7 +1471,7 @@ export function IssueProperties({
     <>
       <span
         className="shrink-0 h-3 w-3 rounded-sm"
-        style={{ backgroundColor: orderedProjects.find((p) => p.id === issue.projectId)?.color ?? "#6366f1" }}
+        style={{ backgroundColor: orderedProjects.find((p) => p.id === issue.projectId)?.color ?? "#a855f7" }}
       />
       <span className="text-sm break-words min-w-0">{projectName(issue.projectId)}</span>
     </>
@@ -1547,7 +1547,7 @@ export function IssueProperties({
               {option.kind === "project" ? (
                 <span
                   className="shrink-0 h-3 w-3 rounded-sm"
-                  style={{ backgroundColor: option.color ?? "#6366f1" }}
+                  style={{ backgroundColor: option.color ?? "#a855f7" }}
                 />
               ) : null}
               {option.name}

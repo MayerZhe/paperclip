@@ -6,21 +6,21 @@ import {
   type ExternalStoreAdapter,
 } from "@assistant-ui/react";
 
-export interface PaperclipIssueRuntimeReassignment {
+export interface SuperNodeIssueRuntimeReassignment {
   assigneeAgentId: string | null;
   assigneeUserId: string | null;
 }
 
-export interface PaperclipIssueRuntimeSendOptions {
+export interface SuperNodeIssueRuntimeSendOptions {
   body: string;
   reopen?: boolean;
-  reassignment?: PaperclipIssueRuntimeReassignment;
+  reassignment?: SuperNodeIssueRuntimeReassignment;
 }
 
-interface UsePaperclipIssueRuntimeOptions {
+interface UseSuperNodeIssueRuntimeOptions {
   messages: readonly ThreadMessage[];
   isRunning: boolean;
-  onSend: (options: PaperclipIssueRuntimeSendOptions) => Promise<void>;
+  onSend: (options: SuperNodeIssueRuntimeSendOptions) => Promise<void>;
   onCancel?: (() => Promise<void>) | undefined;
 }
 
@@ -37,12 +37,12 @@ function readTextContent(message: AppendMessage) {
     .trim();
 }
 
-export function usePaperclipIssueRuntime({
+export function useSuperNodeIssueRuntime({
   messages,
   isRunning,
   onSend,
   onCancel,
-}: UsePaperclipIssueRuntimeOptions) {
+}: UseSuperNodeIssueRuntimeOptions) {
   const onSendRef = useRef(onSend);
   const onCancelRef = useRef(onCancel);
 
@@ -89,3 +89,4 @@ export function usePaperclipIssueRuntime({
 
   return useExternalStoreRuntime(adapter);
 }
+

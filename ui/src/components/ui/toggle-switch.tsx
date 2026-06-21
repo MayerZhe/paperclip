@@ -27,7 +27,7 @@ export const ToggleSwitch = React.forwardRef<
         data-slot="toggle"
         disabled={disabled}
         className={cn(
-          "relative inline-flex shrink-0 items-center rounded-full transition-colors",
+          "relative inline-flex shrink-0 items-center rounded-none transition-colors",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           "disabled:cursor-not-allowed disabled:opacity-50",
           // Track: larger on mobile (<640px), standard on desktop
@@ -40,7 +40,7 @@ export const ToggleSwitch = React.forwardRef<
       >
         <span
           className={cn(
-            "pointer-events-none inline-block rounded-full bg-white shadow-sm transition-transform",
+            "pointer-events-none inline-block rounded-full bg-white transition-transform",
             // Thumb
             isLg ? "size-5.5 sm:size-5" : "size-4.5 sm:size-3.5",
             // Slide position

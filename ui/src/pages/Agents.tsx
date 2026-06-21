@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "@/lib/router";
 import { useQuery } from "@tanstack/react-query";
 import { agentsApi, type OrgNode } from "../api/agents";
 import { heartbeatsApi } from "../api/heartbeats";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useDialogActions } from "../context/DialogContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { useSidebar } from "../context/SidebarContext";
@@ -33,7 +33,7 @@ const roleLabels = AGENT_ROLE_LABELS as Record<string, string>;
 type FilterTab = "all" | "active" | "paused" | "error";
 
 // Agents in these states never appear in the agents list — `terminated` is
-// hidden like an archived company, and `pending_approval` is a hiring gate that
+// hidden like an archived node org, and `pending_approval` is a hiring gate that
 // lives in the task thread, not an agent run state (PAP-75).
 const HIDDEN_AGENT_STATUSES = new Set(["terminated", "pending_approval"]);
 
@@ -77,7 +77,7 @@ function filterOrgTree(nodes: OrgNode[], tab: FilterTab): OrgNode[] {
 }
 
 export function Agents() {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { openNewAgent } = useDialogActions();
   const { setBreadcrumbs } = useBreadcrumbs();
   const navigate = useNavigate();
@@ -136,7 +136,7 @@ export function Agents() {
   }, [setBreadcrumbs]);
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={Bot} message="Select a company to view agents." />;
+    return <EmptyState icon={Bot} message="Select a Node Org to view agents." />;
   }
 
   if (isLoading) {
@@ -510,14 +510,14 @@ function LiveRunIndicator({
   return (
     <Link
       to={`/agents/${agentRef}/runs/${runId}`}
-      className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 hover:bg-blue-500/20 transition-colors no-underline"
+      className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#a855f7]/10 hover:bg-[#a855f7]/20 transition-colors no-underline"
       onClick={(e) => e.stopPropagation()}
     >
       <span className="relative flex h-2 w-2">
-        <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+        <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-[#a855f7] opacity-75" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#a855f7]" />
       </span>
-      <span className="text-[11px] font-medium text-blue-600 dark:text-blue-400">
+      <span className="text-[11px] font-medium text-primary">
         Live{liveCount > 1 ? ` (${liveCount})` : ""}
       </span>
     </Link>

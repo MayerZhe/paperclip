@@ -1375,11 +1375,11 @@ describe("inbox helpers", () => {
 
     expect(groupInboxWorkItems(items, "project", {
       projectById: new Map([
-        ["project-1", { name: "Paperclip App" }],
+        ["project-1", { name: "Super Node App" }],
         ["project-2", { name: "Onboarding" }],
       ]),
     })).toEqual([
-      { key: "project:project-1", label: "Paperclip App", items: [items[0]] },
+      { key: "project:project-1", label: "Super Node App", items: [items[0]] },
       { key: "kind:join_request", label: "Join requests", items: [items[2]] },
       { key: "project:project-2", label: "Onboarding", items: [items[1]] },
       { key: "project:none", label: "No project", items: [items[3]] },
@@ -1474,3 +1474,4 @@ describe("inbox helpers", () => {
     expect(shouldResetInboxWorkspaceGrouping("none", false, true)).toBe(false);
   });
 });
+

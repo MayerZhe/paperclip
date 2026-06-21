@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { IssueWorkMode } from "@paperclipai/shared";
 import { pickTextColorForSolidBg } from "@/lib/color-contrast";
 import { useDialog } from "../context/DialogContext";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useAdapterCapabilities } from "../adapters/use-adapter-capabilities";
 import { executionWorkspacesApi } from "../api/execution-workspaces";
 import { issuesApi } from "../api/issues";
@@ -13,7 +13,7 @@ import { agentsApi } from "../api/agents";
 import { accessApi } from "../api/access";
 import { authApi } from "../api/auth";
 import { assetsApi } from "../api/assets";
-import { buildCompanyUserInlineOptions, buildMarkdownMentionOptions, isAgentTaskTarget } from "../lib/company-members";
+import { buildCompanyUserInlineOptions, buildMarkdownMentionOptions, isAgentTaskTarget } from "../lib/node-org-members";
 import { queryKeys } from "../lib/queryKeys";
 import { orderReusableExecutionWorkspaces } from "../lib/reusable-execution-workspaces";
 import { useProjectOrder } from "../hooks/useProjectOrder";
@@ -52,7 +52,7 @@ import {
   AlertTriangle,
   Tag,
   Calendar,
-  Paperclip,
+  Paperclip as PaperclipIcon,
   FileText,
   Flag,
   Loader2,
@@ -405,7 +405,7 @@ function issueExecutionWorkspaceModeForExistingWorkspace(mode: string | null | u
 
 export function NewIssueDialog() {
   const { newIssueOpen, newIssueDefaults, closeNewIssue } = useDialog();
-  const { companies, selectedCompanyId, selectedCompany } = useCompany();
+  const { companies, selectedCompanyId, selectedCompany } = useNodeOrg();
   const queryClient = useQueryClient();
   const { pushToast } = useToastActions();
   const [title, setTitle] = useState("");
@@ -610,7 +610,7 @@ export function NewIssueDialog() {
 
   const uploadDescriptionImage = useMutation({
     mutationFn: async (file: File) => {
-      if (!effectiveCompanyId) throw new Error("No company selected");
+      if (!effectiveCompanyId) throw new Error("No node org selected");
       return assetsApi.uploadImage(effectiveCompanyId, file, "issues/drafts");
     },
   });
@@ -1415,7 +1415,7 @@ export function NewIssueDialog() {
                     <>
                       <span
                         className="h-3.5 w-3.5 shrink-0 rounded-sm"
-                        style={{ backgroundColor: currentProject.color ?? "#6366f1" }}
+                        style={{ backgroundColor: currentProject.color ?? "#a855f7" }}
                       />
                       <span className="truncate">{option.label}</span>
                     </>
@@ -1430,7 +1430,7 @@ export function NewIssueDialog() {
                     <>
                       <span
                         className="h-3.5 w-3.5 shrink-0 rounded-sm"
-                        style={{ backgroundColor: project?.color ?? "#6366f1" }}
+                        style={{ backgroundColor: project?.color ?? "#a855f7" }}
                       />
                       <span className="truncate">{option.label}</span>
                     </>
@@ -1814,7 +1814,7 @@ export function NewIssueDialog() {
                       <div key={file.id} className="flex items-start justify-between gap-3 rounded-md border border-border/70 px-3 py-2">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <Paperclip className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                            <PaperclipIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                             <span className="truncate text-sm">{file.file.name}</span>
                           </div>
                           <div className="mt-1 text-[11px] text-muted-foreground">
@@ -1930,7 +1930,7 @@ export function NewIssueDialog() {
             onClick={() => stageFileInputRef.current?.click()}
             disabled={createIssue.isPending}
           >
-            <Paperclip className="h-3 w-3" />
+            <PaperclipIcon className="h-3 w-3" />
             Upload
           </button>
 
@@ -2088,3 +2088,4 @@ export function NewIssueDialog() {
     </Dialog>
   );
 }
+

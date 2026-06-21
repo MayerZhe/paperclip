@@ -272,7 +272,7 @@ export function InstanceExperimentalSettings() {
           <div className="space-y-1.5">
             <h2 className="text-sm font-semibold">Enable Environments</h2>
             <p className="max-w-2xl text-sm text-muted-foreground">
-              Show environment management in company settings and allow project and agent environment assignment
+              Show environment management in node org settings and allow project and agent environment assignment
               controls.
             </p>
           </div>
@@ -352,7 +352,7 @@ export function InstanceExperimentalSettings() {
           <div className="space-y-1.5">
             <h2 className="text-sm font-semibold">Cloud Sync</h2>
             <p className="max-w-2xl text-sm text-muted-foreground">
-              Show local Paperclip Cloud upstream connection, preview, push, retry, and activation review surfaces.
+              Show local Super Node Cloud upstream connection, preview, push, retry, and activation review surfaces.
               Saved connections and run history are preserved when this is disabled.
             </p>
           </div>
@@ -480,3 +480,4 @@ export function InstanceExperimentalSettings() {
     </div>
   );
 }
+

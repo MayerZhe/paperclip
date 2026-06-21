@@ -492,16 +492,16 @@ describe("InboxIssueMetaLeading", () => {
     const liveBadgeLabel = Array.from(container.querySelectorAll("span")).find(
       (node) => node.textContent === "Live" && node.className.includes("text-"),
     );
-    const liveDot = container.querySelector('span[class*="bg-blue-500"]');
+    const liveDot = container.querySelector('span[class*="bg-primary"]');
     const pulseRing = container.querySelector('span[class*="animate-pulse"]');
 
     expect(statusIcon).not.toBeNull();
     expect(statusIcon?.className).not.toContain("!border-muted-foreground");
     expect(statusIcon?.className).not.toContain("!text-muted-foreground");
     expect(liveBadge).not.toBeNull();
-    expect(liveBadge?.className).toContain("bg-blue-500/10");
+    expect(liveBadge?.className).toContain("bg-primary/10");
     expect(liveBadgeLabel).not.toBeNull();
-    expect(liveBadgeLabel?.className).toContain("text-blue-600");
+    expect(liveBadgeLabel?.className).toContain("text-primary");
     expect(liveDot).not.toBeNull();
     expect(pulseRing).not.toBeNull();
 

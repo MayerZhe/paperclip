@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useNavigate, useSearchParams } from "@/lib/router";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { useDialogActions } from "../context/DialogContext";
 import { searchApi } from "../api/search";
@@ -112,7 +112,7 @@ function shapeError(error: unknown): { message: string; status?: number } {
 }
 
 export function Search() {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const { openNewIssue } = useDialogActions();
   const navigate = useNavigate();
@@ -271,7 +271,7 @@ export function Search() {
     function pill(value: number) {
       if (!data) return null;
       return (
-        <Badge variant="outline" className="ml-1.5 px-1.5 py-0 text-[10px] tabular-nums font-normal">
+        <Badge variant="outline" className="ml-1.5 px-1.5 py-0 text-[10px] tabular-nums font-mono font-normal">
           {value}
         </Badge>
       );
@@ -454,7 +454,7 @@ function SearchTabContent({
     return (
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-10 sm:px-6">
         <div>
-          <h2 className="text-lg font-semibold">Type to search company memory.</h2>
+          <h2 className="text-lg font-semibold">Type to search node org memory.</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Tasks, comments, plan documents, artifacts, agents, projects — same surface, ranked by relevance.
           </p>
@@ -464,7 +464,7 @@ function SearchTabContent({
             <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Recent searches
             </div>
-            <ul className="flex flex-col divide-y divide-border rounded-md border border-border">
+            <ul className="flex flex-col divide-y divide-border rounded-none border border-border">
               {recentSearches.map((entry) => (
                 <li key={entry}>
                   <button
@@ -599,7 +599,7 @@ function SearchTabContent({
               <IssueGroupHeader
                 label={SUBGROUP_LABELS[group.key]}
                 trailing={
-                  <span className="text-xs font-normal tabular-nums text-muted-foreground">
+                  <span className="text-xs font-normal tabular-nums font-mono text-muted-foreground">
                     {group.results.length}
                   </span>
                 }

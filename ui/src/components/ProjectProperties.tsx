@@ -9,7 +9,7 @@ import { goalsApi } from "../api/goals";
 import { instanceSettingsApi } from "../api/instanceSettings";
 import { projectsApi } from "../api/projects";
 import { secretsApi } from "../api/secrets";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { queryKeys } from "../lib/queryKeys";
 import { statusBadge, statusBadgeDefault } from "../lib/status-colors";
 import { Separator } from "@/components/ui/separator";
@@ -222,7 +222,7 @@ function ArchiveDangerZone({
 }
 
 export function ProjectProperties({ project, onUpdate, onFieldUpdate, getFieldSaveState, onArchive, archivePending }: ProjectPropertiesProps) {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const queryClient = useQueryClient();
   const [goalOpen, setGoalOpen] = useState(false);
   const [executionWorkspaceAdvancedOpen, setExecutionWorkspaceAdvancedOpen] = useState(false);
@@ -258,7 +258,7 @@ export function ProjectProperties({ project, onUpdate, onFieldUpdate, getFieldSa
   });
   const createSecret = useMutation({
     mutationFn: (input: { name: string; value: string }) => {
-      if (!selectedCompanyId) throw new Error("Select a company to create secrets");
+      if (!selectedCompanyId) throw new Error("Select a Node Org to create secrets");
       return secretsApi.create(selectedCompanyId, input);
     },
     onSuccess: () => {
@@ -742,7 +742,7 @@ export function ProjectProperties({ project, onUpdate, onFieldUpdate, getFieldSa
                     {codebase.effectiveLocalFolder}
                   </div>
                   {codebase.origin === "managed_checkout" && (
-                    <div className="text-[11px] text-muted-foreground">Paperclip-managed folder.</div>
+                    <div className="text-[11px] text-muted-foreground">Super Node-managed folder.</div>
                   )}
                 </div>
                 <div className="flex items-center gap-1">
@@ -774,7 +774,7 @@ export function ProjectProperties({ project, onUpdate, onFieldUpdate, getFieldSa
 
             {hasAdditionalLegacyWorkspaces && (
               <div className="text-[11px] text-muted-foreground">
-                Additional legacy workspace records exist on this project. Paperclip is using the primary workspace as the codebase view.
+                Additional legacy workspace records exist on this project. Super Node is using the primary workspace as the codebase view.
               </div>
             )}
 
@@ -1181,3 +1181,4 @@ export function ProjectProperties({ project, onUpdate, onFieldUpdate, getFieldSa
     </div>
   );
 }
+

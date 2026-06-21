@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { executionWorkspacesApi } from "../api/execution-workspaces";
 import { environmentsApi } from "../api/environments";
 import { instanceSettingsApi } from "../api/instanceSettings";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { queryKeys } from "../lib/queryKeys";
 import { orderReusableExecutionWorkspaces } from "../lib/reusable-execution-workspaces";
 import { cn, projectWorkspaceUrl } from "../lib/utils";
@@ -148,7 +148,7 @@ function statusBadge(status: string) {
   const colors: Record<string, string> = {
     active: "bg-green-500/15 text-green-700 dark:text-green-400",
     idle: "bg-muted text-muted-foreground",
-    in_review: "bg-blue-500/15 text-blue-700 dark:text-blue-400",
+    in_review: "bg-primary/15 text-primary dark:text-primary/80",
     archived: "bg-muted text-muted-foreground",
   };
   return (
@@ -202,7 +202,7 @@ export function IssueWorkspaceCard({
   livePreview = false,
   onDraftChange,
 }: IssueWorkspaceCardProps) {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const companyId = issue.companyId ?? selectedCompanyId;
   const [editing, setEditing] = useState(initialEditing);
 

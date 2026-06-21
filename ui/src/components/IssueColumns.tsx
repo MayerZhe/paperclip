@@ -169,22 +169,22 @@ export function InboxIssueMetaLeading({
         <span
           className={cn(
             "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 sm:gap-1.5 sm:px-2",
-            "bg-blue-500/10",
+            "bg-primary/10",
           )}
         >
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-pulse rounded-full bg-blue-400 opacity-75" />
+            <span className="absolute inline-flex h-full w-full animate-pulse rounded-full bg-primary/60 opacity-75" />
             <span
               className={cn(
                 "relative inline-flex h-2 w-2 rounded-full",
-                "bg-blue-500",
+                "bg-primary",
               )}
             />
           </span>
           <span
             className={cn(
               "hidden text-[11px] font-medium sm:inline",
-              "text-blue-600 dark:text-blue-400",
+              "text-primary dark:text-primary/80",
             )}
           >
             Live
@@ -274,7 +274,7 @@ export function InboxIssueTrailingColumns({
 
         if (column === "project") {
           if (projectName) {
-            const accentColor = projectColor ?? "#64748b";
+            const accentColor = projectColor ?? "#888888";
             return (
               <span
                 key={column}

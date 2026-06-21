@@ -49,7 +49,7 @@ vi.mock("./IssueLinkQuicklook", () => ({
   }) => <a href={to}>{children}</a>,
 }));
 vi.mock("../hooks/usePaperclipIssueRuntime", () => ({
-  usePaperclipIssueRuntime: () => ({}),
+  useSuperNodeIssueRuntime: () => ({}),
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -112,7 +112,7 @@ describe("IssueChatThread system notice routing", () => {
       authorType: "system",
       authorAgentId: null,
       authorUserId: null,
-      body: "Paperclip needs a disposition before this issue can continue.",
+      body: "Super Node needs a disposition before this issue can continue.",
       presentation: {
         kind: "system_notice",
         tone: "warning",
@@ -140,7 +140,7 @@ describe("IssueChatThread system notice routing", () => {
     expect(row).not.toBeNull();
     const status = row?.querySelector('[role="status"]');
     expect(status?.getAttribute("aria-label")).toBe("Missing issue disposition");
-    expect(container.textContent).toContain("Paperclip needs a disposition");
+    expect(container.textContent).toContain("Super Node needs a disposition");
     // collapsed by default — metadata identifier should not be visible
     expect(container.textContent).not.toContain("PAP-3440");
     const toggle = row?.querySelector("button[aria-expanded]") as HTMLButtonElement | null;
@@ -263,7 +263,7 @@ describe("IssueChatThread system notice routing", () => {
       authorUserId: null,
       runId: "run-issue-chat-01",
       runAgentId: "agent-codex",
-      body: "Paperclip needs a disposition before this issue can continue.",
+      body: "Super Node needs a disposition before this issue can continue.",
       presentation: {
         kind: "system_notice",
         tone: "warning",
@@ -347,7 +347,7 @@ describe("IssueChatThread system notice routing", () => {
 
     const status = container.querySelector('[role="status"]');
     expect(status).not.toBeNull();
-    expect(status?.textContent).toContain("Paperclip");
+    expect(status?.textContent).toContain("Super Node");
     expect(status?.textContent).not.toContain("You");
   });
 
@@ -377,7 +377,7 @@ describe("IssueChatThread system notice routing", () => {
     const status = container.querySelector('[role="status"]');
     const sourceLink = status?.querySelector('a[href^="/agents/"]') as HTMLAnchorElement | null;
     expect(sourceLink?.getAttribute("href")).toBe("/agents/agent-unknown/runs/run-xyz");
-    expect(sourceLink?.textContent).toBe("Paperclip");
+    expect(sourceLink?.textContent).toBe("Super Node");
   });
 
   it("keeps agent-authored comments as assistant bubbles even when presentation requests system_notice", async () => {
@@ -415,7 +415,7 @@ describe("IssueChatThread system notice routing", () => {
       authorUserId: null,
       runId: "run-stale",
       runAgentId: "agent-codex",
-      body: "Paperclip needs a disposition before this issue can continue.",
+      body: "Super Node needs a disposition before this issue can continue.",
       presentation: {
         kind: "system_notice",
         tone: "warning",
@@ -463,7 +463,7 @@ describe("IssueChatThread system notice routing", () => {
     expect(row?.querySelector('[data-testid="stale-disposition-warning-time"]')?.parentElement?.className).toContain("ml-auto");
     expect(row?.textContent).toContain("Stale disposition warning");
     expect(row?.textContent).not.toContain("This disposition warning is stale because the issue now has a newer disposition.");
-    expect(row?.textContent).not.toContain("Paperclip needs a disposition before this issue can continue.");
+    expect(row?.textContent).not.toContain("Super Node needs a disposition before this issue can continue.");
 
     expect(toggle.getAttribute("aria-expanded")).toBe("false");
     const detailsId = toggle.getAttribute("aria-controls");
@@ -481,3 +481,4 @@ describe("IssueChatThread system notice routing", () => {
     expect(container.textContent).toContain("run-stale");
   });
 });
+

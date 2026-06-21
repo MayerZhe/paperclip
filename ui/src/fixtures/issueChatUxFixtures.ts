@@ -85,7 +85,7 @@ export const issueChatUxMentions: MentionOption[] = [
   },
   {
     id: "mention-project-1",
-    name: "Paperclip Board UI",
+    name: "Super Node Board UI",
     kind: "project",
     projectId: "project-1",
     projectColor: "#0f766e",
@@ -356,3 +356,4 @@ export const issueChatUxFeedbackVotes: FeedbackVote[] = [
     updatedAt: new Date("2026-04-06T12:35:00.000Z"),
   },
 ];
+

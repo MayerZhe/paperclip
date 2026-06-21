@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { Link, Navigate, useParams } from "@/lib/router";
 import { useQuery } from "@tanstack/react-query";
-import { useCompany } from "@/context/CompanyContext";
+import { useNodeOrg } from "@/context/NodeOrgContext";
 import { useBreadcrumbs } from "@/context/BreadcrumbContext";
 import { pluginsApi } from "@/api/plugins";
 import { queryKeys } from "@/lib/queryKeys";
@@ -15,12 +15,12 @@ import { ArrowLeft } from "lucide-react";
 import { NotFoundPage } from "./NotFound";
 
 /**
- * Company-context plugin page. Renders a plugin's `page` slot at
+ * Node Org-context plugin page. Renders a plugin's `page` slot at
  * `/:companyPrefix/plugins/:pluginId` when the plugin declares a page slot
  * and is enabled for that company.
  *
- * @see doc/plugins/PLUGIN_SPEC.md §19.2 — Company-Context Routes
- * @see doc/plugins/PLUGIN_SPEC.md §24.4 — Company-Context Plugin Page
+ * @see doc/plugins/PLUGIN_SPEC.md §19.2 — Node Org-Context Routes
+ * @see doc/plugins/PLUGIN_SPEC.md §24.4 — Node Org-Context Plugin Page
  */
 export function PluginPage() {
   const params = useParams<{
@@ -31,7 +31,7 @@ export function PluginPage() {
   }>();
   const { companyPrefix: routeCompanyPrefix, pluginId, pluginRoutePath } = params;
   const pluginRouteSplat = params["*"];
-  const { companies, selectedCompanyId } = useCompany();
+  const { companies, selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const routeCompany = useMemo(() => {
     if (!routeCompanyPrefix) return null;
@@ -130,7 +130,7 @@ export function PluginPage() {
     }
     return (
       <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">Select a company to view this page.</p>
+        <p className="text-sm text-muted-foreground">Select a node org to view this page.</p>
       </div>
     );
   }

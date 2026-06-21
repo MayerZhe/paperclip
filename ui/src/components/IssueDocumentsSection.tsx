@@ -15,7 +15,7 @@ import { ApiError } from "../api/client";
 import { issuesApi } from "../api/issues";
 import { useAutosaveIndicator } from "../hooks/useAutosaveIndicator";
 import { deriveDocumentRevisionState } from "../lib/document-revisions";
-import type { CompanyUserProfile } from "../lib/company-members";
+import type { CompanyUserProfile } from "../lib/node-org-members";
 import { queryKeys } from "../lib/queryKeys";
 import { cn, relativeTime } from "../lib/utils";
 import { FoldCurtain } from "./FoldCurtain";

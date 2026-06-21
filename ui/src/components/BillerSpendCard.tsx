@@ -71,7 +71,7 @@ export function BillerSpendCard({
               {row.modelCount} model{row.modelCount === 1 ? "" : "s"}
             </CardDescription>
           </div>
-          <span className="text-xl font-bold tabular-nums shrink-0">
+          <span className="text-xl font-bold tabular-nums font-mono shrink-0">
             {formatCents(row.costCents)}
           </span>
         </div>
@@ -108,7 +108,7 @@ export function BillerSpendCard({
                 {billingTypeBreakdown.map(([billingType, costCents]) => (
                   <div key={billingType} className="flex items-center justify-between gap-2 text-xs">
                     <span className="text-muted-foreground">{billingTypeDisplayName(billingType as any)}</span>
-                    <span className="font-medium tabular-nums">{formatCents(costCents)}</span>
+                    <span className="font-medium tabular-nums font-mono">{formatCents(costCents)}</span>
                   </div>
                 ))}
               </div>
@@ -127,7 +127,7 @@ export function BillerSpendCard({
                 {providerBreakdown.map((entry) => (
                   <div key={entry.provider} className="flex items-center justify-between gap-2 text-xs">
                     <span className="text-muted-foreground">{providerDisplayName(entry.provider)}</span>
-                    <div className="text-right tabular-nums">
+                    <div className="text-right tabular-nums font-mono">
                       <div className="font-medium">{formatCents(entry.costCents)}</div>
                       <div className="text-muted-foreground">
                         {formatTokens(entry.inputTokens + entry.outputTokens)} tok

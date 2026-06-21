@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@/lib/router";
 import { useDialog } from "../context/DialogContext";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { accessApi } from "../api/access";
 import { agentsApi } from "../api/agents";
 import { adaptersApi } from "../api/adapters";
@@ -42,7 +42,7 @@ function isAgentAdapterType(type: string): boolean {
 
 export function NewAgentDialog() {
   const { newAgentOpen, closeNewAgent, openNewIssue } = useDialog();
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { pushToast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -292,7 +292,7 @@ export function NewAgentDialog() {
                   Back
                 </button>
                 <p className="text-sm text-muted-foreground">
-                  Choose the runtime Paperclip should start or resume directly.
+                  Choose the runtime Super Node should start or resume directly.
                 </p>
               </div>
 
@@ -337,7 +337,7 @@ export function NewAgentDialog() {
                 <div className="space-y-1">
                   <h2 className="text-sm font-semibold">Invite an external agent</h2>
                   <p className="text-sm text-muted-foreground">
-                    Generate a one-time onboarding prompt that any compatible agent can use to request access, wait for approval, and claim its Paperclip API key.
+                    Generate a one-time onboarding prompt that any compatible agent can use to request access, wait for approval, and claim its Super Node API key.
                   </p>
                 </div>
               </div>
@@ -416,3 +416,4 @@ export function NewAgentDialog() {
     </Dialog>
   );
 }
+

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { issuesApi } from "../api/issues";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
 import { StatusIcon } from "../components/StatusIcon";
@@ -13,7 +13,7 @@ import { formatDate } from "../lib/utils";
 import { ListTodo } from "lucide-react";
 
 export function MyIssues() {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export function MyIssues() {
   });
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={ListTodo} message="Select a company to view your tasks." />;
+    return <EmptyState icon={ListTodo} message="Select a Node Org to view your tasks." />;
   }
 
   if (isLoading) {

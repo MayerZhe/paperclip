@@ -6,7 +6,7 @@
  * light page backgrounds.
  */
 
-const DARK_BG = { r: 24, g: 24, b: 27 }; // zinc-900 (#18181b)
+const DARK_BG = { r: 5, g: 5, b: 5 }; // AgentHubs background (#050505)
 const LIGHT_BG = { r: 255, g: 255, b: 255 }; // white
 
 export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {

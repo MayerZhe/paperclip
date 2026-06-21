@@ -105,7 +105,7 @@ export function IssueScheduledRetryCard({
           ) : null}
           {scheduledRetry.error ? (
             <div className="mt-1 text-xs text-muted-foreground">
-              Last attempt failed: {scheduledRetry.error}. Paperclip will retry automatically.
+              Last attempt failed: {scheduledRetry.error}. Super Node will retry automatically.
             </div>
           ) : null}
           {isError ? (
@@ -192,3 +192,4 @@ export function RetryErrorBand({ error, onRetry, className }: RetryErrorBandProp
     </div>
   );
 }
+

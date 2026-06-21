@@ -6,12 +6,12 @@ import { ApiError } from "@/api/client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useBreadcrumbs } from "@/context/BreadcrumbContext";
-import { useCompany } from "@/context/CompanyContext";
+import { useNodeOrg } from "@/context/NodeOrgContext";
 import { useToast } from "@/context/ToastContext";
 import { queryKeys } from "@/lib/queryKeys";
 
 export function InstanceAccess() {
-  const { companies } = useCompany();
+  const { companies } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const { pushToast } = useToast();
   const queryClient = useQueryClient();
@@ -64,7 +64,7 @@ export function InstanceAccess() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.access.userCompanyAccess(selectedUserId!) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.access.adminUsers(search) });
-      pushToast({ title: "Company access updated", tone: "success" });
+      pushToast({ title: "Node Org access updated", tone: "success" });
     },
   });
 
@@ -105,7 +105,7 @@ export function InstanceAccess() {
           <h1 className="text-lg font-semibold">Instance Access</h1>
         </div>
         <p className="max-w-3xl text-sm text-muted-foreground">
-          Search users, manage instance-admin status, and control which companies they can access.
+          Search users, manage instance-admin status, and control which node orgs they can access.
         </p>
       </div>
 
@@ -142,7 +142,7 @@ export function InstanceAccess() {
                   ) : null}
                 </div>
                 <div className="mt-2 text-xs text-muted-foreground">
-                  {user.activeCompanyMembershipCount} active company memberships
+                  {user.activeCompanyMembershipCount} active node org memberships
                 </div>
               </button>
             ))}
@@ -180,9 +180,9 @@ export function InstanceAccess() {
 
               <div className="space-y-3">
                 <div>
-                  <h2 className="text-sm font-semibold">Company access</h2>
+                  <h2 className="text-sm font-semibold">Node Org access</h2>
                   <p className="text-sm text-muted-foreground">
-                    Toggle company membership for this user. New access defaults to an active operator membership.
+                    Toggle node org membership for this user. New access defaults to an active operator membership.
                   </p>
                 </div>
                 <div className="grid gap-3 md:grid-cols-2">
@@ -214,7 +214,7 @@ export function InstanceAccess() {
                     onClick={() => updateCompanyAccessMutation.mutate()}
                     disabled={updateCompanyAccessMutation.isPending}
                   >
-                    {updateCompanyAccessMutation.isPending ? "Saving…" : "Save company access"}
+                    {updateCompanyAccessMutation.isPending ? "Saving…" : "Save node org access"}
                   </Button>
                 </div>
               </div>

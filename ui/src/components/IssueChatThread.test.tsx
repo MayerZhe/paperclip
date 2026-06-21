@@ -176,7 +176,7 @@ vi.mock("./IssueLinkQuicklook", () => ({
 }));
 
 vi.mock("../hooks/usePaperclipIssueRuntime", () => ({
-  usePaperclipIssueRuntime: () => ({}),
+  useSuperNodeIssueRuntime: () => ({}),
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -2962,3 +2962,4 @@ describe("IssueChatThread", () => {
     });
   });
 });
+

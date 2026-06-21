@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Project } from "@paperclipai/shared";
 import { projectsApi } from "../api/projects";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useDialogActions } from "../context/DialogContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
@@ -74,7 +74,7 @@ function sortProjects(projects: Project[], sortField: ProjectSortField, sortDir:
 }
 
 export function Projects() {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { openNewProject } = useDialogActions();
   const { setBreadcrumbs } = useBreadcrumbs();
   const [sortField, setSortField] = useState<ProjectSortField>("name");
@@ -116,7 +116,7 @@ export function Projects() {
   const sortLabel = PROJECT_SORT_OPTIONS.find((option) => option.field === sortField)?.label ?? "Name";
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={Hexagon} message="Select a company to view projects." />;
+    return <EmptyState icon={Hexagon} message="Select a Node Org to view projects." />;
   }
 
   if (isLoading) {
@@ -216,13 +216,13 @@ export function Projects() {
                         trailing={
                           <div className="flex items-center gap-3">
                             <span
-                              className="hidden text-xs text-muted-foreground tabular-nums sm:inline"
+                              className="hidden text-xs text-muted-foreground tabular-nums font-mono sm:inline"
                               title={`${formatNumber(project.taskCount ?? 0)} task${(project.taskCount ?? 0) === 1 ? "" : "s"}`}
                             >
                               {formatNumber(project.taskCount ?? 0)} task{(project.taskCount ?? 0) === 1 ? "" : "s"}
                             </span>
                             {project.budget && (
-                              <span className="hidden text-xs text-muted-foreground tabular-nums sm:inline">
+                              <span className="hidden text-xs text-muted-foreground tabular-nums font-mono sm:inline">
                                 {formatProjectBudget(project.budget)}
                               </span>
                             )}

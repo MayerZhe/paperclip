@@ -5,7 +5,7 @@ import type { Goal } from "@paperclipai/shared";
 import { GOAL_STATUSES, GOAL_LEVELS } from "@paperclipai/shared";
 import { agentsApi } from "../api/agents";
 import { goalsApi } from "../api/goals";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { queryKeys } from "../lib/queryKeys";
 import { StatusBadge } from "./StatusBadge";
 import { formatDate, cn, agentUrl } from "../lib/utils";
@@ -71,7 +71,7 @@ function PickerButton({
 }
 
 export function GoalProperties({ goal, onUpdate }: GoalPropertiesProps) {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
 
   const { data: agents } = useQuery({
     queryKey: queryKeys.agents.list(selectedCompanyId!),

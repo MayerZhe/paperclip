@@ -93,7 +93,7 @@ export function ExecutionWorkspaceCloseDialog({
           <DialogTitle>{actionLabel}</DialogTitle>
           <DialogDescription className="break-words">
             Archive <span className="font-medium text-foreground">{workspaceName}</span> and clean up any owned workspace
-            artifacts. Paperclip keeps the workspace record and task history, but removes it from active workspace views.
+            artifacts. Super Node keeps the workspace record and task history, but removes it from active workspace views.
           </DialogDescription>
         </DialogHeader>
 
@@ -312,3 +312,4 @@ export function ExecutionWorkspaceCloseDialog({
     </Dialog>
   );
 }
+

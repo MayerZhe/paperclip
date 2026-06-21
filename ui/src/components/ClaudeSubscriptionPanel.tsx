@@ -45,7 +45,7 @@ function orderedWindows(windows: QuotaWindow[]): QuotaWindow[] {
 }
 
 function fillClass(usedPercent: number | null): string {
-  if (usedPercent == null) return "bg-zinc-700";
+  if (usedPercent == null) return "bg-muted/70";
   if (usedPercent >= 90) return "bg-red-400";
   if (usedPercent >= 70) return "bg-amber-400";
   return "bg-primary/70";
@@ -119,7 +119,7 @@ export function ClaudeSubscriptionPanel({
                   ) : null}
                 </div>
                 {window.usedPercent != null ? (
-                  <div className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
+                  <div className="shrink-0 text-sm font-semibold tabular-nums font-mono text-foreground">
                     {window.usedPercent}% used
                   </div>
                 ) : null}

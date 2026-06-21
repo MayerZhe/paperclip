@@ -6,7 +6,7 @@ import { timeAgo } from "../lib/timeAgo";
 import { cn } from "../lib/utils";
 import { formatActivityVerb } from "../lib/activity-format";
 import { deriveProjectUrlKey, type ActivityEvent, type Agent } from "@paperclipai/shared";
-import type { CompanyUserProfile } from "../lib/company-members";
+import type { CompanyUserProfile } from "../lib/node-org-members";
 
 function entityLink(entityType: string, entityId: string, name?: string | null): string | null {
   switch (entityType) {

@@ -423,7 +423,7 @@ export function WorkspaceRuntimeControls({
 
       <CommandSection
         title="Services"
-        description="Long-running commands that Paperclip can supervise for this workspace."
+        description="Long-running commands that Super Node can supervise for this workspace."
         items={resolvedSections.services}
         emptyMessage={resolvedServiceEmptyMessage}
         disabledHint={visibleDisabledHint}
@@ -512,3 +512,4 @@ export function WorkspaceRuntimeQuickControls({
     </div>
   );
 }
+

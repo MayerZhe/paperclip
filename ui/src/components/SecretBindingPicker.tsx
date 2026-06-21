@@ -4,7 +4,7 @@ import { AlertCircle, KeyRound, Loader2, Plus, X } from "lucide-react";
 import type { CompanySecret, SecretVersionSelector } from "@paperclipai/shared";
 import { secretsApi } from "../api/secrets";
 import { queryKeys } from "../lib/queryKeys";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -69,7 +69,7 @@ export function SecretBindingPicker({
   statusFilter = ["active"],
 }: SecretBindingPickerProps) {
   const queryClient = useQueryClient();
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const [createOpen, setCreateOpen] = useState(false);
   const [createName, setCreateName] = useState("");
   const [createValue, setCreateValue] = useState("");

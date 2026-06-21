@@ -2,7 +2,7 @@ import { startTransition, useDeferredValue, useEffect, useMemo, useState, useCal
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { accessApi } from "../api/access";
 import { useDialogActions } from "../context/DialogContext";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { Link } from "@/lib/router";
 import { executionWorkspacesApi } from "../api/execution-workspaces";
 import { issuesApi } from "../api/issues";
@@ -14,7 +14,7 @@ import {
   shouldBlurPageSearchOnEscape,
 } from "../lib/keyboardShortcuts";
 import { formatAssigneeUserLabel } from "../lib/assignees";
-import { buildCompanyUserLabelMap, buildCompanyUserProfileMap } from "../lib/company-members";
+import { buildCompanyUserLabelMap, buildCompanyUserProfileMap } from "../lib/node-org-members";
 import { createIssueDetailPath, withIssueDetailHeaderSeed } from "../lib/issueDetailBreadcrumb";
 import {
   buildSubIssueProgressSummary,
@@ -106,12 +106,12 @@ const issueStatusLabels: Record<IssueStatus, string> = {
 };
 const progressSegmentClasses: Record<IssueStatus, string> = {
   backlog: "bg-muted-foreground/40",
-  todo: "bg-blue-500",
+  todo: "bg-primary",
   in_progress: "bg-yellow-500",
   in_review: "bg-violet-500",
   done: "bg-green-500",
   blocked: "bg-red-500",
-  cancelled: "bg-neutral-400",
+  cancelled: "bg-muted-foreground/50",
 };
 
 /* ── View state ── */
@@ -528,7 +528,7 @@ function SubIssueProgressSummaryStrip({
             {showCostSummary && (
               <>
                 <span
-                  className="text-muted-foreground tabular-nums"
+                  className="text-muted-foreground tabular-nums font-mono"
                   title={`${costSummary.runCount.toLocaleString()} run${
                     costSummary.runCount === 1 ? "" : "s"
                   } across ${costSummary.issueCount} sub-task${
@@ -537,7 +537,7 @@ function SubIssueProgressSummaryStrip({
                 >
                   {formatTokens(totalTokens)} tokens
                 </span>
-                <span className="text-muted-foreground tabular-nums">
+                <span className="text-muted-foreground tabular-nums font-mono">
                   {formatDurationMs(costSummary.runtimeMs)} runtime
                 </span>
               </>
@@ -624,7 +624,7 @@ export function IssuesList({
   onUpdateIssue,
 }: IssuesListProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { openNewIssue } = useDialogActions();
   const { data: session } = useQuery({
     queryKey: queryKeys.auth.session,
@@ -1414,7 +1414,7 @@ export function IssuesList({
                     title="Cards per column"
                   >
                     <ListCollapse className="h-3.5 w-3.5" />
-                    <span className="min-w-4 text-xs tabular-nums">{viewState.boardColumnPageSize}</span>
+                    <span className="min-w-4 text-xs tabular-nums font-mono">{viewState.boardColumnPageSize}</span>
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent align="end" className="w-40 p-0">

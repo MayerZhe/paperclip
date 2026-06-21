@@ -25,7 +25,7 @@ import { PageTabBar } from "../components/PageTabBar";
 import { ProviderQuotaCard } from "../components/ProviderQuotaCard";
 import { StatusBadge } from "../components/StatusBadge";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useDateRange, PRESET_KEYS, PRESET_LABELS } from "../hooks/useDateRange";
 import { queryKeys } from "../lib/queryKeys";
 import { billingTypeDisplayName, cn, formatCents, formatTokens, providerDisplayName } from "../lib/utils";
@@ -84,7 +84,7 @@ function MetricTile({
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</div>
-          <div className="mt-2 text-2xl font-semibold tabular-nums">{value}</div>
+          <div className="mt-2 text-2xl font-semibold tabular-nums font-mono">{value}</div>
           <div className="mt-1 text-xs leading-5 text-muted-foreground">{subtitle}</div>
         </div>
         <div className="flex h-9 w-9 shrink-0 items-center justify-center border border-border">
@@ -147,7 +147,7 @@ function FinanceSummaryCard({
 }
 
 export function Costs() {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const queryClient = useQueryClient();
 
@@ -523,13 +523,13 @@ export function Costs() {
   const budgetPolicies = budgetData?.policies ?? [];
   const activeBudgetIncidents = budgetData?.activeIncidents ?? [];
   const budgetPoliciesByScope = useMemo(() => ({
-    company: budgetPolicies.filter((policy) => policy.scopeType === "company"),
+    "node org": budgetPolicies.filter((policy) => policy.scopeType === "company"),
     agent: budgetPolicies.filter((policy) => policy.scopeType === "agent"),
     project: budgetPolicies.filter((policy) => policy.scopeType === "project"),
   }), [budgetPolicies]);
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={DollarSign} message="Select a company to view costs." />;
+    return <EmptyState icon={DollarSign} message="Select a Node Org to view costs." />;
   }
 
   const showCustomPrompt = preset === "custom" && !customReady;
@@ -665,7 +665,7 @@ export function Costs() {
                   <CardContent className="space-y-4 px-5 pb-5 pt-2">
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
-                        <div className="text-3xl font-semibold tabular-nums">
+                        <div className="text-3xl font-semibold tabular-nums font-mono">
                           {formatCents(spendData?.summary.spendCents ?? 0)}
                         </div>
                         <div className="mt-1 text-sm text-muted-foreground">
@@ -676,7 +676,7 @@ export function Costs() {
                       </div>
                       <div className="border border-border px-4 py-3 text-right">
                         <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">usage</div>
-                        <div className="mt-1 text-lg font-medium tabular-nums">
+                        <div className="mt-1 text-lg font-medium tabular-nums font-mono">
                           {formatTokens(inferenceTokenTotal)}
                         </div>
                       </div>
@@ -744,7 +744,7 @@ export function Costs() {
                                 <Identity name={row.agentName ?? row.agentId} size="sm" />
                                 {row.agentStatus === "terminated" ? <StatusBadge status="terminated" /> : null}
                               </div>
-                              <div className="text-right text-sm tabular-nums">
+                              <div className="text-right text-sm tabular-nums font-mono">
                                 <div className="font-medium">{formatCents(row.costCents)}</div>
                                 <div className="text-xs text-muted-foreground">
                                   in {formatTokens(row.inputTokens + row.cachedInputTokens)} · out {formatTokens(row.outputTokens)}
@@ -780,7 +780,7 @@ export function Costs() {
                                           {providerDisplayName(modelRow.biller)} · {billingTypeDisplayName(modelRow.billingType)}
                                         </div>
                                       </div>
-                                      <div className="text-right tabular-nums">
+                                      <div className="text-right tabular-nums font-mono">
                                         <div className="font-medium">
                                           {formatCents(modelRow.costCents)}
                                           <span className="ml-1 font-normal text-muted-foreground">({sharePct}%)</span>
@@ -817,7 +817,7 @@ export function Costs() {
                             className="flex items-center justify-between gap-3 border border-border px-3 py-2 text-sm"
                           >
                             <span className="truncate">{row.projectName ?? row.projectId ?? "Unattributed"}</span>
-                            <span className="font-medium tabular-nums">{formatCents(row.costCents)}</span>
+                            <span className="font-medium tabular-nums font-mono">{formatCents(row.costCents)}</span>
                           </div>
                         ))
                       )}
@@ -901,7 +901,7 @@ export function Costs() {
               ) : null}
 
               <div className="space-y-5">
-                {(["company", "agent", "project"] as const).map((scopeType) => {
+                {(["node org", "agent", "project"] as const).map((scopeType) => {
                   const rows = budgetPoliciesByScope[scopeType];
                   if (rows.length === 0) return null;
                   return (
@@ -909,8 +909,8 @@ export function Costs() {
                       <div>
                         <h2 className="text-lg font-semibold capitalize">{scopeType} budgets</h2>
                         <p className="text-sm text-muted-foreground">
-                          {scopeType === "company"
-                            ? "Company-wide monthly policy."
+                          {scopeType === "node org"
+                            ? "Node Org-wide monthly policy."
                             : scopeType === "agent"
                               ? "Recurring monthly spend policies for individual agents."
                               : "Lifetime spend policies for execution-bound projects."}
@@ -939,7 +939,7 @@ export function Costs() {
                 {budgetPolicies.length === 0 ? (
                   <Card>
                     <CardContent className="px-5 py-8 text-sm text-muted-foreground">
-                      No budget policies yet. Set agent and project budgets from their detail pages, or use the existing company monthly budget control.
+                      No budget policies yet. Set agent and project budgets from their detail pages, or use the existing node org monthly budget control.
                     </CardContent>
                   </Card>
                 ) : null}

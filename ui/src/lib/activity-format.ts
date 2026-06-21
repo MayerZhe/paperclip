@@ -1,5 +1,5 @@
 import type { Agent } from "@paperclipai/shared";
-import type { CompanyUserProfile } from "./company-members";
+import type { CompanyUserProfile } from "./node-org-members";
 
 type ActivityDetails = Record<string, unknown> | null | undefined;
 

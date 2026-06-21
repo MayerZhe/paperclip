@@ -22,7 +22,7 @@ import { AGENT_ADAPTER_TYPES } from "@paperclipai/shared";
 import { teamCatalogApi } from "../api/teamCatalog";
 import { agentsApi } from "../api/agents";
 import { getAdapterLabel } from "../adapters/adapter-display-registry";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { useToastActions } from "../context/ToastContext";
 import { queryKeys } from "../lib/queryKeys";
@@ -518,7 +518,7 @@ function MetricTile({
   return (
     <div className="rounded-md border border-border bg-card px-3 py-2.5">
       <div className="flex items-center justify-between">
-        <span className="text-xl font-semibold tabular-nums">{value}</span>
+        <span className="text-xl font-semibold tabular-nums font-mono">{value}</span>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </div>
       <span className="text-xs text-muted-foreground">{label}</span>
@@ -845,8 +845,8 @@ const STEP_LABELS: Record<WizardStep, string> = {
   preview: "Preview",
 };
 
-// `simplified` is the onboarding seam (design §6): the newly created company is
-// treated as a full-company-equivalent target, so the target-manager step is
+// `simplified` is the onboarding seam (design §6): the newly created node org is
+// treated as a full-node org-equivalent target, so the target-manager step is
 // dropped and source policy is never surfaced (onboarding only offers
 // markdown_only/assets teams). The skill plan collapses to a count and the
 // preview is minimal, but the skill step still renders when required skills
@@ -906,8 +906,8 @@ export interface UseInstallTeamCatalogEntryOptions {
   team: CatalogTeam;
   /**
    * Run the simplified onboarding flow: no target-manager step, source policy
-   * never surfaced, collapsed preview. The company is treated as a
-   * full-company-equivalent target (`targetManagerAgentId: null`).
+   * never surfaced, collapsed preview. The node org is treated as a
+   * full-node org-equivalent target (`targetManagerAgentId: null`).
    */
   simplified?: boolean;
   onInstalled?: (result: CatalogTeamInstallResult) => void;
@@ -1298,7 +1298,7 @@ function TeamInstallerDialog({
                 <p className="font-medium">Install failed</p>
                 <p className="mt-0.5 text-xs">{applyError}</p>
                 <p className="mt-1 text-xs opacity-80">
-                  Partial state is not rolled back. Review the company activity log before retrying.
+                  Partial state is not rolled back. Review the node org activity log before retrying.
                 </p>
               </div>
             </div>
@@ -1403,10 +1403,10 @@ export function StepTargetManager({
   return (
     <div className="space-y-4">
       <div
-        className="rounded-md border border-blue-500/30 bg-blue-500/10 px-3 py-2.5 text-sm text-blue-700 dark:text-blue-300"
+        className="rounded-none border border-primary/30 bg-primary/10 px-3 py-2.5 text-sm text-primary dark:text-primary/80"
         id="target-manager-help"
       >
-        This team&apos;s root agents need a manager in your company. Pick the agent who will become
+        This team&apos;s root agents need a manager in your node org. Pick the agent who will become
         their parent. Internal team hierarchy is preserved.
       </div>
 
@@ -1460,7 +1460,7 @@ export function StepTargetManager({
             checked={fullCompany}
             onChange={(e) => onToggleFullCompany(e.target.checked)}
           />
-          Use this team as a full-company package (no target manager)
+          Use this team as a full-node org package (no target manager)
         </label>
       )}
     </div>
@@ -1580,7 +1580,7 @@ const SKILL_ACTION_META: Record<
   { label: string; tone: string }
 > = {
   already_in_package: { label: "Bundled in package", tone: "text-emerald-600 dark:text-emerald-300 border-emerald-500/30" },
-  catalog_install_required: { label: "Will install from catalog", tone: "text-blue-600 dark:text-blue-300 border-blue-500/30" },
+  catalog_install_required: { label: "Will install from catalog", tone: "text-primary dark:text-primary/80 border-primary/30" },
   external_import_required: { label: "Will import from source", tone: "text-amber-600 dark:text-amber-300 border-amber-500/30" },
   blocked: { label: "Blocked", tone: "text-rose-600 dark:text-rose-300 border-rose-500/30" },
 };
@@ -1597,7 +1597,7 @@ export function StepSkillPlan({
   // per-skill plan override, design §7 graceful degradation).
   return (
     <div className="space-y-4">
-      <div role="alert" className="rounded-md border border-blue-500/30 bg-blue-500/10 px-3 py-2.5 text-sm text-blue-700 dark:text-blue-300">
+      <div role="alert" className="rounded-none border border-primary/30 bg-primary/10 px-3 py-2.5 text-sm text-primary dark:text-primary/80">
         Before agents are imported, the catalog resolves the skills they depend on. This is the
         resolution plan.
       </div>
@@ -1932,7 +1932,7 @@ export function StepPreview({
 function SummaryCount({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-md border border-border px-3 py-2">
-      <span className="text-lg font-semibold tabular-nums">{value}</span>
+      <span className="text-lg font-semibold tabular-nums font-mono">{value}</span>
       <p className="text-xs text-muted-foreground">{label}</p>
     </div>
   );
@@ -1997,7 +1997,7 @@ export function ApplySuccess({
         <p className="text-base font-semibold">Team installed</p>
       </div>
       <p className="text-sm text-muted-foreground">
-        {team.name} was imported into your company. Imported entities are stamped with catalog provenance.
+        {team.name} was imported into your node org. Imported entities are stamped with catalog provenance.
       </p>
       {result && (
         <ul className="divide-y divide-border/60 rounded-md border border-border px-3">
@@ -2170,7 +2170,7 @@ export function TeamCatalog() {
   const { "*": routePath } = useParams<{ "*": string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const { pushToast } = useToastActions();
   const queryClient = useQueryClient();
@@ -2297,7 +2297,7 @@ export function TeamCatalog() {
   if (!selectedCompanyId) {
     return (
       <div className="p-8">
-        <EmptyState icon={Users2} message="Select a company to browse the team catalog." />
+        <EmptyState icon={Users2} message="Select a Node Org to browse the team catalog." />
       </div>
     );
   }

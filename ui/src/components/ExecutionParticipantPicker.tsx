@@ -3,7 +3,7 @@ import type { Agent, Issue } from "@paperclipai/shared";
 import { useQuery } from "@tanstack/react-query";
 import { accessApi } from "../api/access";
 import { formatAssigneeUserLabel } from "../lib/assignees";
-import { buildCompanyUserInlineOptions, buildCompanyUserLabelMap } from "../lib/company-members";
+import { buildCompanyUserInlineOptions, buildCompanyUserLabelMap } from "../lib/node-org-members";
 import { queryKeys } from "../lib/queryKeys";
 import { sortAgentsByRecency, getRecentAssigneeIds } from "../lib/recent-assignees";
 import {

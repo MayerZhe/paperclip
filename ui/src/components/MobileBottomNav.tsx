@@ -7,7 +7,7 @@ import {
   Users,
   Inbox,
 } from "lucide-react";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useDialogActions } from "../context/DialogContext";
 import { SIDEBAR_SCROLL_RESET_STATE } from "../lib/navigation-scroll";
 import { cn } from "../lib/utils";
@@ -36,7 +36,7 @@ type MobileNavItem = MobileNavLinkItem | MobileNavActionItem;
 
 export function MobileBottomNav({ visible }: MobileBottomNavProps) {
   const location = useLocation();
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { openNewIssue } = useDialogActions();
   const inboxBadge = useInboxBadge(selectedCompanyId);
 
@@ -76,7 +76,7 @@ export function MobileBottomNav({ visible }: MobileBottomNavProps) {
                 type="button"
                 onClick={item.onClick}
                 className={cn(
-                  "relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-medium transition-colors",
+                  "relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-none text-[10px] font-medium transition-colors",
                   active
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -96,7 +96,7 @@ export function MobileBottomNav({ visible }: MobileBottomNavProps) {
               state={SIDEBAR_SCROLL_RESET_STATE}
               className={({ isActive }) =>
                 cn(
-                  "relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-medium transition-colors",
+                  "relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-none text-[10px] font-medium transition-colors",
                   isActive
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground",

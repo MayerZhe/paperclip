@@ -41,7 +41,7 @@ function detailText(window: QuotaWindow): string | null {
 }
 
 function fillClass(usedPercent: number | null): string {
-  if (usedPercent == null) return "bg-zinc-700";
+  if (usedPercent == null) return "bg-muted/70";
   if (usedPercent >= 90) return "bg-red-400";
   if (usedPercent >= 70) return "bg-amber-400";
   return "bg-primary/70";
@@ -122,7 +122,7 @@ function QuotaWindowRow({ window }: { window: QuotaWindow }) {
         <div className="flex items-center justify-between gap-3">
           <div className="text-sm font-medium text-foreground">{window.label}</div>
           {window.valueLabel ? (
-            <div className="text-sm font-semibold tabular-nums text-foreground">{window.valueLabel}</div>
+            <div className="text-sm font-semibold tabular-nums font-mono text-foreground">{window.valueLabel}</div>
           ) : null}
         </div>
         {detail ? (
@@ -141,7 +141,7 @@ function QuotaWindowRow({ window }: { window: QuotaWindow }) {
             <div className="mt-1 text-xs text-muted-foreground">{detail}</div>
           ) : null}
         </div>
-        <div className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
+        <div className="shrink-0 text-sm font-semibold tabular-nums font-mono text-foreground">
           {window.usedPercent}% used
         </div>
       </div>

@@ -545,9 +545,9 @@ describe("MarkdownEditor", () => {
     expect(findMentionMatch("Ping @Super Node App", "Ping @Super Node App".length)).toEqual({
       trigger: "mention",
       marker: "@",
-      query: "Paperclip App",
+      query: "Super Node App",
       atPos: 5,
-      endPos: "Ping @Paperclip App".length,
+      endPos: "Ping @Super Node App".length,
     });
   });
 
@@ -904,3 +904,4 @@ describe("MarkdownEditor", () => {
     });
   });
 });
+

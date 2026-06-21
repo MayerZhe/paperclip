@@ -34,7 +34,7 @@ describe("SystemNotice", () => {
     const node = render(
       <SystemNotice
         tone="warning"
-        body="Paperclip needs a disposition before this issue can continue."
+        body="Super Node needs a disposition before this issue can continue."
       />,
     );
 
@@ -42,7 +42,7 @@ describe("SystemNotice", () => {
     expect(status.length).toBe(1);
     expect(status[0]?.getAttribute("aria-label")).toBe("System warning");
     expect(node.textContent).toContain(
-      "Paperclip needs a disposition before this issue can continue.",
+      "Super Node needs a disposition before this issue can continue.",
     );
   });
 
@@ -195,3 +195,4 @@ describe("SystemNotice", () => {
     expect(node.textContent).toContain("PAP-1");
   });
 });
+

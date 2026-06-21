@@ -1164,7 +1164,7 @@ function TranscriptDiffGroup({
     : "diff";
 
   return (
-    <div className="rounded-xl border border-blue-500/20 bg-blue-500/[0.04] p-2">
+    <div className="rounded-xl border border-primary/20 bg-primary/[0.04] p-2">
       <div
         role="button"
         tabIndex={0}
@@ -1173,11 +1173,11 @@ function TranscriptDiffGroup({
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen((v) => !v); } }}
       >
         <GitCompare className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
-        <span className={cn("text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-700 dark:text-blue-300")}>
+        <span className={cn("text-[11px] font-semibold uppercase tracking-[0.14em] text-primary dark:text-primary/80")}>
           {shortFile}
         </span>
         {hasChanges && (
-          <span className="text-[10px] tabular-nums">
+          <span className="text-[10px] tabular-nums font-mono">
             <span className="text-emerald-600 dark:text-emerald-400">+{addCount}</span>
             {" "}
             <span className="text-red-600 dark:text-red-400">-{removeCount}</span>
@@ -1211,7 +1211,7 @@ function TranscriptDiffGroup({
                 );
               case "file_header":
                 return (
-                  <span key={key} className="block font-semibold text-blue-600 dark:text-blue-300 mt-2 first:mt-0">
+                  <span key={key} className="block font-semibold text-primary dark:text-primary/80 mt-2 first:mt-0">
                     {hunk.text}
                     {"\n"}
                   </span>
@@ -1286,7 +1286,7 @@ function TranscriptSystemGroup({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-xl border border-blue-500/20 bg-blue-500/[0.04] p-2 text-blue-700 dark:text-blue-300">
+    <div className="rounded-xl border border-primary/20 bg-primary/[0.04] p-2 text-primary dark:text-primary/80">
       <div
         role="button"
         tabIndex={0}
@@ -1301,10 +1301,10 @@ function TranscriptSystemGroup({
         {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
       </div>
       {open && (
-        <pre className="mt-2 overflow-x-auto whitespace-pre-wrap break-words font-mono text-[11px] text-blue-700/80 dark:text-blue-300/80 pl-5">
+        <pre className="mt-2 overflow-x-auto whitespace-pre-wrap break-words font-mono text-[11px] text-primary/80 dark:text-primary/60 pl-5">
           {block.lines.map((line, i) => (
             <span key={`${line.ts}-${i}`}>
-              <span className="select-none text-blue-500/40 dark:text-blue-400/30">{i > 0 ? "\n" : ""}</span>
+              <span className="select-none text-primary/40 dark:text-primary/30">{i > 0 ? "\n" : ""}</span>
               {line.text}
             </span>
           ))}

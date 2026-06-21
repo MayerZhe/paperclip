@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { Link, useNavigate } from "@/lib/router";
 import { useQuery } from "@tanstack/react-query";
 import { agentsApi, type OrgNode } from "../api/agents";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
 import { agentUrl } from "../lib/utils";
@@ -171,7 +171,7 @@ const defaultDotColor = "#a3a3a3";
 // ── Main component ──────────────────────────────────────────────────────
 
 export function OrgChart() {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const navigate = useNavigate();
 
@@ -429,7 +429,7 @@ export function OrgChart() {
   }, [pan, zoom]);
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={Network} message="Select a company to view the org chart." />;
+    return <EmptyState icon={Network} message="Select a Node Org to view the org chart." />;
   }
 
   if (isLoading) {
@@ -446,13 +446,13 @@ export function OrgChart() {
         <Link to="/company/import">
           <Button variant="outline" size="sm">
             <Upload className="mr-1.5 h-3.5 w-3.5" />
-            Import company
+            Import node org
           </Button>
         </Link>
         <Link to="/company/export">
           <Button variant="outline" size="sm">
             <Download className="mr-1.5 h-3.5 w-3.5" />
-            Export company
+            Export node org
           </Button>
         </Link>
       </div>

@@ -5,7 +5,7 @@ import { queryKeys } from "../lib/queryKeys";
 
 export type CompanyListResult = { companies: Company[]; unauthorized: boolean };
 
-// Single source of truth for the `["companies"]` query. Both CompanyProvider and
+// Single source of truth for the `["companies"]` query. Both NodeOrgProvider and
 // the invite landing page read this cache entry, so they must agree on the shape —
 // returning a bare `Company[]` from one and this wrapped object from the other
 // silently corrupts the shared cache and crashes whichever reads the other's shape.

@@ -7,8 +7,8 @@ import { accessApi } from "../api/access";
 import { issuesApi } from "../api/issues";
 import { agentsApi } from "../api/agents";
 import { projectsApi } from "../api/projects";
-import { buildCompanyUserProfileMap } from "../lib/company-members";
-import { useCompany } from "../context/CompanyContext";
+import { buildCompanyUserProfileMap } from "../lib/node-org-members";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useDialogActions } from "../context/DialogContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
@@ -35,7 +35,7 @@ function getRecentIssues(issues: Issue[]): Issue[] {
 }
 
 export function Dashboard() {
-  const { selectedCompanyId, companies } = useCompany();
+  const { selectedCompanyId, companies } = useNodeOrg();
   const { openOnboarding } = useDialogActions();
   const { setBreadcrumbs } = useBreadcrumbs();
   const [animatedActivityIds, setAnimatedActivityIds] = useState<Set<string>>(new Set());
@@ -176,14 +176,14 @@ export function Dashboard() {
       return (
         <EmptyState
           icon={LayoutDashboard}
-          message="Welcome to Paperclip. Set up your first company and agent to get started."
+          message="Welcome to Super Node. Set up your first node org and agent to get started."
           action="Get Started"
           onAction={openOnboarding}
         />
       );
     }
     return (
-      <EmptyState icon={LayoutDashboard} message="Create or select a company to view the dashboard." />
+      <EmptyState icon={LayoutDashboard} message="Create or select a Node Org to view the dashboard." />
     );
   }
 
@@ -198,7 +198,7 @@ export function Dashboard() {
       {error && <p className="text-sm text-destructive">{error.message}</p>}
 
       {hasNoAgents && (
-        <div className="flex items-center justify-between gap-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-500/25 dark:bg-amber-950/60">
+        <div className="flex items-center justify-between gap-3 border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-500/25 dark:bg-amber-950/60">
           <div className="flex items-center gap-2.5">
             <Bot className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
             <p className="text-sm text-amber-900 dark:text-amber-100">
@@ -219,7 +219,7 @@ export function Dashboard() {
       {data && (
         <>
           {data.budgets.activeIncidents > 0 ? (
-            <div className="flex items-start justify-between gap-3 rounded-xl border border-red-500/20 bg-[linear-gradient(180deg,rgba(255,80,80,0.12),rgba(255,255,255,0.02))] px-4 py-3">
+            <div className="flex items-start justify-between gap-3 border border-red-500/20 bg-red-500/[0.06] px-4 py-3">
               <div className="flex items-start gap-2.5">
                 <PauseCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-300" />
                 <div>
@@ -310,7 +310,7 @@ export function Dashboard() {
             slotTypes={["dashboardWidget"]}
             context={{ companyId: selectedCompanyId }}
             className="grid gap-4 md:grid-cols-2"
-            itemClassName="rounded-lg border bg-card p-4 shadow-sm"
+            itemClassName="border bg-card p-4"
           />
 
           <div className="grid md:grid-cols-2 gap-4">

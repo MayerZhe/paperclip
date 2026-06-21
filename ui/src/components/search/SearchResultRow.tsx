@@ -1,5 +1,5 @@
 import { memo, type ComponentType, type SVGProps } from "react";
-import { Bot, FileText, Hexagon, MessageSquare, Paperclip, Quote } from "lucide-react";
+import { Bot, FileText, Hexagon, MessageSquare, Paperclip as PaperclipIcon, Quote } from "lucide-react";
 import type { Agent, CompanySearchResult } from "@paperclipai/shared";
 import { Link } from "@/lib/router";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,7 @@ type SnippetStyle = {
 const SNIPPET_STYLES: Record<string, SnippetStyle> = {
   comment: { Icon: MessageSquare, label: "Comment" },
   document: { Icon: FileText, label: "Doc" },
-  artifact: { Icon: Paperclip, label: "Artifact" },
+  artifact: { Icon: PaperclipIcon, label: "Artifact" },
   description: { Icon: Quote, label: "Description" },
 };
 
@@ -121,7 +121,7 @@ function SearchResultRowImpl({
         className={cn(ROW_BASE, "py-4", isActive && "bg-muted/40", className)}
         data-result-type="artifact"
       >
-        <Paperclip className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+        <PaperclipIcon className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-2.5 gap-y-1">
             <span className="truncate text-sm font-medium text-foreground">{result.title}</span>
@@ -140,11 +140,11 @@ function SearchResultRowImpl({
           ) : null}
           <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground sm:hidden">
             <span className="truncate">{artifact.issueTitle}</span>
-            {updated ? <span className="ml-auto shrink-0 tabular-nums">{updated}</span> : null}
+            {updated ? <span className="ml-auto shrink-0 tabular-nums font-mono">{updated}</span> : null}
           </div>
         </div>
         <div className="ml-2 hidden shrink-0 flex-col items-end gap-2 sm:flex">
-          {updated ? <span className="text-xs tabular-nums text-muted-foreground">{updated}</span> : null}
+          {updated ? <span className="text-xs tabular-nums font-mono text-muted-foreground">{updated}</span> : null}
           {result.previewImageUrl ? (
             <img
               src={result.previewImageUrl}
@@ -206,7 +206,7 @@ function SearchResultRowImpl({
         {hasRightRail ? (
           <div className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground sm:hidden">
             {assigneeName ? <span className="truncate">{assigneeName}</span> : null}
-            {updated ? <span className="ml-auto tabular-nums">{updated}</span> : null}
+            {updated ? <span className="ml-auto tabular-nums font-mono">{updated}</span> : null}
           </div>
         ) : null}
       </div>
@@ -215,7 +215,7 @@ function SearchResultRowImpl({
           {assigneeName || updated ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               {assigneeName ? <Identity name={assigneeName} size="sm" /> : null}
-              {updated ? <span className="tabular-nums">{updated}</span> : null}
+              {updated ? <span className="tabular-nums font-mono">{updated}</span> : null}
             </div>
           ) : null}
           {previewImageUrl ? (
@@ -265,3 +265,4 @@ function SnippetLine({ text, highlights, field, fallbackLabel, multiline = false
     </div>
   );
 }
+

@@ -19,7 +19,7 @@ import {
   type BlockedInboxGroupBy,
   type BlockedInboxSort,
 } from "../lib/blockedInbox";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { useGeneralSettings } from "../context/GeneralSettingsContext";
 import { useSidebar } from "../context/SidebarContext";
@@ -32,7 +32,7 @@ import {
 } from "../lib/issue-filters";
 import { collectLiveIssueIds } from "../lib/liveIssueIds";
 import { formatAssigneeUserLabel } from "../lib/assignees";
-import { buildCompanyUserLabelMap, buildCompanyUserProfileMap } from "../lib/company-members";
+import { buildCompanyUserLabelMap, buildCompanyUserProfileMap } from "../lib/node-org-members";
 import {
   armIssueDetailInboxQuickArchive,
   createIssueDetailLocationState,
@@ -284,13 +284,13 @@ export function FailedRunInboxRow({
                 onClick={onMarkRead}
                 className={cn(
                   "inline-flex h-4 w-4 items-center justify-center rounded-full transition-colors",
-                  "hover:bg-blue-500/20",
+                  "hover:bg-primary/20",
                 )}
                 aria-label="Mark as read"
               >
                 <span className={cn(
                   "block h-2 w-2 rounded-full transition-opacity duration-300",
-                  "bg-blue-600 dark:bg-blue-400",
+                  "bg-primary",
                   unreadState === "fading" ? "opacity-0" : "opacity-100",
                 )} />
               </button>
@@ -299,7 +299,7 @@ export function FailedRunInboxRow({
                 type="button"
                 onClick={onArchive}
                 disabled={archiveDisabled}
-                className="inline-flex h-4 w-4 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-30"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-none text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-30"
                 aria-label="Dismiss from inbox"
               >
                 <X className="h-3.5 w-3.5" />
@@ -318,7 +318,7 @@ export function FailedRunInboxRow({
         >
           {!showUnreadSlot && <span className="hidden h-2 w-2 shrink-0 sm:inline-flex" aria-hidden="true" />}
           <span className="hidden h-3.5 w-3.5 shrink-0 sm:inline-flex" aria-hidden="true" />
-          <span className="mt-0.5 shrink-0 rounded-md bg-red-500/20 p-1.5 sm:mt-0">
+          <span className="mt-0.5 shrink-0 rounded-none bg-red-500/20 p-1.5 sm:mt-0">
             <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
           </span>
           <span className="min-w-0 flex-1">
@@ -358,7 +358,7 @@ export function FailedRunInboxRow({
             <button
               type="button"
               onClick={onDismiss}
-              className="rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100"
+              className="rounded-none p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100"
               aria-label="Dismiss"
             >
               <X className="h-4 w-4" />
@@ -382,7 +382,7 @@ export function FailedRunInboxRow({
           <button
             type="button"
             onClick={onDismiss}
-            className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="rounded-none p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
             aria-label="Dismiss"
           >
             <X className="h-4 w-4" />
@@ -440,13 +440,13 @@ function ApprovalInboxRow({
                 onClick={onMarkRead}
                 className={cn(
                   "inline-flex h-4 w-4 items-center justify-center rounded-full transition-colors",
-                  "hover:bg-blue-500/20",
+                  "hover:bg-primary/20",
                 )}
                 aria-label="Mark as read"
               >
                 <span className={cn(
                   "block h-2 w-2 rounded-full transition-opacity duration-300",
-                  "bg-blue-600 dark:bg-blue-400",
+                  "bg-primary",
                   unreadState === "fading" ? "opacity-0" : "opacity-100",
                 )} />
               </button>
@@ -455,7 +455,7 @@ function ApprovalInboxRow({
                 type="button"
                 onClick={onArchive}
                 disabled={archiveDisabled}
-                className="inline-flex h-4 w-4 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-30"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-none text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-30"
                 aria-label="Dismiss from inbox"
               >
                 <X className="h-3.5 w-3.5" />
@@ -474,7 +474,7 @@ function ApprovalInboxRow({
         >
           {!showUnreadSlot && <span className="hidden h-2 w-2 shrink-0 sm:inline-flex" aria-hidden="true" />}
           <span className="hidden h-3.5 w-3.5 shrink-0 sm:inline-flex" aria-hidden="true" />
-          <span className="mt-0.5 shrink-0 rounded-md bg-muted p-1.5 sm:mt-0">
+          <span className="mt-0.5 shrink-0 rounded-none bg-muted p-1.5 sm:mt-0">
             <Icon className="h-4 w-4 text-muted-foreground" />
           </span>
           <span className="min-w-0 flex-1">
@@ -576,13 +576,13 @@ function JoinRequestInboxRow({
                 onClick={onMarkRead}
                 className={cn(
                   "inline-flex h-4 w-4 items-center justify-center rounded-full transition-colors",
-                  "hover:bg-blue-500/20",
+                  "hover:bg-primary/20",
                 )}
                 aria-label="Mark as read"
               >
                 <span className={cn(
                   "block h-2 w-2 rounded-full transition-opacity duration-300",
-                  "bg-blue-600 dark:bg-blue-400",
+                  "bg-primary",
                   unreadState === "fading" ? "opacity-0" : "opacity-100",
                 )} />
               </button>
@@ -591,7 +591,7 @@ function JoinRequestInboxRow({
                 type="button"
                 onClick={onArchive}
                 disabled={archiveDisabled}
-                className="inline-flex h-4 w-4 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-30"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-none text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100 disabled:pointer-events-none disabled:opacity-30"
                 aria-label="Dismiss from inbox"
               >
                 <X className="h-3.5 w-3.5" />
@@ -604,7 +604,7 @@ function JoinRequestInboxRow({
         <div className="flex min-w-0 flex-1 items-start gap-2">
           {!showUnreadSlot && <span className="hidden h-2 w-2 shrink-0 sm:inline-flex" aria-hidden="true" />}
           <span className="hidden h-3.5 w-3.5 shrink-0 sm:inline-flex" aria-hidden="true" />
-          <span className="mt-0.5 shrink-0 rounded-md bg-muted p-1.5 sm:mt-0">
+          <span className="mt-0.5 shrink-0 rounded-none bg-muted p-1.5 sm:mt-0">
             <UserPlus className="h-4 w-4 text-muted-foreground" />
           </span>
           <span className="min-w-0 flex-1">
@@ -661,7 +661,7 @@ function JoinRequestInboxRow({
 }
 
 export function Inbox() {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const { openNewIssue } = useDialogActions();
   const { isMobile } = useSidebar();
@@ -1866,7 +1866,7 @@ export function Inbox() {
   }, [selectedIndex]);
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={InboxIcon} message="Select a company to view inbox." />;
+    return <EmptyState icon={InboxIcon} message="Select a Node Org to view inbox." />;
   }
 
   const hasRunFailures = failedRuns.length > 0;
@@ -2281,7 +2281,7 @@ export function Inbox() {
         <>
           {showSeparatorBefore("work_items") && <Separator />}
           <div>
-            <div ref={listRef} className="overflow-hidden rounded-xl">
+            <div ref={listRef} className="overflow-hidden rounded-none">
               {(() => {
                 const renderInboxIssue = ({
                   issue,
@@ -2494,8 +2494,8 @@ export function Inbox() {
                     if (showTodayDivider) {
                       elements.push(
                         <div key={`today-divider-${group.key}-${index}`} className="my-2 flex items-center gap-3 px-4">
-                          <div className="flex-1 border-t border-zinc-600" />
-                          <span className="shrink-0 text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+                          <div className="flex-1 border-t border-border" />
+                          <span className="shrink-0 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                             Earlier
                           </span>
                         </div>,
@@ -2729,7 +2729,7 @@ export function Inbox() {
                   <button
                     type="button"
                     onClick={() => dismissAlert("alert:agent-errors")}
-                    className="rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover/alert:opacity-100"
+                    className="rounded-none p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover/alert:opacity-100"
                     aria-label="Dismiss"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -2752,7 +2752,7 @@ export function Inbox() {
                   <button
                     type="button"
                     onClick={() => dismissAlert("alert:budget")}
-                    className="rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover/alert:opacity-100"
+                    className="rounded-none p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover/alert:opacity-100"
                     aria-label="Dismiss"
                   >
                     <X className="h-3.5 w-3.5" />

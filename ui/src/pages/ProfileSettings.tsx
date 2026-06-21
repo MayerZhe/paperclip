@@ -5,7 +5,7 @@ import type { AuthSession, CurrentUserProfile, UpdateCurrentUserProfile } from "
 import { authApi } from "@/api/auth";
 import { assetsApi } from "@/api/assets";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { queryKeys } from "../lib/queryKeys";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ function deriveInitials(name: string) {
 
 export function ProfileSettings() {
   const { setBreadcrumbs } = useBreadcrumbs();
-  const { selectedCompanyId, selectedCompany } = useCompany();
+  const { selectedCompanyId, selectedCompany } = useNodeOrg();
   const queryClient = useQueryClient();
   const avatarInputId = useId();
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
@@ -85,7 +85,7 @@ export function ProfileSettings() {
   const uploadAvatarMutation = useMutation({
     mutationFn: async (file: File) => {
       if (!selectedCompanyId) {
-        throw new Error("Select a company before uploading a profile avatar.");
+        throw new Error("Select a node org before uploading a profile avatar.");
       }
 
       const asset = await assetsApi.uploadImage(
@@ -134,8 +134,8 @@ export function ProfileSettings() {
   const initials = deriveInitials(currentName);
   const isSavingProfile = updateMutation.isPending || uploadAvatarMutation.isPending || removeAvatarMutation.isPending;
   const uploadHint = selectedCompany
-    ? `Stored in Paperclip file storage for ${selectedCompany.name}.`
-    : "Select a company to upload an avatar into Paperclip storage.";
+    ? `Stored in Super Node file storage for ${selectedCompany.name}.`
+    : "Select a node org to upload an avatar into Super Node storage.";
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -271,3 +271,4 @@ export function ProfileSettings() {
     </div>
   );
 }
+

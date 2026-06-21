@@ -228,7 +228,7 @@ describe("CloudUpstream", () => {
       updatedAt: "2026-05-18T18:00:00.000Z",
       lastRunId: null,
     });
-    window.localStorage.setItem("paperclip-cloud-upstream-pending-connection", "pending-1");
+    window.localStorage.setItem("super-node-cloud-upstream-pending-connection", "pending-1");
     const replaceStateSpy = vi.spyOn(window.history, "replaceState");
 
     try {
@@ -257,7 +257,7 @@ describe("CloudUpstream", () => {
       });
     } finally {
       replaceStateSpy.mockRestore();
-      window.localStorage.removeItem("paperclip-cloud-upstream-pending-connection");
+      window.localStorage.removeItem("super-node-cloud-upstream-pending-connection");
     }
   });
 
@@ -266,7 +266,7 @@ describe("CloudUpstream", () => {
     mockLocationState.search = "?code=cb-code&state=cb-state";
     mockCloudUpstreamsApi.list.mockResolvedValue({ connections: [], runs: [] });
     mockCloudUpstreamsApi.finishConnect.mockRejectedValue(new Error("state expired"));
-    window.localStorage.setItem("paperclip-cloud-upstream-pending-connection", "pending-1");
+    window.localStorage.setItem("super-node-cloud-upstream-pending-connection", "pending-1");
 
     try {
       const root = createRoot(container);
@@ -290,7 +290,7 @@ describe("CloudUpstream", () => {
         root.unmount();
       });
     } finally {
-      window.localStorage.removeItem("paperclip-cloud-upstream-pending-connection");
+      window.localStorage.removeItem("super-node-cloud-upstream-pending-connection");
     }
   });
 

@@ -111,7 +111,7 @@ describe("MarkdownBody", () => {
       <QueryClientProvider client={new QueryClient()}>
         <ThemeProvider>
           <MarkdownBody>
-            {`[@Taylor](${buildUserMentionHref("user-123")}) [@CodexCoder](${buildAgentMentionHref("agent-123", "code")}) [@Paperclip App](${buildProjectMentionHref("project-456", "#336699")}) [/release-changelog](${buildSkillMentionHref("skill-789", "release-changelog")}) [/routine:Weekly review](${buildRoutineMentionHref("routine-123")})`}
+            {`[@Taylor](${buildUserMentionHref("user-123")}) [@CodexCoder](${buildAgentMentionHref("agent-123", "code")}) [@Super Node App](${buildProjectMentionHref("project-456", "#336699")}) [/release-changelog](${buildSkillMentionHref("skill-789", "release-changelog")}) [/routine:Weekly review](${buildRoutineMentionHref("routine-123")})`}
           </MarkdownBody>
         </ThemeProvider>
       </QueryClientProvider>,
@@ -121,10 +121,10 @@ describe("MarkdownBody", () => {
     expect(html).toContain('data-mention-kind="user"');
     expect(html).toContain('href="/agents/agent-123"');
     expect(html).toContain('data-mention-kind="agent"');
-    expect(html).toContain("--paperclip-mention-icon-mask");
+    expect(html).toContain("--super-node-mention-icon-mask");
     expect(html).toContain('href="/projects/project-456"');
     expect(html).toContain('data-mention-kind="project"');
-    expect(html).toContain("--paperclip-mention-project-color:#336699");
+    expect(html).toContain("--super-node-mention-project-color:#336699");
     expect(html).toContain('href="/skills/skill-789"');
     expect(html).toContain('data-mention-kind="skill"');
     expect(html).toContain('href="/routines/routine-123"');
@@ -193,7 +193,7 @@ describe("MarkdownBody", () => {
     expect(html).toContain(">PAP-1271<");
     expect(html).toContain('data-mention-kind="issue"');
     expect(html).toContain("paperclip-markdown-issue-ref");
-    expect(html).not.toContain("paperclip-mention-chip--issue");
+    expect(html).not.toContain("super-node-mention-chip--issue");
   });
 
   it("uses concise issue aria labels until a distinct title is available", () => {
@@ -308,7 +308,7 @@ describe("MarkdownBody", () => {
 
   it("renders wiki links with a custom resolver when enabled", () => {
     const html = renderMarkdown(
-      "See [[wiki/entities/paperclip|Paperclip]] and [[wiki/entities/dotta-b]].",
+      "See [[wiki/entities/paperclip|Super Node]] and [[wiki/entities/dotta-b]].",
       [],
       {
         enableWikiLinks: true,
@@ -319,7 +319,7 @@ describe("MarkdownBody", () => {
     expect(html).toContain('href="/wiki/page/wiki/entities/paperclip.md"');
     expect(html).toContain('data-paperclip-wiki-link="true"');
     expect(html).toContain('data-paperclip-wiki-target="wiki/entities/paperclip"');
-    expect(html).toContain(">Paperclip</a>");
+    expect(html).toContain(">Super Node</a>");
     expect(html).toContain('href="/wiki/page/wiki/entities/dotta-b.md"');
     expect(html).toContain(">wiki/entities/dotta-b</a>");
     expect(html).not.toContain("[[wiki/entities/paperclip");
@@ -497,7 +497,7 @@ describe("MarkdownBody", () => {
     expect(html).toContain('href="/issues/PAP-77"');
     expect(html).toContain('data-mention-kind="issue"');
     expect(html).toContain("paperclip-markdown-issue-ref");
-    expect(html).not.toContain("paperclip-mention-chip--issue");
+    expect(html).not.toContain("super-node-mention-chip--issue");
   });
 
   it("gates bare-identifier auto-linking to known company prefixes", () => {
@@ -534,3 +534,4 @@ describe("MarkdownBody", () => {
     expect(html).toContain('href="/issues/ACME-1"');
   });
 });
+

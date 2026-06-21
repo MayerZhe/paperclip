@@ -112,7 +112,7 @@ function KanbanColumn({
         <span className="mt-2 [writing-mode:vertical-rl] rotate-180 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
           {statusLabel(status)}
         </span>
-        <span className="mt-auto rounded-full bg-background px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-muted-foreground">
+        <span className="mt-auto rounded-full bg-background px-1.5 py-0.5 text-[10px] font-medium tabular-nums font-mono text-muted-foreground">
           {issues.length}
         </span>
       </div>
@@ -128,7 +128,7 @@ function KanbanColumn({
             <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {statusLabel(status)}
             </span>
-            <span className="text-xs text-muted-foreground/60 ml-auto tabular-nums">
+            <span className="text-xs text-muted-foreground/60 ml-auto tabular-nums font-mono">
               {issues.length}
             </span>
           </>
@@ -244,10 +244,10 @@ function KanbanCard({
             </span>
           ) : null}
           {isLive && (
-            <span className="inline-flex shrink-0 items-center gap-1 text-[10px] font-medium text-blue-600 dark:text-blue-400">
+            <span className="inline-flex shrink-0 items-center gap-1 text-[10px] font-medium text-primary dark:text-primary/80">
               <span className="relative flex h-2 w-2">
-                <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-primary/60 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
               {compact ? "Live" : null}
             </span>

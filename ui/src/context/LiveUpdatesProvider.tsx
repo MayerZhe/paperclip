@@ -6,13 +6,13 @@ import type { ActiveRunForIssue, LiveRunForIssue } from "../api/heartbeats";
 import type { CompanyUserDirectoryResponse } from "../api/access";
 import { issuesApi } from "../api/issues";
 import { authApi } from "../api/auth";
-import { useCompany } from "./CompanyContext";
+import { useNodeOrg } from "./NodeOrgContext";
 import type { ToastInput } from "./ToastContext";
 import { useToastActions } from "./ToastContext";
 import { upsertIssueCommentInPages } from "../lib/optimistic-issue-comments";
 import { clearIssueExecutionRun, removeLiveRunById } from "../lib/optimistic-issue-runs";
 import { queryKeys } from "../lib/queryKeys";
-import { toCompanyRelativePath } from "../lib/company-routes";
+import { toCompanyRelativePath } from "../lib/node-org-routes";
 import { useLocation } from "../lib/router";
 import { buildSameOriginWebSocketUrl } from "../lib/websocket-url";
 
@@ -929,7 +929,7 @@ export const __liveUpdatesTestUtils = {
 };
 
 export function LiveUpdatesProvider({ children }: { children: ReactNode }) {
-  const { selectedCompanyId, selectedCompany } = useCompany();
+  const { selectedCompanyId, selectedCompany } = useNodeOrg();
   const queryClient = useQueryClient();
   const { pushToast } = useToastActions();
   const location = useLocation();

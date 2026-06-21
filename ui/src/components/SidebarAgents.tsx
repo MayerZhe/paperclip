@@ -12,7 +12,7 @@ import {
   Users,
   AlertTriangle,
 } from "lucide-react";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useDialogActions } from "../context/DialogContext";
 import { useSidebar } from "../context/SidebarContext";
 import { useToastActions } from "../context/ToastContext";
@@ -153,12 +153,12 @@ function SidebarAgentItem({
             ) : null}
             {runCount > 0 ? (
               <span className="relative flex h-2 w-2">
-                <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-primary/60 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
             ) : null}
             {runCount > 0 ? (
-              <span className="text-[11px] font-medium text-blue-600 dark:text-blue-400">
+              <span className="text-[11px] font-medium text-primary dark:text-primary/80">
                 {runCount} live
               </span>
             ) : null}
@@ -227,7 +227,7 @@ export function SidebarAgents({ streamlined = false }: { streamlined?: boolean }
   const [open, setOpen] = useState(true);
   const [pendingAgentIds, setPendingAgentIds] = useState<Set<string>>(() => new Set());
   const queryClient = useQueryClient();
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { openNewAgent } = useDialogActions();
   const { isMobile, setSidebarOpen } = useSidebar();
   const { pushToast } = useToastActions();

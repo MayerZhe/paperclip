@@ -72,7 +72,7 @@ describe("DevRestartBanner", () => {
       button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(window.confirm).toHaveBeenCalledWith("Restart Paperclip now? This may interrupt 1 live run.");
+    expect(window.confirm).toHaveBeenCalledWith("Restart Super Node now? This may interrupt 1 live run.");
     expect(mockHealthApi.requestDevServerRestart).toHaveBeenCalledTimes(1);
     expect(node.textContent).toContain("Restart requested");
   });
@@ -111,3 +111,4 @@ describe("DevRestartBanner", () => {
     expect(node.textContent).toContain("Restart now");
   });
 });
+

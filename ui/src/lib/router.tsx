@@ -2,13 +2,13 @@ import * as React from "react";
 import * as RouterDom from "react-router-dom";
 import type { NavigateOptions, To } from "react-router-dom";
 import type { Issue } from "@paperclipai/shared";
-import { useCompany } from "@/context/CompanyContext";
+import { useNodeOrg } from "@/context/NodeOrgContext";
 import { IssueLinkQuicklook } from "@/components/IssueLinkQuicklook";
 import {
   applyCompanyPrefix,
   extractCompanyPrefixFromPath,
   normalizeCompanyPrefix,
-} from "@/lib/company-routes";
+} from "@/lib/node-org-routes";
 import { parseIssuePathIdFromPath } from "@/lib/issue-reference";
 
 function resolveTo(to: To, companyPrefix: string | null): To {
@@ -27,7 +27,7 @@ function resolveTo(to: To, companyPrefix: string | null): To {
 }
 
 function useActiveCompanyPrefix(): string | null {
-  const { selectedCompany } = useCompany();
+  const { selectedCompany } = useNodeOrg();
   const params = RouterDom.useParams<{ companyPrefix?: string }>();
   const location = RouterDom.useLocation();
 

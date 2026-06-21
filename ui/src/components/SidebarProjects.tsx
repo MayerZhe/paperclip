@@ -12,7 +12,7 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useDialogActions } from "../context/DialogContext";
 import { useSidebar } from "../context/SidebarContext";
 import { authApi } from "../api/auth";
@@ -227,7 +227,7 @@ function SortableProjectItem(props: ProjectItemProps) {
 
 export function SidebarProjects() {
   const [open, setOpen] = useState(true);
-  const { selectedCompany, selectedCompanyId } = useCompany();
+  const { selectedCompany, selectedCompanyId } = useNodeOrg();
   const { openNewProject } = useDialogActions();
   const { isMobile, setSidebarOpen } = useSidebar();
   const fineReorderPointer = useFineReorderPointer();

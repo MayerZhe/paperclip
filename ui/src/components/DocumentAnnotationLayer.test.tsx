@@ -87,7 +87,7 @@ describe("DocumentAnnotationLayer", () => {
       await new Promise((resolve) => window.requestAnimationFrame(resolve));
     });
 
-    const highlights = Array.from(container.querySelectorAll(".paperclip-doc-annotation-highlight"));
+    const highlights = Array.from(container.querySelectorAll(".super-node-doc-annotation-highlight"));
     expect(highlights).toHaveLength(4);
 
     for (const highlight of highlights) {
@@ -133,8 +133,8 @@ describe("DocumentAnnotationLayer", () => {
       await new Promise((resolve) => window.requestAnimationFrame(resolve));
     });
 
-    expect(container.querySelector(".paperclip-doc-annotation-highlight")).toBeNull();
-    expect(container.querySelector(".paperclip-doc-annotation-hit-target")).toBeNull();
+    expect(container.querySelector(".super-node-doc-annotation-highlight")).toBeNull();
+    expect(container.querySelector(".super-node-doc-annotation-hit-target")).toBeNull();
   });
 
   it("uses native CSS highlights for visual paint when the browser supports them", async () => {
@@ -180,15 +180,15 @@ describe("DocumentAnnotationLayer", () => {
       await new Promise((resolve) => window.requestAnimationFrame(resolve));
     });
 
-    expect(container.querySelector(".paperclip-doc-annotation-highlight")).toBeNull();
-    expect(container.querySelector(".paperclip-doc-annotation-hit-target")).not.toBeNull();
-    const openHighlightCall = setHighlight.mock.calls.find(([name]) => name === "paperclip-doc-annotation-open");
+    expect(container.querySelector(".super-node-doc-annotation-highlight")).toBeNull();
+    expect(container.querySelector(".super-node-doc-annotation-hit-target")).not.toBeNull();
+    const openHighlightCall = setHighlight.mock.calls.find(([name]) => name === "super-node-doc-annotation-open");
     expect(openHighlightCall).toBeTruthy();
     expect((openHighlightCall?.[1] as MockHighlight).ranges).toHaveLength(1);
 
     act(async () => root?.unmount());
     root = null;
-    expect(deleteHighlight).toHaveBeenCalledWith("paperclip-doc-annotation-open");
+    expect(deleteHighlight).toHaveBeenCalledWith("super-node-doc-annotation-open");
 
     (globalThis as { CSS?: unknown }).CSS = originalCss;
     (globalThis as { Highlight?: unknown }).Highlight = originalHighlight;

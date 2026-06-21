@@ -5,7 +5,7 @@ import { issuesApi } from "../api/issues";
 import { agentsApi } from "../api/agents";
 import { projectsApi } from "../api/projects";
 import { heartbeatsApi } from "../api/heartbeats";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { collectLiveIssueIds } from "../lib/liveIssueIds";
 import { queryKeys } from "../lib/queryKeys";
@@ -56,7 +56,7 @@ export function buildIssuesSearchUrl(currentHref: string, search: string): strin
 }
 
 export function Issues() {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -175,7 +175,7 @@ export function Issues() {
   });
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={CircleDot} message="Select a company to view tasks." />;
+    return <EmptyState icon={CircleDot} message="Select a Node Org to view tasks." />;
   }
 
   return (
@@ -187,7 +187,7 @@ export function Issues() {
       agents={agents}
       projects={projects}
       liveIssueIds={liveIssueIds}
-      viewStateKey="paperclip:issues-view"
+      viewStateKey="super-node:issues-view"
       issueLinkState={issueLinkState}
       initialAssignees={searchParams.get("assignee") ? [searchParams.get("assignee")!] : undefined}
       initialWorkspaces={initialWorkspaces.length > 0 ? initialWorkspaces : undefined}

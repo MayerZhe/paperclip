@@ -4,7 +4,7 @@ const CHARS = [" ", ".", "·", "▪", "▫", "○"] as const;
 const TARGET_FPS = 24;
 const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
 
-const PAPERCLIP_SPRITES = [
+const SUPER_NODE_SPRITES = [
   [
     "  ╭────╮ ",
     " ╭╯╭──╮│ ",
@@ -27,7 +27,7 @@ const PAPERCLIP_SPRITES = [
   ],
 ] as const;
 
-type PaperclipSprite = (typeof PAPERCLIP_SPRITES)[number];
+type SuperNodeSprite = (typeof SUPER_NODE_SPRITES)[number];
 
 interface Clip {
   x: number;
@@ -37,7 +37,7 @@ interface Clip {
   life: number;
   maxLife: number;
   drift: number;
-  sprite: PaperclipSprite;
+  sprite: SuperNodeSprite;
   width: number;
   height: number;
 }
@@ -46,14 +46,14 @@ function measureChar(container: HTMLElement): { w: number; h: number } {
   const span = document.createElement("span");
   span.textContent = "M";
   span.style.cssText =
-    "position:absolute;visibility:hidden;white-space:pre;font-size:11px;font-family:monospace;line-height:1;";
+    "position:absolute;visibility:hidden;white-space:pre;font-size:11px;font-family:var(--font-mono);line-height:1;";
   container.appendChild(span);
   const rect = span.getBoundingClientRect();
   container.removeChild(span);
   return { w: rect.width, h: rect.height };
 }
 
-function spriteSize(sprite: PaperclipSprite): { width: number; height: number } {
+function spriteSize(sprite: SuperNodeSprite): { width: number; height: number } {
   let width = 0;
   for (const row of sprite) width = Math.max(width, row.length);
   return { width, height: sprite.length };
@@ -130,7 +130,7 @@ export function AsciiArtAnimation() {
       for (let baseRow = 1; baseRow < rows - 9; baseRow += gapY) {
         const startX = Math.floor(baseRow / gapY) % 2 === 0 ? 2 : 10;
         for (let baseCol = startX; baseCol < cols - 10; baseCol += gapX) {
-          const sprite = PAPERCLIP_SPRITES[(baseCol + baseRow) % PAPERCLIP_SPRITES.length]!;
+          const sprite = SUPER_NODE_SPRITES[(baseCol + baseRow) % SUPER_NODE_SPRITES.length]!;
           for (let sr = 0; sr < sprite.length; sr++) {
             const line = sprite[sr]!;
             for (let sc = 0; sc < line.length; sc++) {
@@ -151,7 +151,7 @@ export function AsciiArtAnimation() {
     }
 
     function spawnClip() {
-      const sprite = PAPERCLIP_SPRITES[Math.floor(Math.random() * PAPERCLIP_SPRITES.length)]!;
+      const sprite = SUPER_NODE_SPRITES[Math.floor(Math.random() * SUPER_NODE_SPRITES.length)]!;
       const size = spriteSize(sprite);
       const edge = Math.random();
       let x = 0;
@@ -340,9 +340,9 @@ export function AsciiArtAnimation() {
   return (
     <pre
       ref={preRef}
-      className="w-full h-full m-0 p-0 overflow-hidden text-muted-foreground/60 select-none leading-none"
-      style={{ fontSize: "11px", fontFamily: "monospace" }}
+      className="w-full h-full m-0 p-0 overflow-hidden text-muted-foreground/60 select-none leading-none font-mono text-[11px]"
       aria-hidden="true"
     />
   );
 }
+

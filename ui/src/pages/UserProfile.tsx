@@ -9,7 +9,7 @@ import { EmptyState } from "../components/EmptyState";
 import { PageSkeleton } from "../components/PageSkeleton";
 import { StatusBadge } from "../components/StatusBadge";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { queryKeys } from "../lib/queryKeys";
 import {
   formatCents,
@@ -43,7 +43,7 @@ function completionRate(stats: UserProfileWindowStats) {
 function HeroStat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="min-w-0">
-      <div className="text-2xl font-semibold tabular-nums sm:text-3xl">{value}</div>
+      <div className="text-2xl font-semibold tabular-nums font-mono sm:text-3xl">{value}</div>
       <div className="mt-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
       {hint ? <div className="mt-0.5 text-xs text-muted-foreground/70">{hint}</div> : null}
     </div>
@@ -56,7 +56,7 @@ function WindowColumn({ stats }: { stats: UserProfileWindowStats }) {
     <div className="flex min-w-0 flex-col gap-4 border-l border-border pl-5 first:border-l-0 first:pl-0">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{stats.label}</h2>
-        <span className="text-[11px] text-muted-foreground tabular-nums">{completionRate(stats)} done</span>
+        <span className="text-[11px] text-muted-foreground tabular-nums font-mono">{completionRate(stats)} done</span>
       </div>
 
       <div className="grid grid-cols-2 gap-x-5 gap-y-3">
@@ -66,7 +66,7 @@ function WindowColumn({ stats }: { stats: UserProfileWindowStats }) {
         <Metric value={formatNumber(stats.activityCount)} label="Actions" />
       </div>
 
-      <div className="grid grid-cols-2 gap-x-5 gap-y-1.5 pt-3 text-xs tabular-nums text-muted-foreground">
+      <div className="grid grid-cols-2 gap-x-5 gap-y-1.5 pt-3 text-xs tabular-nums font-mono text-muted-foreground">
         <span>Tokens</span>
         <span className="text-right text-foreground">{formatTokens(tokens)}</span>
         <span>Spend</span>
@@ -83,7 +83,7 @@ function WindowColumn({ stats }: { stats: UserProfileWindowStats }) {
 function Metric({ value, label }: { value: string; label: string }) {
   return (
     <div className="min-w-0">
-      <div className="truncate text-xl font-semibold tabular-nums">{value}</div>
+      <div className="truncate text-xl font-semibold tabular-nums font-mono">{value}</div>
       <div className="mt-0.5 text-[11px] text-muted-foreground">{label}</div>
     </div>
   );
@@ -100,7 +100,7 @@ function UsageChart({ points }: { points: UserProfileDailyPoint[] }) {
       <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-border pb-3">
         <h2 className="text-sm font-semibold">Last 14 days</h2>
         <div className="flex items-baseline gap-4 text-xs text-muted-foreground">
-          <span className="tabular-nums text-foreground">{formatTokens(totalTokensSum)}</span>
+          <span className="tabular-nums font-mono text-foreground">{formatTokens(totalTokensSum)}</span>
           <span>tokens total</span>
         </div>
       </div>
@@ -128,7 +128,7 @@ function UsageChart({ points }: { points: UserProfileDailyPoint[] }) {
           );
         })}
       </div>
-      <div className="mt-2 grid grid-cols-[repeat(14,minmax(0,1fr))] gap-1.5 text-[10px] tabular-nums text-muted-foreground sm:gap-2">
+      <div className="mt-2 grid grid-cols-[repeat(14,minmax(0,1fr))] gap-1.5 text-[10px] tabular-nums font-mono text-muted-foreground sm:gap-2">
         {points.map((point, index) => (
           <div key={point.date} className="text-center">
             {index === 0 || index === 6 || index === 13 ? formatShortDate(point.date) : null}
@@ -170,7 +170,7 @@ function UsageList({
     <section>
       <div className="flex items-baseline justify-between gap-3 border-b border-border pb-3">
         <h2 className="text-sm font-semibold">{title}</h2>
-        <span className="text-xs text-muted-foreground tabular-nums">{rows.length}</span>
+        <span className="text-xs text-muted-foreground tabular-nums font-mono">{rows.length}</span>
       </div>
       {rows.length === 0 ? (
         <div className="pt-4 text-sm text-muted-foreground">{empty}</div>
@@ -182,7 +182,7 @@ function UsageList({
                 <div className="truncate text-sm font-medium">{row.label}</div>
                 <div className="truncate text-xs text-muted-foreground">{row.sublabel}</div>
               </div>
-              <div className="flex items-baseline gap-4 text-xs tabular-nums sm:justify-end">
+              <div className="flex items-baseline gap-4 text-xs tabular-nums font-mono sm:justify-end">
                 <span className="text-muted-foreground">{formatTokens(totalTokens(row))}</span>
                 <span className="font-medium">{formatCents(row.costCents)}</span>
               </div>
@@ -196,7 +196,7 @@ function UsageList({
 
 export function UserProfile() {
   const { userSlug = "" } = useParams<{ userSlug: string }>();
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const companyId = selectedCompanyId ?? NO_COMPANY;
 
@@ -243,7 +243,7 @@ export function UserProfile() {
   );
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={UserRound} message="Select a company to view user profiles." />;
+    return <EmptyState icon={UserRound} message="Select a Node Org to view user profiles." />;
   }
 
   if (isLoading) {
@@ -251,7 +251,7 @@ export function UserProfile() {
   }
 
   if (error || !data) {
-    return <EmptyState icon={AlertCircle} message="User profile not found for this company." />;
+    return <EmptyState icon={AlertCircle} message="User profile not found for this node org." />;
   }
 
   const allTimeTokens = allTime ? totalTokens(allTime) : 0;
@@ -300,7 +300,7 @@ export function UserProfile() {
         <section>
           <div className="flex items-baseline justify-between gap-3 border-b border-border pb-3">
             <h2 className="text-sm font-semibold">Recent tasks</h2>
-            <span className="text-xs text-muted-foreground tabular-nums">{data.recentIssues.length}</span>
+            <span className="text-xs text-muted-foreground tabular-nums font-mono">{data.recentIssues.length}</span>
           </div>
           {data.recentIssues.length === 0 ? (
             <div className="pt-4 text-sm text-muted-foreground">No touched tasks yet.</div>
@@ -316,7 +316,7 @@ export function UserProfile() {
                     <span className="truncate text-sm">{issue.title}</span>
                     <span className="flex items-center gap-3 sm:justify-end">
                       <StatusBadge status={issue.status} />
-                      <span className="text-xs tabular-nums text-muted-foreground">{relativeTime(issue.updatedAt)}</span>
+                      <span className="text-xs tabular-nums font-mono text-muted-foreground">{relativeTime(issue.updatedAt)}</span>
                     </span>
                   </Link>
                 </li>
@@ -328,7 +328,7 @@ export function UserProfile() {
         <section>
           <div className="flex items-baseline justify-between gap-3 border-b border-border pb-3">
             <h2 className="text-sm font-semibold">Recent activity</h2>
-            <span className="text-xs text-muted-foreground tabular-nums">{data.recentActivity.length}</span>
+            <span className="text-xs text-muted-foreground tabular-nums font-mono">{data.recentActivity.length}</span>
           </div>
           {data.recentActivity.length === 0 ? (
             <div className="pt-4 text-sm text-muted-foreground">No direct user actions recorded yet.</div>
@@ -342,7 +342,7 @@ export function UserProfile() {
                       {event.entityType} · {event.entityId.slice(0, 12)}
                     </div>
                   </div>
-                  <span className="text-xs tabular-nums text-muted-foreground sm:justify-self-end">{relativeTime(event.createdAt)}</span>
+                  <span className="text-xs tabular-nums font-mono text-muted-foreground sm:justify-self-end">{relativeTime(event.createdAt)}</span>
                 </li>
               ))}
             </ul>

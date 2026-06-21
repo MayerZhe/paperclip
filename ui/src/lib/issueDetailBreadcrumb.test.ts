@@ -76,7 +76,7 @@ describe("issueDetailBreadcrumb", () => {
         goalId: null,
         goalIds: [],
         goals: [],
-        name: "Paperclip App",
+        name: "Super Node App",
         description: null,
         status: "in_progress",
         leadAgentId: null,
@@ -180,7 +180,7 @@ describe("issueDetailBreadcrumb", () => {
       status: "todo",
       priority: "medium",
       projectId: "project-1",
-      projectName: "Paperclip App",
+      projectName: "Super Node App",
       originKind: "manual",
       originId: null,
     });
@@ -203,7 +203,7 @@ describe("issueDetailBreadcrumb", () => {
       status: "todo",
       priority: "medium",
       projectId: "project-1",
-      projectName: "Paperclip App",
+      projectName: "Super Node App",
       originKind: "manual",
       originId: null,
     });
@@ -216,3 +216,4 @@ describe("issueDetailBreadcrumb", () => {
     expect(shouldArmIssueDetailInboxQuickArchive(armIssueDetailInboxQuickArchive(state))).toBe(true);
   });
 });
+

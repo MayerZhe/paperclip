@@ -9,7 +9,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import { parseDocumentAnnotationHash } from "@/lib/document-annotation-hash";
 import { DocumentAnnotationLayer, type PendingAnchor } from "./DocumentAnnotationLayer";
 import { DocumentAnnotationPanel } from "./DocumentAnnotationPanel";
-import type { CompanyUserProfile } from "@/lib/company-members";
+import type { CompanyUserProfile } from "@/lib/node-org-members";
 
 const DESKTOP_ANNOTATION_PANEL_WIDTH = 360;
 const DESKTOP_ANNOTATION_PANEL_MIN_WIDTH = 280;
@@ -279,7 +279,7 @@ export function IssueDocumentAnnotations({
   ) : null;
 
   return (
-    <div className="paperclip-doc-annotation-host relative">
+    <div className="super-node-doc-annotation-host relative">
       <section
         ref={(element) => {
           containerRef.current = element;
@@ -373,7 +373,7 @@ export function DocumentAnnotationsCountChip({
       aria-expanded={panelOpen}
     >
       <MessageSquare className="h-3 w-3" aria-hidden="true" />
-      <span className="tabular-nums">{openCount}</span>
+      <span className="tabular-nums font-mono">{openCount}</span>
       <span className="hidden sm:inline">
         {openCount === 1 ? "comment" : "comments"}
       </span>

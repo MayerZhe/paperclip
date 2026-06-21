@@ -1463,7 +1463,7 @@ describe("IssueDetail", () => {
         uploadedAt: new Date("2026-04-21T00:02:00.000Z"),
       },
     ]);
-    localStorage.setItem("paperclip:issue-comment-draft:issue-1", "Draft follow-up message");
+    localStorage.setItem("super-node:issue-comment-draft:issue-1", "Draft follow-up message");
     mockIssuesApi.update.mockResolvedValue(createIssue({ workMode: "planning" }));
 
     act(async () => {
@@ -1486,9 +1486,9 @@ describe("IssueDetail", () => {
     await flushReact();
 
     expect(mockIssuesApi.update).toHaveBeenCalledWith(issue.identifier, { workMode: "planning" });
-    expect(localStorage.getItem("paperclip:issue-comment-draft:issue-1")).toBe("Draft follow-up message");
+    expect(localStorage.getItem("super-node:issue-comment-draft:issue-1")).toBe("Draft follow-up message");
     expect(container.textContent).toContain("planning-notes.txt");
-    localStorage.removeItem("paperclip:issue-comment-draft:issue-1");
+    localStorage.removeItem("super-node:issue-comment-draft:issue-1");
   });
 
   it("hides attachments backing promoted outputs while keeping filtered markdown artifacts visible", async () => {

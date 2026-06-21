@@ -159,7 +159,7 @@ function CloudUpstreamRender({ fixture }: { fixture: Fixture }) {
             <h1 className="text-lg font-semibold">Cloud upstream</h1>
           </div>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Push {selectedCompanyName} into a Paperclip Cloud stack. Automations stay paused until activation.
+            Push {selectedCompanyName} into a Super Node Cloud stack. Automations stay paused until activation.
           </p>
         </div>
         {connection?.target.origin ? (
@@ -211,7 +211,7 @@ function CloudUpstreamRender({ fixture }: { fixture: Fixture }) {
               <Input
                 defaultValue="https://paperclip.paperclip.app/PC521D/dashboard"
                 placeholder="https://paperclip.paperclip.app/PC521D/dashboard"
-                aria-label="Paperclip Cloud stack URL"
+                aria-label="Super Node Cloud stack URL"
                 autoFocus
               />
               <Button disabled>
@@ -272,7 +272,7 @@ function CloudUpstreamRender({ fixture }: { fixture: Fixture }) {
                       : "in progress"}
                 </div>
               </div>
-              <div className="text-sm tabular-nums">{latestRun.progressPercent}%</div>
+              <div className="text-sm tabular-nums font-mono">{latestRun.progressPercent}%</div>
             </div>
             <div className="mt-3 h-2 rounded-full bg-muted">
               <div className="h-2 rounded-full bg-primary" style={{ width: `${latestRun.progressPercent}%` }} />
@@ -342,7 +342,7 @@ function SummaryGrid({ summary }: { summary: CloudUpstreamSummaryCount[] }) {
     <div className="grid gap-2 sm:grid-cols-4">
       {summary.map((item) => (
         <div key={item.key} className="rounded-md border border-border px-3 py-2">
-          <div className="text-lg font-semibold tabular-nums">{item.count}</div>
+          <div className="text-lg font-semibold tabular-nums font-mono">{item.count}</div>
           <div className="text-xs text-muted-foreground">{item.label}</div>
         </div>
       ))}
@@ -490,7 +490,7 @@ function formatBytes(value: number) {
 const STACK_TARGET = {
   stackId: "stk_2vKqz9D8mNFqQ7Rp",
   stackSlug: "paperclip-prod",
-  stackDisplayName: "Paperclip Prod",
+  stackDisplayName: "Super Node Prod",
   companyId: "co_4hT2yX",
   primaryHost: "paperclip.paperclip.app",
   origin: "https://paperclip.paperclip.app",
@@ -736,7 +736,7 @@ function buildFixture(state: FixtureStateKey): Fixture {
   switch (state) {
     case "settings-pane":
       return {
-        selectedCompanyName: "Paperclip · PC521D",
+        selectedCompanyName: "Super Node · PC521D",
         connection: connectedConnection(),
         preview: null,
         latestRun: null,
@@ -746,7 +746,7 @@ function buildFixture(state: FixtureStateKey): Fixture {
       };
     case "connect-wizard":
       return {
-        selectedCompanyName: "Paperclip · PC521D",
+        selectedCompanyName: "Super Node · PC521D",
         connection: null,
         preview: null,
         latestRun: null,
@@ -756,7 +756,7 @@ function buildFixture(state: FixtureStateKey): Fixture {
       };
     case "schema-mismatch":
       return {
-        selectedCompanyName: "Paperclip · PC521D",
+        selectedCompanyName: "Super Node · PC521D",
         connection: connectedConnection(STACK_TARGET_SCHEMA_BEHIND),
         preview: schemaMismatchPreview(),
         latestRun: null,
@@ -766,7 +766,7 @@ function buildFixture(state: FixtureStateKey): Fixture {
       };
     case "preview":
       return {
-        selectedCompanyName: "Paperclip · PC521D",
+        selectedCompanyName: "Super Node · PC521D",
         connection: connectedConnection(),
         preview: basePreview(),
         latestRun: null,
@@ -776,7 +776,7 @@ function buildFixture(state: FixtureStateKey): Fixture {
       };
     case "preview-clean":
       return {
-        selectedCompanyName: "Paperclip · PC521D",
+        selectedCompanyName: "Super Node · PC521D",
         connection: connectedConnection(),
         preview: cleanPreview(),
         latestRun: null,
@@ -786,7 +786,7 @@ function buildFixture(state: FixtureStateKey): Fixture {
       };
     case "progress":
       return {
-        selectedCompanyName: "Paperclip · PC521D",
+        selectedCompanyName: "Super Node · PC521D",
         connection: connectedConnection(),
         preview: null,
         latestRun: runningRun(),
@@ -796,7 +796,7 @@ function buildFixture(state: FixtureStateKey): Fixture {
       };
     case "retry":
       return {
-        selectedCompanyName: "Paperclip · PC521D",
+        selectedCompanyName: "Super Node · PC521D",
         connection: connectedConnection(),
         preview: null,
         latestRun: failedRun(),
@@ -808,7 +808,7 @@ function buildFixture(state: FixtureStateKey): Fixture {
       };
     case "finish":
       return {
-        selectedCompanyName: "Paperclip · PC521D",
+        selectedCompanyName: "Super Node · PC521D",
         connection: connectedConnection(),
         preview: null,
         latestRun: succeededRun(),
@@ -820,3 +820,4 @@ function buildFixture(state: FixtureStateKey): Fixture {
       };
   }
 }
+

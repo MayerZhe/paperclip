@@ -27,7 +27,7 @@ import { documentAnnotationsApi } from "@/api/document-annotations";
 import { MarkdownBody } from "./MarkdownBody";
 import type { PendingAnchor } from "./DocumentAnnotationLayer";
 import type { Agent } from "@paperclipai/shared";
-import type { CompanyUserProfile } from "@/lib/company-members";
+import type { CompanyUserProfile } from "@/lib/node-org-members";
 
 type AnnotationFilter = "open" | "resolved" | "stale" | "orphan";
 
@@ -75,7 +75,7 @@ export function DocumentAnnotationPanel(props: AnnotationPanelProps) {
         <SheetContent
           side="bottom"
           showCloseButton={false}
-          className="paperclip-doc-annotation-sheet z-[60] flex max-h-[88vh] flex-col rounded-none border-t border-border bg-popover p-0 text-popover-foreground shadow-2xl"
+          className="super-node-doc-annotation-sheet z-[60] flex max-h-[88vh] flex-col rounded-none border-t border-border bg-popover p-0 text-popover-foreground shadow-2xl"
         >
           <SheetTitle className="sr-only">
             Comments on {props.documentKey} revision {props.documentRevisionNumber}
@@ -245,7 +245,7 @@ function AnnotationPanelBody(props: AnnotationPanelProps) {
               )}
             >
               <span>{entry.label}</span>
-              <span className={cn("tabular-nums", isActive ? "text-muted-foreground" : "text-muted-foreground/70")}>
+              <span className={cn("tabular-nums font-mono", isActive ? "text-muted-foreground" : "text-muted-foreground/70")}>
                 {count}
               </span>
             </button>

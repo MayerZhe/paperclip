@@ -4,8 +4,8 @@ import type { ActivityEvent, Agent } from "@paperclipai/shared";
 import { activityApi } from "../api/activity";
 import { accessApi } from "../api/access";
 import { agentsApi } from "../api/agents";
-import { buildCompanyUserProfileMap } from "../lib/company-members";
-import { useCompany } from "../context/CompanyContext";
+import { buildCompanyUserProfileMap } from "../lib/node-org-members";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
 import { EmptyState } from "../components/EmptyState";
@@ -44,7 +44,7 @@ function activityEntityTitle(event: ActivityEvent) {
 }
 
 export function Activity() {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const [filter, setFilter] = useState("all");
 
@@ -101,7 +101,7 @@ export function Activity() {
   }, [data]);
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={History} message="Select a company to view activity." />;
+    return <EmptyState icon={History} message="Select a Node Org to view activity." />;
   }
 
   if (isLoading) {

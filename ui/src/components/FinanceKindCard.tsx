@@ -28,7 +28,7 @@ export function FinanceKindCard({ rows }: FinanceKindCardProps) {
                   {row.eventCount} event{row.eventCount === 1 ? "" : "s"} · {row.billerCount} biller{row.billerCount === 1 ? "" : "s"}
                 </div>
               </div>
-              <div className="text-right tabular-nums">
+              <div className="text-right tabular-nums font-mono">
                 <div className="text-sm font-medium">{formatCents(row.netCents)}</div>
                 <div className="text-xs text-muted-foreground">
                   {formatCents(row.debitCents)} debits

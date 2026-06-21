@@ -4,12 +4,12 @@ import { Link } from "@/lib/router";
 import { ActiveAgentsPanel } from "../components/ActiveAgentsPanel";
 import { EmptyState } from "../components/EmptyState";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 
 const DASHBOARD_LIVE_RUN_LIMIT = 50;
 
 export function DashboardLive() {
-  const { selectedCompanyId, companies } = useCompany();
+  const { selectedCompanyId, companies } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export function DashboardLive() {
     return (
       <EmptyState
         icon={RadioTower}
-        message={companies.length === 0 ? "Create a company to view live runs." : "Select a company to view live runs."}
+        message={companies.length === 0 ? "Create a Node Org to view live runs." : "Select a Node Org to view live runs."}
       />
     );
   }

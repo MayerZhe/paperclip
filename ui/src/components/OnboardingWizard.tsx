@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AdapterEnvironmentTestResult } from "@paperclipai/shared";
 import { useLocation, useNavigate, useParams } from "@/lib/router";
 import { useDialog } from "../context/DialogContext";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { companiesApi } from "../api/companies";
 import { goalsApi } from "../api/goals";
 import { agentsApi } from "../api/agents";
@@ -63,7 +63,7 @@ import {
 type Step = 1 | 2 | 3 | 4;
 type AdapterType = string;
 
-const DEFAULT_TASK_DESCRIPTION = `You are the CEO. You set the direction for the company.
+const DEFAULT_TASK_DESCRIPTION = `You are the CEO. You set the direction for the node org.
 
 - hire a founding engineer
 - write a hiring plan
@@ -71,7 +71,7 @@ const DEFAULT_TASK_DESCRIPTION = `You are the CEO. You set the direction for the
 
 export function OnboardingWizard() {
   const { onboardingOpen, onboardingOptions, closeOnboarding } = useDialog();
-  const { companies, setSelectedCompanyId, loading: companiesLoading } = useCompany();
+  const { companies, setSelectedCompanyId, loading: companiesLoading } = useNodeOrg();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
@@ -192,7 +192,7 @@ export function OnboardingWizard() {
 
   const { data: adapterModels } = useQuery({
     // The wizard doesn't expose an environment selector, so models always
-    // resolve against the local Paperclip host (environmentId = null).
+    // resolve against the local Super Node host (environmentId = null).
     queryKey: createdCompanyId
       ? queryKeys.agents.adapterModels(createdCompanyId, adapterType, null)
       : ["agents", "none", "adapter-models", adapterType, null],
@@ -359,7 +359,7 @@ export function OnboardingWizard() {
   ): Promise<AdapterEnvironmentTestResult | null> {
     if (!createdCompanyId) {
       setAdapterEnvError(
-        "Create or select a company before testing adapter environment."
+        "Create or select a Node Org before testing adapter environment."
       );
       return null;
     }
@@ -415,7 +415,7 @@ export function OnboardingWizard() {
 
       setStep(2);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create company");
+      setError(err instanceof Error ? err.message : "Failed to create Node Org");
     } finally {
       setLoading(false);
     }
@@ -632,7 +632,7 @@ export function OnboardingWizard() {
               <div className="flex items-center gap-0 mb-8 border-b border-border">
                 {(
                   [
-                    { step: 1 as Step, label: "Company", icon: Building2 },
+                    { step: 1 as Step, label: "Node Org", icon: Building2 },
                     { step: 2 as Step, label: "Agent", icon: Bot },
                     { step: 3 as Step, label: "Task", icon: ListTodo },
                     { step: 4 as Step, label: "Launch", icon: Rocket }
@@ -663,7 +663,7 @@ export function OnboardingWizard() {
                       <Building2 className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h3 className="font-medium">Name your company</h3>
+                      <h3 className="font-medium">Name your node org</h3>
                       <p className="text-xs text-muted-foreground">
                         This is the organization your agents will work for.
                       </p>
@@ -678,7 +678,7 @@ export function OnboardingWizard() {
                           : "text-muted-foreground group-focus-within:text-foreground"
                       )}
                     >
-                      Company name
+                      Node Org name
                     </label>
                     <input
                       className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
@@ -701,7 +701,7 @@ export function OnboardingWizard() {
                     </label>
                     <textarea
                       className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-[60px]"
-                      placeholder="What is this company trying to achieve?"
+                      placeholder="What is this node org trying to achieve?"
                       value={companyGoal}
                       onChange={(e) => setCompanyGoal(e.target.value)}
                     />
@@ -1145,7 +1145,7 @@ export function OnboardingWizard() {
                         <p className="text-sm font-medium truncate">
                           {companyName}
                         </p>
-                        <p className="text-xs text-muted-foreground">Company</p>
+                        <p className="text-xs text-muted-foreground">Node Org</p>
                       </div>
                       <Check className="h-4 w-4 text-green-500 shrink-0" />
                     </div>
@@ -1260,7 +1260,7 @@ export function OnboardingWizard() {
           {/* Right half — ASCII art (hidden on mobile) */}
           <div
             className={cn(
-              "hidden md:block overflow-hidden bg-[#1d1d1d] transition-[width,opacity] duration-500 ease-in-out",
+              "hidden md:block overflow-hidden bg-secondary transition-[width,opacity] duration-500 ease-in-out",
               step === 1 ? "w-1/2 opacity-100" : "w-0 opacity-0"
             )}
           >
@@ -1325,3 +1325,4 @@ function AdapterEnvironmentResult({
     </div>
   );
 }
+

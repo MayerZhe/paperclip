@@ -32,7 +32,7 @@ import {
   type WorkspaceRuntimeControlRequest,
 } from "../components/WorkspaceRuntimeControls";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useToastActions } from "../context/ToastContext";
 import { collectLiveIssueIds } from "../lib/liveIssueIds";
 import { queryKeys } from "../lib/queryKeys";
@@ -106,7 +106,7 @@ function executionWorkspaceTabPath(workspaceId: string, tab: ExecutionWorkspaceB
 function LegacyWorkspaceTabRedirect({ workspaceId }: { workspaceId: string }) {
   useEffect(() => {
     try {
-      localStorage.removeItem(`paperclip:execution-workspace-tab:${workspaceId}`);
+      localStorage.removeItem(`super-node:execution-workspace-tab:${workspaceId}`);
     } catch {}
   }, [workspaceId]);
 
@@ -364,7 +364,7 @@ function ExecutionWorkspaceIssuesList({
       projects={projectOptions}
       liveIssueIds={liveIssueIds}
       projectId={project?.id}
-      viewStateKey="paperclip:execution-workspace-issues-view"
+      viewStateKey="super-node:execution-workspace-issues-view"
       baseCreateIssueDefaults={createIssueDefaults}
       onUpdateIssue={(id, data) => updateIssue.mutate({ id, data })}
     />
@@ -475,7 +475,7 @@ function ExecutionWorkspaceRoutinesList({
       ]);
       pushToast({
         title: "Routine started",
-        body: "Paperclip created a run using this execution workspace.",
+        body: "Super Node created a run using this execution workspace.",
         tone: "success",
       });
     },
@@ -485,7 +485,7 @@ function ExecutionWorkspaceRoutinesList({
     onError: (mutationError) => {
       pushToast({
         title: "Routine run failed",
-        body: mutationError instanceof Error ? mutationError.message : "Paperclip could not start the routine run.",
+        body: mutationError instanceof Error ? mutationError.message : "Super Node could not start the routine run.",
         tone: "error",
       });
     },
@@ -559,7 +559,7 @@ export function ExecutionWorkspaceDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { setBreadcrumbs } = useBreadcrumbs();
-  const { selectedCompanyId, setSelectedCompanyId } = useCompany();
+  const { selectedCompanyId, setSelectedCompanyId } = useNodeOrg();
   const [form, setForm] = useState<WorkspaceFormState | null>(null);
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -932,7 +932,7 @@ export function ExecutionWorkspaceDetail() {
 
                 <div className="space-y-4">
                   <div className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Lifecycle commands</div>
-                  <Field label="Provision command" hint="Runs when Paperclip prepares this execution workspace">
+                  <Field label="Provision command" hint="Runs when Super Node prepares this execution workspace">
                     <Textarea
                       className="min-h-20 font-mono"
                       value={form.provisionCommand}
@@ -1251,3 +1251,4 @@ export function ExecutionWorkspaceDetail() {
     </>
   );
 }
+

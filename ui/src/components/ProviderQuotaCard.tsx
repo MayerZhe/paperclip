@@ -152,7 +152,7 @@ export function ProviderQuotaCard({
               )}
             </CardDescription>
           </div>
-          <span className="text-xl font-bold tabular-nums shrink-0">
+          <span className="text-xl font-bold tabular-nums font-mono shrink-0">
             {formatCents(totalCostCents)}
           </span>
         </div>
@@ -201,7 +201,7 @@ export function ProviderQuotaCard({
                         <span className="text-muted-foreground font-mono flex-1">
                           {formatTokens(tokens)} tok
                         </span>
-                        <span className="font-medium tabular-nums">{formatCents(cents)}</span>
+                        <span className="font-medium tabular-nums font-mono">{formatCents(cents)}</span>
                       </div>
                       <div className="h-2 w-full border border-border overflow-hidden">
                         <div
@@ -276,7 +276,7 @@ export function ProviderQuotaCard({
                           {providerDisplayName(row.biller)} · {billingTypeDisplayName(row.billingType)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0 tabular-nums text-xs">
+                      <div className="flex items-center gap-3 shrink-0 tabular-nums font-mono text-xs">
                         <span className="text-muted-foreground">
                           {formatTokens(rowTokens)} tok
                         </span>
@@ -348,9 +348,9 @@ export function ProviderQuotaCard({
                             <span className="font-mono text-muted-foreground shrink-0">{qw.label}</span>
                             <span className="flex-1" />
                             {qw.valueLabel != null ? (
-                              <span className="font-medium tabular-nums">{qw.valueLabel}</span>
+                              <span className="font-medium tabular-nums font-mono">{qw.valueLabel}</span>
                             ) : qw.usedPercent != null ? (
-                              <span className="font-medium tabular-nums">{qw.usedPercent}% used</span>
+                              <span className="font-medium tabular-nums font-mono">{qw.usedPercent}% used</span>
                             ) : null}
                           </div>
                           {qw.usedPercent != null && fillColor != null && (

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { goalsApi } from "../api/goals";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useDialogActions } from "../context/DialogContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Target, Plus } from "lucide-react";
 
 export function Goals() {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { openNewGoal } = useDialogActions();
   const { setBreadcrumbs } = useBreadcrumbs();
 
@@ -27,7 +27,7 @@ export function Goals() {
   });
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={Target} message="Select a company to view goals." />;
+    return <EmptyState icon={Target} message="Select a Node Org to view goals." />;
   }
 
   if (isLoading) {

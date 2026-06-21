@@ -7,7 +7,7 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Cpu, Plus, Power, Trash2, FolderOpen, Package, RefreshCw, Download } from "lucide-react";
-import { useCompany } from "@/context/CompanyContext";
+import { useNodeOrg } from "@/context/NodeOrgContext";
 import { useBreadcrumbs } from "@/context/BreadcrumbContext";
 import { adaptersApi } from "@/api/adapters";
 import type { AdapterInfo } from "@/api/adapters";
@@ -86,12 +86,12 @@ function AdapterRow({
               </Badge>
             )}
             {adapter.overriddenBuiltin && (
-              <Badge variant="secondary" className="text-blue-600 border-blue-400">
+              <Badge variant="secondary" className="text-primary border-primary">
                 Overrides built-in
               </Badge>
             )}
             {overriddenBy && (
-              <Badge variant="secondary" className="text-blue-600 border-blue-400">
+              <Badge variant="secondary" className="text-primary border-primary">
                 Overridden by {overriddenBy}
               </Badge>
             )}
@@ -252,7 +252,7 @@ function ReinstallDialog({
 }
 
 export function AdapterManager() {
-  const { selectedCompany } = useCompany();
+  const { selectedCompany } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const queryClient = useQueryClient();
   const { pushToast } = useToastActions();
@@ -266,7 +266,7 @@ export function AdapterManager() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { label: selectedCompany?.name ?? "Company", href: "/dashboard" },
+      { label: selectedCompany?.name ?? "Node Org", href: "/dashboard" },
       { label: "Settings", href: "/instance/settings/general" },
       { label: "Adapters" },
     ]);

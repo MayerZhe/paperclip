@@ -69,7 +69,7 @@ function Section({
                     >
                       <span>{group.label}</span>
                       {group.count > 1 ? (
-                        <span className="tabular-nums text-[10px] font-medium opacity-80">×{group.count}</span>
+                        <span className="tabular-nums font-mono text-[10px] font-medium opacity-80">×{group.count}</span>
                       ) : null}
                     </span>
                   ))}

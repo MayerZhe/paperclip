@@ -29,7 +29,7 @@ const archivedCompany = { id: "archived-company" };
 function makeCompany(id: string): Company {
   return {
     id,
-    name: "Paperclip",
+    name: "Super Node",
     description: null,
     status: "active",
     pauseReason: null,
@@ -153,7 +153,7 @@ describe("NodeOrgProvider", () => {
   });
 
   it("does not expose a stale stored company id before companies load", async () => {
-    localStorage.setItem("paperclip.selectedCompanyId", "stale-company");
+    localStorage.setItem("super-node.selectedCompanyId", "stale-company");
     mockCompaniesApi.list.mockImplementation(() => new Promise(() => {}));
     const seen: Array<string | null> = [];
 
@@ -171,7 +171,7 @@ describe("NodeOrgProvider", () => {
   });
 
   it("replaces a stale stored company id with the first loaded company", async () => {
-    localStorage.setItem("paperclip.selectedCompanyId", "stale-company");
+    localStorage.setItem("super-node.selectedCompanyId", "stale-company");
     queryClient.setQueryData(queryKeys.companies.all, {
       companies: [makeCompany("company-1")],
       unauthorized: false,
@@ -192,3 +192,4 @@ describe("NodeOrgProvider", () => {
     expect(seen).toEqual([null]);
   });
 });
+

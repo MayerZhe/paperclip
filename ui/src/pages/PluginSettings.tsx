@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Puzzle, ArrowLeft, ShieldAlert, ActivitySquare, CheckCircle, XCircle, Loader2, Clock, Cpu, Webhook, CalendarClock, AlertTriangle, FolderOpen, Save } from "lucide-react";
 import type { PluginLocalFolderDeclaration } from "@paperclipai/shared";
-import { useCompany } from "@/context/CompanyContext";
+import { useNodeOrg } from "@/context/NodeOrgContext";
 import { useBreadcrumbs } from "@/context/BreadcrumbContext";
 import { Link, Navigate, useParams } from "@/lib/router";
 import { PluginSlotMount, usePluginSlots } from "@/plugins/slots";
@@ -52,7 +52,7 @@ import {
  * - `POST /api/plugins/:pluginId/config/test` — test configuration.
  *
  * URL params:
- * - `companyPrefix` — the company slug (for breadcrumb links).
+ * - `companyPrefix` — the node org slug (for breadcrumb links).
  * - `pluginId` — UUID of the plugin to display.
  *
  * @see PluginManager — parent list page.
@@ -60,7 +60,7 @@ import {
  * @see doc/plugins/PLUGIN_SPEC.md §19.8 — Plugin Settings UI.
  */
 export function PluginSettings() {
-  const { selectedCompany, selectedCompanyId } = useCompany();
+  const { selectedCompany, selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const { companyPrefix, pluginId } = useParams<{ companyPrefix?: string; pluginId: string }>();
   const [activeTab, setActiveTab] = useState<"configuration" | "status">("configuration");
@@ -116,7 +116,7 @@ export function PluginSettings() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { label: selectedCompany?.name ?? "Company", href: "/dashboard" },
+      { label: selectedCompany?.name ?? "Node Org", href: "/dashboard" },
       { label: "Settings", href: "/instance/settings/heartbeats" },
       { label: "Plugins", href: "/instance/settings/plugins" },
       { label: plugin?.manifestJson?.displayName ?? plugin?.packageName ?? "Plugin Details" },
@@ -253,14 +253,14 @@ export function PluginSettings() {
                 />
               ) : environmentDrivers.length > 0 ? (
                 <div className="rounded-md border border-border/60 bg-muted/20 px-4 py-3 text-sm">
-                  <p className="font-medium text-foreground">Configure this plugin from Company Environments.</p>
+                  <p className="font-medium text-foreground">Configure this plugin from Node Org Environments.</p>
                   <p className="mt-1 text-muted-foreground">
                     {driverLabel || "This plugin"} registers environment runtime settings there so credentials stay
-                    company-scoped instead of instance-global.
+                    node org-scoped instead of instance-global.
                   </p>
                   <div className="mt-3">
                     <Link to="/company/settings/environments">
-                      <Button variant="outline" size="sm">Open Company Environments</Button>
+                      <Button variant="outline" size="sm">Open Node Org Environments</Button>
                     </Link>
                   </div>
                 </div>
@@ -570,7 +570,7 @@ export function PluginSettings() {
 }
 
 // ---------------------------------------------------------------------------
-// PluginLocalFoldersSettings — host-managed company-scoped folders
+// PluginLocalFoldersSettings — host-managed node org-scoped folders
 // ---------------------------------------------------------------------------
 
 interface PluginLocalFoldersSettingsProps {
@@ -593,7 +593,7 @@ function PluginLocalFoldersSettings({ pluginId, companyId, declarations }: Plugi
   if (!companyId) {
     return (
       <div className="rounded-md border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
-        Select a company to configure this plugin's local folders.
+        Select a node org to configure this plugin's local folders.
       </div>
     );
   }
@@ -1176,9 +1176,9 @@ function JobStatusDot({ status }: { status: string }) {
       : status === "failed"
         ? "bg-red-500"
         : status === "running"
-          ? "bg-blue-500 animate-pulse"
+          ? "bg-primary animate-pulse"
           : status === "cancelled"
-            ? "bg-gray-400"
+            ? "bg-muted-foreground/50"
             : "bg-amber-500"; // queued, pending
   return (
     <span
@@ -1198,7 +1198,7 @@ function DeliveryStatusDot({ status }: { status: string }) {
       : status === "failed"
         ? "bg-red-500"
         : status === "received"
-          ? "bg-blue-500"
+          ? "bg-primary"
           : "bg-amber-500"; // pending
   return (
     <span

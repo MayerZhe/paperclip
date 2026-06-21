@@ -37,7 +37,7 @@ import { pluginsApi } from "@/api/plugins";
 import { ApiError } from "@/api/client";
 import { useToastActions, type ToastInput } from "@/context/ToastContext";
 import { useSidebar } from "@/context/SidebarContext";
-import { isGlobalPath, normalizeCompanyPrefix } from "@/lib/company-routes";
+import { isGlobalPath, normalizeCompanyPrefix } from "@/lib/node-org-routes";
 
 // ---------------------------------------------------------------------------
 // Bridge error type (mirrors the SDK's PluginBridgeError)
@@ -166,7 +166,7 @@ export type PluginBridgeContextValue = {
  * resolve the current plugin without ambient mutable globals.
  *
  * Because plugin bundles share the host's React instance (via the bridge
- * registry on `globalThis.__paperclipPluginBridge__`), context propagation
+ * registry on `globalThis.__superNodePluginBridge__`), context propagation
  * works correctly across the host/plugin boundary.
  */
 export const PluginBridgeContext =
@@ -282,7 +282,7 @@ function hasCompanyPrefix(pathname: string, companyPrefix: string): boolean {
 }
 
 /**
- * Resolve a plugin-provided Paperclip path to the active company scope.
+ * Resolve a plugin-provided Super Node path to the active company scope.
  *
  * This intentionally handles plugin page roots such as `/wiki`, which cannot
  * be listed in the host router's static board-route table ahead of time.
@@ -656,3 +656,4 @@ export function usePluginStream<T = unknown>(
 
   return { events, lastEvent, connecting, connected, error, close };
 }
+
