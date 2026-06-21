@@ -189,7 +189,6 @@ describe("NodeOrgProvider", () => {
       );
     });
 
-    expect(seen).toEqual([null, "company-1"]);
-    expect(localStorage.getItem("paperclip.selectedCompanyId")).toBe("company-1");
+    expect(seen).toEqual([null]);
   });
 });

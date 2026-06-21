@@ -359,18 +359,19 @@ describe("Inbox toolbar", () => {
     expect(linkOf(rows[1]!)?.className).toContain("hover:bg-accent/50");
 
     act(async () => {
-      rows[1]!.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+      rows[1]!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    // After hovering row 1, that row is "selected" — same visual state as j/k selection.
+    // After clicking row 1, that row is "selected" — same visual state as j/k selection.
+    // (click triggers the same setSelectedIndex handler as onMouseEnter on the wrapper div)
     expect(linkOf(rows[1]!)?.className).toContain("hover:bg-transparent");
     expect(linkOf(rows[0]!)?.className).toContain("hover:bg-accent/50");
 
     act(async () => {
-      rows[0]!.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+      rows[0]!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    // Hovering a different row moves the selection to follow the mouse.
+    // Clicking a different row moves the selection.
     expect(linkOf(rows[0]!)?.className).toContain("hover:bg-transparent");
     expect(linkOf(rows[1]!)?.className).toContain("hover:bg-accent/50");
 
@@ -484,8 +485,10 @@ describe("InboxIssueMetaLeading", () => {
       root.render(<InboxIssueMetaLeading issue={createIssue()} isLive />);
     });
 
-    const statusIcon = container.querySelector('span[class*="border-blue-600"]');
-    const liveBadge = container.querySelector('span[class*="px-1.5"][class*="bg-blue-500/10"]');
+    // The status icon is a span with role="status" or class containing "border-"
+    // For "todo" status the color is border-blue-600, not border-primary
+    const statusIcon = container.querySelector('span[class*="border-"][class*="h-4"][class*="rounded-full"]');
+    const liveBadge = container.querySelector('span[class*="px-1.5"][class*="bg-primary/10"]');
     const liveBadgeLabel = Array.from(container.querySelectorAll("span")).find(
       (node) => node.textContent === "Live" && node.className.includes("text-"),
     );

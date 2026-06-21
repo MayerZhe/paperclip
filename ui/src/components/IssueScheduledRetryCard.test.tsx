@@ -78,7 +78,7 @@ async function waitForRetryButtonText(expected: string) {
   for (let i = 0; i < 20; i += 1) {
     if ((getRetryNowButton()?.textContent ?? "").includes(expected)) return;
     // eslint-disable-next-line no-await-in-loop
-    act(async () => {
+    await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
   }

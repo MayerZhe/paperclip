@@ -14,18 +14,12 @@ function dispatchTouchEvent(
   type: "touchstart" | "touchmove" | "touchend",
   coords: { x: number; y: number },
 ) {
-  const event = new Event(type, { bubbles: true, cancelable: true });
-  const touchPoint = { clientX: coords.x, clientY: coords.y };
-
-  Object.defineProperty(event, "touches", {
-    configurable: true,
-    value: type === "touchend" ? [] : [touchPoint],
+  const event = new TouchEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    touches: type === "touchend" ? [] : [{ clientX: coords.x, clientY: coords.y } as Touch],
+    changedTouches: [{ clientX: coords.x, clientY: coords.y } as Touch],
   });
-  Object.defineProperty(event, "changedTouches", {
-    configurable: true,
-    value: [touchPoint],
-  });
-
   node.dispatchEvent(event);
 }
 
@@ -66,12 +60,29 @@ describe("SwipeToArchive", () => {
     Object.defineProperty(wrapper, "offsetWidth", { configurable: true, value: 200 });
     Object.defineProperty(wrapper, "offsetHeight", { configurable: true, value: 48 });
 
+    // The SwipeToArchive gesture pipeline:
+    //   touchstart  → records start coords + layout width in refs
+    //   touchmove   → detects horizontal drag > 6 px, sets suppressClickRef
+    //                 (ref) and calls setOffsetX (React state). React 19
+    //                 classifies touchmove as ContinuousEventPriority which
+    //                 does not commit state updates synchronously in jsdom.
+    //   touchend    → compares |offsetX| against COMMIT_THRESHOLD and fires
+    //                 commitArchive → setTimeout(onArchive, 140 ms).
+    //
+    // To work around React 19's continuous-event batching, we dispatch
+    // touchstart and touchmove inside the same act() callback so they share
+    // a flushSync boundary, then advance timers to let the deferred state
+    // commit resolve before touchend runs.
     act(() => {
       dispatchTouchEvent(wrapper, "touchstart", { x: 180, y: 20 });
-    });
-    act(() => {
       dispatchTouchEvent(wrapper, "touchmove", { x: 80, y: 22 });
     });
+
+    // Advance timers to release React's internal scheduler deferrals
+    act(() => {
+      vi.advanceTimersByTime(0);
+    });
+
     act(() => {
       dispatchTouchEvent(wrapper, "touchend", { x: 80, y: 22 });
     });
@@ -80,6 +91,7 @@ describe("SwipeToArchive", () => {
       button!.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     });
 
+    // suppressClickRef is a ref — synchronous regardless of state flush
     expect(onClick).not.toHaveBeenCalled();
 
     act(() => {

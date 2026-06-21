@@ -204,17 +204,21 @@ describe("ProjectWorkspaceDetail plugin tabs", () => {
     mockRouteSearch.value = "";
   });
 
-  async function render() {
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    act(async () => {
+  function createQueryClient() {
+    return new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  }
+
+  async function render(queryClient?: QueryClient) {
+    const qc = queryClient ?? createQueryClient();
+    act(() => {
       root = createRoot(container);
       root.render(
-        <QueryClientProvider client={queryClient}>
+        <QueryClientProvider client={qc}>
           <ProjectWorkspaceDetail />
         </QueryClientProvider>,
       );
     });
-    act(async () => {
+    await act(async () => {
       await flush();
     });
   }

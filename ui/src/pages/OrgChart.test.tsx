@@ -210,11 +210,10 @@ describe("OrgChart mobile gestures", () => {
   it("pans the chart with one-finger touch drag", async () => {
     const { viewport, layer } = await renderOrgChart();
 
-    act(async () => {
-      viewport.dispatchEvent(createTouchEvent("touchstart", [{ clientX: 100, clientY: 100 }]));
-      viewport.dispatchEvent(createTouchEvent("touchmove", [{ clientX: 130, clientY: 145 }]));
-      viewport.dispatchEvent(createTouchEvent("touchend", []));
-    });
+    viewport.dispatchEvent(createTouchEvent("touchstart", [{ clientX: 100, clientY: 100 }]));
+    viewport.dispatchEvent(createTouchEvent("touchmove", [{ clientX: 130, clientY: 145 }]));
+    viewport.dispatchEvent(createTouchEvent("touchend", []));
+    await flushReact();
 
     expect(layer.style.transform).toBe("translate(50px, 105px) scale(1)");
   });
@@ -223,12 +222,11 @@ describe("OrgChart mobile gestures", () => {
     const { viewport } = await renderOrgChart();
     const card = container.querySelector("[data-org-card]") as HTMLDivElement;
 
-    act(async () => {
-      viewport.dispatchEvent(createTouchEvent("touchstart", [{ clientX: 100, clientY: 100 }]));
-      viewport.dispatchEvent(createTouchEvent("touchmove", [{ clientX: 130, clientY: 145 }]));
-      viewport.dispatchEvent(createTouchEvent("touchend", []));
-      card.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-    });
+    viewport.dispatchEvent(createTouchEvent("touchstart", [{ clientX: 100, clientY: 100 }]));
+    viewport.dispatchEvent(createTouchEvent("touchmove", [{ clientX: 130, clientY: 145 }]));
+    viewport.dispatchEvent(createTouchEvent("touchend", []));
+    await flushReact();
+    card.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
 
     expect(navigateMock).not.toHaveBeenCalled();
   });
@@ -237,28 +235,26 @@ describe("OrgChart mobile gestures", () => {
     const { viewport } = await renderOrgChart();
     const card = container.querySelector("[data-org-card]") as HTMLDivElement;
 
-    act(async () => {
-      viewport.dispatchEvent(createTouchEvent("touchstart", [{ clientX: 100, clientY: 100 }]));
-      viewport.dispatchEvent(createTouchEvent("touchend", []));
-      card.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-    });
+    viewport.dispatchEvent(createTouchEvent("touchstart", [{ clientX: 100, clientY: 100 }]));
+    viewport.dispatchEvent(createTouchEvent("touchend", []));
+    await flushReact();
+    card.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
 
     expect(navigateMock).toHaveBeenCalledWith("/agents/ceo");
   });
   it("pinch-zooms toward the touch center", async () => {
     const { viewport, layer } = await renderOrgChart();
 
-    act(async () => {
-      viewport.dispatchEvent(createTouchEvent("touchstart", [
-        { clientX: 100, clientY: 100 },
-        { clientX: 200, clientY: 100 },
-      ]));
-      viewport.dispatchEvent(createTouchEvent("touchmove", [
-        { clientX: 75, clientY: 100 },
-        { clientX: 225, clientY: 100 },
-      ]));
-      viewport.dispatchEvent(createTouchEvent("touchend", []));
-    });
+    viewport.dispatchEvent(createTouchEvent("touchstart", [
+      { clientX: 100, clientY: 100 },
+      { clientX: 200, clientY: 100 },
+    ]));
+    viewport.dispatchEvent(createTouchEvent("touchmove", [
+      { clientX: 75, clientY: 100 },
+      { clientX: 225, clientY: 100 },
+    ]));
+    viewport.dispatchEvent(createTouchEvent("touchend", []));
+    await flushReact();
 
     expect(layer.style.transform).toBe("translate(-45px, 40px) scale(1.5)");
   });

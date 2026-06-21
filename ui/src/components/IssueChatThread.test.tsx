@@ -963,6 +963,7 @@ describe("IssueChatThread", () => {
   });
 
   it("uses comments rendered by onRefreshLatestComments before resolving latest", async () => {
+    vi.useFakeTimers();
     const scrolledIds: string[] = [];
     const originalScrollIntoView = Element.prototype.scrollIntoView;
     Element.prototype.scrollIntoView = vi.fn(function scrollIntoView(this: Element) {
@@ -1003,8 +1004,15 @@ describe("IssueChatThread", () => {
           onAdd={async () => {}}
           enableLiveTranscriptPolling={false}
           onRefreshLatestComments={async () => {
-            setComments([olderComment, latestComment]);
-            await new Promise((resolve) => window.requestAnimationFrame(resolve));
+            // Use flushSync to commit the state update synchronously so
+            // that latestMessagesRef.current is current when
+            // scrollToLatestCommentWithSettle reads it.
+            await new Promise<void>((resolve) => {
+              flushSync(() => {
+                setComments([olderComment, latestComment]);
+              });
+              resolve();
+            });
           }}
         />
       );
@@ -1024,10 +1032,15 @@ describe("IssueChatThread", () => {
     ) as HTMLButtonElement | undefined;
     expect(jump).toBeDefined();
 
-    act(async () => {
+    act(() => {
       jump?.click();
-      await new Promise((resolve) => window.requestAnimationFrame(resolve));
     });
+
+    // onRefreshLatestComments uses flushSync to commit setComments synchronously.
+    // Its returned Promise schedules scrollToLatestCommentWithSettle as a microtask.
+    // Use vi.runAllTimersAsync to drain the microtask queue (where .then fires)
+    // and then fire the setTimeout(120) settle ticks.
+    await vi.runAllTimersAsync();
 
     expect(scrolledIds).toContain("comment-comment-after-refresh");
 
@@ -2104,8 +2117,10 @@ describe("IssueChatThread", () => {
       root.unmount();
     });
 
+    // Switch to real timers so the act() microtask drain (setTimeout) can fire.
+    vi.useRealTimers();
     const remount = createRoot(container);
-    act(() => {
+    await act(async () => {
       remount.render(
         <MemoryRouter>
           <IssueChatThread
@@ -2195,7 +2210,7 @@ describe("IssueChatThread", () => {
     const fileInput = container.querySelector('input[type="file"]') as HTMLInputElement | null;
     expect(fileInput?.getAttribute("accept")).toBeNull();
 
-    act(() => {
+    await act(async () => {
       composer?.dispatchEvent(createFileDragEvent("dragenter", [
         new File(["hello"], "notes.txt", { type: "text/plain" }),
       ]));
@@ -2252,9 +2267,13 @@ describe("IssueChatThread", () => {
     const composer = container.querySelector('[data-testid="issue-chat-composer"]') as HTMLDivElement | null;
     const file = new File(["report body"], "report.pdf", { type: "application/pdf" });
 
-    act(async () => {
+    await act(async () => {
       composer?.dispatchEvent(createFileDragEvent("drop", [file]));
     });
+
+    // Drain microtasks so the onAttachImage promise resolves and React commits
+    // the "attached" status update.
+    await act(async () => {});
 
     expect(onAttachImage).toHaveBeenCalledWith(file);
     const attachmentList = container.querySelector('[data-testid="issue-chat-composer-attachments"]');
@@ -2292,7 +2311,7 @@ describe("IssueChatThread", () => {
     expect(composer).not.toBeNull();
     expect(editor).not.toBeNull();
 
-    act(() => {
+    await act(async () => {
       editor?.dispatchEvent(createFileDragEvent("dragenter", [
         new File(["hello"], "notes.txt", { type: "text/plain" }),
       ]));
@@ -2351,9 +2370,13 @@ describe("IssueChatThread", () => {
     const editor = container.querySelector('textarea[aria-label="Issue chat editor"]') as HTMLTextAreaElement | null;
     const file = new File(["report body"], "report.pdf", { type: "application/pdf" });
 
-    act(async () => {
+    await act(async () => {
       editor?.dispatchEvent(createFileDragEvent("drop", [file]));
     });
+
+    // Drain microtasks so the onAttachImage promise resolves and React commits
+    // the "attached" status update.
+    await act(async () => {});
 
     expect(onAttachImage).toHaveBeenCalledWith(file);
     const attachmentList = container.querySelector('[data-testid="issue-chat-composer-attachments"]');

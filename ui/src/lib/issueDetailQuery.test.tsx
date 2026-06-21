@@ -76,7 +76,7 @@ function IssueDetailQueryHarness({
 async function flush() {
   // Multiple act cycles to allow React Query to process the async queryFn
   for (let i = 0; i < 5; i++) {
-    act(async () => {
+    await act(async () => {
       await new Promise((r) => setTimeout(r, 0));
     });
   }

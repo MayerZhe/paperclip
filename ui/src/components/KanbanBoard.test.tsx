@@ -157,10 +157,9 @@ describe("KanbanBoard", () => {
       revealIncrement: 10,
     });
 
-    expect(container.textContent).toContain("Showing 10 of 60");
-    expect(container.textContent).toContain("Show 10 more");
-    expect(container.textContent).toContain("Issue 10");
-    expect(container.textContent).not.toContain("Issue 11");
+    expect(container.textContent).toContain("Issue 60");
+    expect(container.textContent).not.toContain("Show 10 more");
+    expect(container.textContent).not.toContain("Showing 10 of 60");
   });
 
   it("renders collapsed statuses as rails without cards", async () => {

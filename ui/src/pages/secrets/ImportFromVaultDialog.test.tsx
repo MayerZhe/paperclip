@@ -86,14 +86,14 @@ function makePreview(
 }
 
 async function flush() {
-  act(async () => {
+  await act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
 }
 
 async function flushDebounce() {
-  act(async () => {
+  await act(async () => {
     await new Promise((resolve) => window.setTimeout(resolve, 300));
   });
 }
@@ -407,6 +407,11 @@ describe("ImportFromVaultDialog", () => {
     const keyInput = document.querySelector(
       `[data-testid="review-key-${externalRef}"]`,
     ) as HTMLInputElement | null;
+    expect(keyInput).toBeTruthy();
+    if (!keyInput) {
+      act(() => root.unmount());
+      return;
+    }
     const valueSetter = Object.getOwnPropertyDescriptor(
       window.HTMLInputElement.prototype,
       "value",
@@ -619,8 +624,8 @@ describe("ImportFromVaultDialog", () => {
 
     // Select all loaded
     const headerCheckbox = document.querySelector(
-      '[data-testid="vault-table-body"]',
-    )?.parentElement?.querySelector('thead button[role="checkbox"]') as HTMLButtonElement | null;
+      'thead button[role="checkbox"][aria-label^="Select all loaded"]',
+    ) as HTMLButtonElement | null;
     expect(headerCheckbox).toBeTruthy();
     act(async () => {
       headerCheckbox!.click();
@@ -689,11 +694,7 @@ describe("ImportFromVaultDialog", () => {
   });
 
   it("shows a permission-error banner when AWS denies ListSecrets", async () => {
-    const error = Object.assign(new Error("AccessDeniedException"), {
-      name: "ApiError",
-      status: 403,
-      body: null,
-    });
+    const error = new ApiError("AccessDeniedException", 403, null);
     mockSecretsApi.remoteImportPreview.mockRejectedValueOnce(error);
 
     const { queryClient } = makeWrapper();
@@ -716,7 +717,8 @@ describe("ImportFromVaultDialog", () => {
 
     const banner = document.querySelector('[data-testid="preview-error-banner"]');
     expect(banner).not.toBeNull();
-    expect(banner?.textContent).toContain("Could not load remote secrets");
+    expect(banner?.textContent).toContain("AWS denied list access");
+    expect(banner?.textContent).toContain("missing secretsmanager:ListSecrets");
 
     act(async () => {
       root.unmount();

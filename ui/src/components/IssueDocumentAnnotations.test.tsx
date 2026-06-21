@@ -96,7 +96,10 @@ vi.mock("./DocumentAnnotationLayer", () => ({
 
 
 async function flush() {
-  act(() => {});
+  await act(async () => {
+    await Promise.resolve();
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+  });
 }
 
 function setTextareaValue(textarea: HTMLTextAreaElement, value: string) {

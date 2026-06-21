@@ -32,6 +32,10 @@ const mockIssuesApi = vi.hoisted(() => ({
   createLabel: vi.fn(),
 }));
 
+const mockAccessApi = vi.hoisted(() => ({
+  listUserDirectory: vi.fn(),
+}));
+
 const mockAuthApi = vi.hoisted(() => ({
   getSession: vi.fn(),
 }));
@@ -56,6 +60,10 @@ vi.mock("../api/issues", () => ({
 
 vi.mock("../api/auth", () => ({
   authApi: mockAuthApi,
+}));
+
+vi.mock("../api/access", () => ({
+  accessApi: mockAccessApi,
 }));
 
 vi.mock("../context/ToastContext", () => ({
@@ -380,6 +388,7 @@ describe("IssueProperties", () => {
       color: "#6366f1",
     }));
     mockAuthApi.getSession.mockResolvedValue({ user: { id: "user-1" } });
+    mockAccessApi.listUserDirectory.mockResolvedValue({ users: [] });
   });
 
   afterEach(() => {
@@ -477,14 +486,18 @@ describe("IssueProperties", () => {
     act(async () => {
       addButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    await flush();
+    await vi.waitFor(() => {
+      expect(container.querySelector('input[placeholder="Search tasks..."]')).not.toBeNull();
+    }, { timeout: 3000 });
 
-    expect(container.querySelector('input[placeholder="Search tasks..."]')).not.toBeNull();
+    await vi.waitFor(() => {
+      const candidateButton = Array.from(container.querySelectorAll("button"))
+        .find((button) => button.textContent?.includes("PAP-3 New blocker"));
+      expect(candidateButton).not.toBeUndefined();
+    }, { timeout: 3000 });
 
     const candidateButton = Array.from(container.querySelectorAll("button"))
       .find((button) => button.textContent?.includes("PAP-3 New blocker"));
-    expect(candidateButton).not.toBeUndefined();
-
     act(async () => {
       candidateButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -518,7 +531,9 @@ describe("IssueProperties", () => {
     act(async () => {
       addButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    await flush();
+    await vi.waitFor(() => {
+      expect(container.querySelector('input[aria-label="Search tasks to add as blockers"]')).not.toBeNull();
+    }, { timeout: 3000 });
 
     const searchInput = container.querySelector('input[aria-label="Search tasks to add as blockers"]') as HTMLInputElement | null;
     expect(searchInput).not.toBeNull();
@@ -529,11 +544,11 @@ describe("IssueProperties", () => {
       searchInput!.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
-    await waitForAssertion(() => {
+    await vi.waitFor(() => {
       expect(mockIssuesApi.list).toHaveBeenCalledWith("company-1", { q: "remote", limit: 50 });
       expect(container.textContent).toContain("PAP-99 Remote blocker");
       expect(container.textContent).not.toContain("PAP-3 Loaded issue");
-    });
+    }, { timeout: 3000 });
 
     const candidateButton = Array.from(container.querySelectorAll("button"))
       .find((button) => button.textContent?.includes("PAP-99 Remote blocker"));
@@ -863,11 +878,10 @@ describe("IssueProperties", () => {
       onUpdate: vi.fn(),
       inline: true,
     });
-    await flush();
-    await flush();
-
+    await vi.waitFor(() => {
+      expect(container.textContent).not.toContain("No labels");
+    }, { timeout: 3000 });
     expect(container.textContent).toContain("Bug");
-    expect(container.textContent).not.toContain("No labels");
 
     act(() => root.unmount());
   });
@@ -932,10 +946,10 @@ describe("IssueProperties", () => {
       childIssues: [],
       onUpdate,
     });
-    await flush();
-    await flush();
 
-    expect(container.textContent).toContain("Custom · gpt-5.4 · high");
+    await vi.waitFor(() => {
+      expect(container.textContent).toContain("Custom · gpt-5.4 · high");
+    }, { timeout: 3000 });
     expect(container.textContent).toContain("Model lane");
 
     const modelButton = Array.from(container.querySelectorAll("button"))
@@ -1013,14 +1027,25 @@ describe("IssueProperties", () => {
       onUpdate: vi.fn(),
       inline: true,
     });
-    await flush();
+    await vi.waitFor(() => {
+      expect(container.querySelector('button[aria-label="Add label"]')).not.toBeNull();
+    }, { timeout: 3000 });
 
     const addLabelButton = container.querySelector('button[aria-label="Add label"]');
     expect(addLabelButton).not.toBeNull();
     act(async () => {
       addLabelButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    await flush();
+    await vi.waitFor(() => {
+      expect(container.querySelector('input[placeholder="Search labels..."]')).not.toBeNull();
+    }, { timeout: 3000 });
+
+    await vi.waitFor(() => {
+      const labelButtons = Array.from(container.querySelectorAll("button"))
+        .filter((button) => button.textContent?.includes("Bug") || button.textContent?.includes("Feature"));
+      const bugButton = labelButtons.find((button) => button.textContent?.includes("Bug") && button.querySelector("svg"));
+      expect(bugButton).not.toBeUndefined();
+    }, { timeout: 3000 });
 
     const labelButtons = Array.from(container.querySelectorAll("button"))
       .filter((button) => button.textContent?.includes("Bug") || button.textContent?.includes("Feature"));
@@ -1053,7 +1078,12 @@ describe("IssueProperties", () => {
     act(async () => {
       parentTrigger!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    await flush();
+
+    await vi.waitFor(() => {
+      const candidateButton = Array.from(container.querySelectorAll("button"))
+        .find((button) => button.textContent?.includes("PAP-2 Candidate parent"));
+      expect(candidateButton).not.toBeUndefined();
+    }, { timeout: 3000 });
 
     const candidateButton = Array.from(container.querySelectorAll("button"))
       .find((button) => button.textContent?.includes("PAP-2 Candidate parent"));

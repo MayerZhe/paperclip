@@ -195,8 +195,19 @@ function createIssue(overrides: Partial<Issue> = {}): Issue {
 }
 
 async function flush() {
-  act(async () => {
+  await act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+}
+
+/**
+ * Flush that also waits long enough for jsdom's requestAnimationFrame
+ * setInterval (~16ms) to settle.  Use this when the code under test
+ * wraps side-effects in rAF (e.g. the scroll-load effect).
+ */
+async function flushWithAnimFrame() {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 20));
   });
 }
 
@@ -225,7 +236,7 @@ async function waitForMicrotaskAssertion(assertion: () => void, attempts = 20) {
       return;
     } catch (error) {
       lastError = error;
-      act(async () => {
+      await act(async () => {
         await Promise.resolve();
       });
     }
@@ -1268,8 +1279,8 @@ describe("IssuesList", () => {
       expect(container.querySelectorAll('[data-testid="issue-row"]')).toHaveLength(100);
     });
 
-    await flush();
-    await flush();
+    // Let any initial rAF-based scroll-load settle before checking.
+    await flushWithAnimFrame();
     expect(container.querySelectorAll('[data-testid="issue-row"]')).toHaveLength(100);
 
     act(() => {
@@ -1313,9 +1324,8 @@ describe("IssuesList", () => {
     await waitForAssertion(() => {
       expect(container.querySelectorAll('[data-testid="issue-row"]')).toHaveLength(100);
     });
-    await flush();
-    expect(onLoadMoreIssues).toHaveBeenCalledTimes(1);
-    await flush();
+    // rAF-based checkScrollPosition needs the animation-frame interval to settle.
+    await flushWithAnimFrame();
     expect(onLoadMoreIssues).toHaveBeenCalledTimes(1);
 
     act(() => {

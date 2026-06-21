@@ -75,8 +75,9 @@ vi.mock("../context/ToastContext", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flush() {
-  act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
+  await act(async () => {
+    await Promise.resolve();
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
 }
 
@@ -176,7 +177,7 @@ describe("RoutineHistoryTab", () => {
     const root = createRoot(container);
     const queryClient = makeQueryClient();
     const routine = props.routine ?? createRoutine();
-    act(async () => {
+    await act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <RoutineHistoryTab
@@ -193,6 +194,7 @@ describe("RoutineHistoryTab", () => {
         </QueryClientProvider>,
       );
     });
+    await flush();
     await flush();
     return root;
   }

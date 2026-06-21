@@ -180,7 +180,7 @@ describe("useLiveRunTranscripts", () => {
 
     expect(latestIsInitialHydrating).toBe(true);
 
-    act(async () => {
+    await act(async () => {
       resolveLog?.({ runId: "run-1", store: "memory", logRef: "log-1", content: "", nextOffset: 0 });
       await Promise.resolve();
     });

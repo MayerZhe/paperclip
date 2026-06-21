@@ -147,7 +147,7 @@ vi.mock("../lib/paste-normalization", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flush() {
-  act(async () => {
+  await act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 }
@@ -406,6 +406,7 @@ describe("MarkdownEditor", () => {
     act(() => {
       scope?.dispatchEvent(createFileDragEvent("dragenter"));
     });
+    await flush();
 
     expect(scope?.className).toContain("ring-1");
     expect(container.textContent).toContain("Drop image to upload");
@@ -413,6 +414,7 @@ describe("MarkdownEditor", () => {
     act(() => {
       scope?.dispatchEvent(createFileDragEvent("dragleave"));
     });
+    await flush();
 
     expect(scope?.className).not.toContain("ring-1");
 
@@ -698,7 +700,7 @@ describe("MarkdownEditor", () => {
   ): Promise<{ option: HTMLButtonElement; root: ReturnType<typeof createRoot>; menu: HTMLElement }> {
     const root = createRoot(container);
 
-    act(async () => {
+    await act(async () => {
       root.render(
         <MarkdownEditor
           value="@Pap"
@@ -722,7 +724,7 @@ describe("MarkdownEditor", () => {
     selection?.removeAllRanges();
     selection?.addRange(range);
 
-    act(() => {
+    await act(async () => {
       document.dispatchEvent(new Event("selectionchange"));
     });
     await flush();
