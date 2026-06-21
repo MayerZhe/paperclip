@@ -55,15 +55,15 @@ vi.mock("@/lib/router", () => ({
 }));
 
 vi.mock("./Sidebar", () => ({
-  Sidebar: () => <div>Main company nav</div>,
+  Sidebar: () => <div>Main node org nav</div>,
 }));
 
 vi.mock("./InstanceSidebar", () => ({
   InstanceSidebar: () => <div>Instance sidebar</div>,
 }));
 
-vi.mock("./CompanySettingsSidebar", () => ({
-  CompanySettingsSidebar: () => <div>Company settings sidebar</div>,
+vi.mock("./NodeOrgSettingsSidebar", () => ({
+  NodeOrgSettingsSidebar: () => <div>Node Org settings sidebar</div>,
 }));
 
 vi.mock("./BreadcrumbBar", () => ({
@@ -217,7 +217,7 @@ vi.mock("../lib/main-content-focus", () => ({
 
 
 async function flushReact() {
-  act(async () => {
+  await act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });

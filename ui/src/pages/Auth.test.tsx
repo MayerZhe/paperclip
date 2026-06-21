@@ -46,11 +46,11 @@ vi.mock("@/context/NodeOrgContext", () => ({
 
 
 async function flushReact() {
-  act(async () => {
-    await Promise.resolve();
-    await new Promise((resolve) => window.setTimeout(resolve, 0));
-  });
-  flushSync(() => {});
+  await act(async () => {
+      await Promise.resolve();
+      await new Promise((resolve) => window.setTimeout(resolve, 0));
+    });
+    flushSync(() => {});
 }
 
 function renderAuthPage(container: HTMLElement) {

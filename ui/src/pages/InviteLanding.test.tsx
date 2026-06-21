@@ -64,11 +64,11 @@ vi.mock("@/context/NodeOrgContext", () => ({
 
 
 async function flushReact() {
-  act(async () => {
-    await Promise.resolve();
-    await new Promise((resolve) => window.setTimeout(resolve, 0));
-  });
-  flushSync(() => {});
+  await act(async () => {
+      await Promise.resolve();
+      await new Promise((resolve) => window.setTimeout(resolve, 0));
+    });
+    flushSync(() => {});
 }
 
 describe("InviteLandingPage", () => {
@@ -540,15 +540,15 @@ describe("InviteLandingPage", () => {
 
     expect(acceptInviteMock).toHaveBeenCalledWith("pcp_invite_test", { requestType: "human" });
     expect(container.textContent).toContain("Request to join Acme Robotics");
-    expect(container.textContent).toContain("A company admin must approve your request to join.");
+    expect(container.textContent).toContain("must approve your request to join.");
     expect(container.textContent).toContain(
-      "Ask them to visit Company Settings → Members to approve your request.",
+      "Ask them to visit Node Org Settings → Members to approve your request.",
     );
     expect(container.querySelector('img[alt="Acme Robotics logo"]')).not.toBeNull();
     expect(container.textContent).not.toContain("http://localhost/company/settings/members");
 
     const approvalLinks = Array.from(container.querySelectorAll("a")).filter(
-      (link) => link.textContent === "Company Settings → Members",
+      (link) => link.textContent === "Node Org Settings → Members",
     );
     expect(approvalLinks).toHaveLength(2);
     const expectedApprovalUrl = `${window.location.origin}/company/settings/members`;
@@ -788,12 +788,12 @@ describe("InviteLandingPage", () => {
     await flushReact();
 
     expect(container.textContent).toContain("Join Acme Robotics");
-    expect(container.textContent).toContain("Already in this company");
+    expect(container.textContent).toContain("Already in this node org");
     expect(container.textContent).toContain("This account already belongs to Acme Robotics.");
     expect(acceptInviteMock).not.toHaveBeenCalled();
 
     const openButton = Array.from(container.querySelectorAll("button")).find(
-      (button) => button.textContent === "Open company",
+      (button) => button.textContent === "Open node org",
     );
     expect(openButton).not.toBeNull();
 

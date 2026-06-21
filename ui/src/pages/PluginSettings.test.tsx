@@ -55,7 +55,7 @@ vi.mock("@/components/PageTabBar", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flushReact() {
-  act(async () => {
+  await act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -166,9 +166,9 @@ describe("PluginSettings", () => {
     const root = await renderSettings(container);
 
     expect(container.textContent).toContain("Configure this plugin from Node Org Environments.");
-    expect(container.textContent).toContain("company-scoped instead of instance-global");
+    expect(container.textContent).toContain("node org-scoped instead of instance-global");
     const link = container.querySelector('a[href="/company/settings/environments"]');
-    expect(link?.textContent).toContain("Open Company Environments");
+    expect(link?.textContent).toContain("Open Node Org Environments");
 
     act(async () => {
       root.unmount();

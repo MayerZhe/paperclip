@@ -67,7 +67,7 @@ vi.mock("@/lib/router", () => ({
 
 
 async function flushReact() {
-  act(async () => {
+  await act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -170,7 +170,7 @@ describe("CloudUpstream", () => {
     await flushReact();
     await flushReact();
 
-    const input = container.querySelector<HTMLInputElement>("input[aria-label='Paperclip Cloud stack URL']");
+    const input = container.querySelector<HTMLInputElement>("input[aria-label='Super Node Cloud stack URL']");
     expect(input).toBeTruthy();
     act(async () => {
       const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;

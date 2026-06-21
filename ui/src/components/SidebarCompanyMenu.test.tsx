@@ -99,7 +99,7 @@ vi.mock("../context/SidebarContext", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flushReact() {
-  act(async () => {
+  await act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -170,7 +170,7 @@ describe("SidebarNodeOrgMenu", () => {
     expect(document.body.textContent).toContain("ANA");
     expect(document.body.textContent).toContain("Add company...");
     expect(document.body.textContent).toContain("Invite people to Acme Labs");
-    expect(document.body.textContent).toContain("Node Org settings");
+    expect(document.body.textContent).toContain("Company settings");
     expect(document.body.textContent).toContain("Sign out");
 
     const signOutButton = Array.from(document.body.querySelectorAll('[data-slot="dropdown-menu-item"]'))
