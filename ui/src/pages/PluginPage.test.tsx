@@ -56,7 +56,7 @@ vi.mock("@/plugins/slots", async () => {
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -89,7 +89,7 @@ async function renderPage(container: HTMLDivElement) {
     defaultOptions: { queries: { retry: false } },
   });
 
-  await act(async () => {
+  act(async () => {
     root.render(
       <QueryClientProvider client={queryClient}>
         <PluginPage />
@@ -132,7 +132,7 @@ describe("PluginPage", () => {
     expect(container.textContent).toContain("Back");
     expect(container.querySelector('a[href="/PAP/dashboard"]')).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -168,7 +168,7 @@ describe("PluginPage", () => {
     // Page slot itself still renders.
     expect(container.querySelector('[data-testid="plugin-slot-mount"]')?.textContent).toBe("Wiki");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -201,7 +201,7 @@ describe("PluginPage", () => {
 
     expect(mockSetBreadcrumbs).toHaveBeenCalledWith([{ label: "index" }]);
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

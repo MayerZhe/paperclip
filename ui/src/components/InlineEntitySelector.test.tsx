@@ -4,17 +4,11 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { InlineEntitySelector } from "./InlineEntitySelector";
+import { act } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 describe("InlineEntitySelector", () => {
   let container: HTMLDivElement;
@@ -58,7 +52,7 @@ describe("InlineEntitySelector", () => {
     const trigger = container.querySelector("button") as HTMLButtonElement | null;
     expect(trigger).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -66,17 +60,17 @@ describe("InlineEntitySelector", () => {
     expect(searchInput).not.toBeNull();
     searchInput?.focus();
 
-    await act(async () => {
+    act(async () => {
       await Promise.resolve();
     });
 
-    await act(async () => {
+    act(async () => {
       searchInput?.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowDown" }));
     });
 
     expect(documentKeyDown).not.toHaveBeenCalled();
 
-    await act(async () => {
+    act(async () => {
       searchInput?.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }));
     });
 
@@ -123,7 +117,7 @@ describe("InlineEntitySelector", () => {
     const trigger = container.querySelector("button") as HTMLButtonElement | null;
     expect(trigger).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 

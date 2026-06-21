@@ -3,6 +3,7 @@
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DocumentAnnotationLayer } from "./DocumentAnnotationLayer";
+import { act } from "react";
 
 const mockRangesForNormalizedSpan = vi.hoisted(() => vi.fn());
 
@@ -15,11 +16,6 @@ vi.mock("@/lib/document-annotation-selection", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  await callback();
-  await Promise.resolve();
-  await new Promise((resolve) => setTimeout(resolve, 0));
-}
 
 function makeRect(left: number, top: number, width: number, height: number): DOMRect {
   return {
@@ -56,7 +52,7 @@ describe("DocumentAnnotationLayer", () => {
 
   afterEach(async () => {
     if (root) {
-      await act(() => root?.unmount());
+      act(() => root?.unmount());
       root = null;
     }
     rectSpy.mockRestore();
@@ -69,7 +65,7 @@ describe("DocumentAnnotationLayer", () => {
     body.textContent = "Annotated body text.";
     root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root?.render(
         <DocumentAnnotationLayer
           containerRef={{ current: body }}
@@ -119,7 +115,7 @@ describe("DocumentAnnotationLayer", () => {
     });
     root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root?.render(
         <DocumentAnnotationLayer
           containerRef={{ current: body }}
@@ -166,7 +162,7 @@ describe("DocumentAnnotationLayer", () => {
     body.textContent = "Annotated body text.";
     root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root?.render(
         <DocumentAnnotationLayer
           containerRef={{ current: body }}
@@ -190,7 +186,7 @@ describe("DocumentAnnotationLayer", () => {
     expect(openHighlightCall).toBeTruthy();
     expect((openHighlightCall?.[1] as MockHighlight).ranges).toHaveLength(1);
 
-    await act(async () => root?.unmount());
+    act(async () => root?.unmount());
     root = null;
     expect(deleteHighlight).toHaveBeenCalledWith("paperclip-doc-annotation-open");
 

@@ -48,7 +48,7 @@ function createRuntimeService(overrides: Partial<WorkspaceRuntimeService> = {}):
 }
 
 describe("buildWorkspaceRuntimeControlSections", () => {
-  it("separates service and job commands while matching running services", () => {
+  it("separates service and job commands while matching running services", async () => {
     const sections = buildWorkspaceRuntimeControlSections({
       runtimeConfig: {
         commands: [
@@ -78,7 +78,7 @@ describe("buildWorkspaceRuntimeControlSections", () => {
     });
   });
 
-  it("keeps stopped stale runtime services from masking updated inherited commands", () => {
+  it("keeps stopped stale runtime services from masking updated inherited commands", async () => {
     const sections = buildWorkspaceRuntimeControlSections({
       runtimeConfig: {
         commands: [
@@ -108,7 +108,7 @@ describe("buildWorkspaceRuntimeControlSections", () => {
     expect(sections.otherServices).toEqual([]);
   });
 
-  it("surfaces running stale runtime services separately from updated commands", () => {
+  it("surfaces running stale runtime services separately from updated commands", async () => {
     const sections = buildWorkspaceRuntimeControlSections({
       runtimeConfig: {
         commands: [
@@ -146,7 +146,7 @@ describe("buildWorkspaceRuntimeControlSections", () => {
     ]);
   });
 
-  it("surfaces running stale runtime services separately from updated commands", () => {
+  it("surfaces running stale runtime services separately from updated commands", async () => {
     const sections = buildWorkspaceRuntimeControlSections({
       runtimeConfig: {
         commands: [
@@ -184,7 +184,7 @@ describe("buildWorkspaceRuntimeControlSections", () => {
     ]);
   });
 
-  it("surfaces running stale runtime services separately from updated commands", () => {
+  it("surfaces running stale runtime services separately from updated commands", async () => {
     const sections = buildWorkspaceRuntimeControlSections({
       runtimeConfig: {
         commands: [
@@ -224,7 +224,7 @@ describe("buildWorkspaceRuntimeControlSections", () => {
 });
 
 describe("buildWorkspaceRuntimeControlItems", () => {
-  it("keeps the legacy flat export shape for stale importers", () => {
+  it("keeps the legacy flat export shape for stale importers", async () => {
     const items = buildWorkspaceRuntimeControlItems({
       runtimeConfig: {
         commands: [
@@ -261,7 +261,7 @@ describe("WorkspaceRuntimeControls", () => {
     document.body.innerHTML = "";
   });
 
-  it("renders service and job actions distinctly", () => {
+  it("renders service and job actions distinctly", async () => {
     const sections = buildWorkspaceRuntimeControlSections({
       runtimeConfig: {
         commands: [
@@ -294,7 +294,7 @@ describe("WorkspaceRuntimeControls", () => {
     act(() => root.unmount());
   });
 
-  it("lets quick action buttons inherit the shared button shape tokens", () => {
+  it("lets quick action buttons inherit the shared button shape tokens", async () => {
     const sections = buildWorkspaceRuntimeControlSections({
       runtimeConfig: {
         commands: [
@@ -329,7 +329,7 @@ describe("WorkspaceRuntimeControls", () => {
     act(() => root.unmount());
   });
 
-  it("shows disabled actions when local command prerequisites are missing", () => {
+  it("shows disabled actions when local command prerequisites are missing", async () => {
     const sections = buildWorkspaceRuntimeControlSections({
       runtimeConfig: {
         commands: [
@@ -360,7 +360,7 @@ describe("WorkspaceRuntimeControls", () => {
     act(() => root.unmount());
   });
 
-  it("hides the disabled hint once services can already run", () => {
+  it("hides the disabled hint once services can already run", async () => {
     const sections = buildWorkspaceRuntimeControlSections({
       runtimeConfig: {
         commands: [
@@ -389,7 +389,7 @@ describe("WorkspaceRuntimeControls", () => {
     act(() => root.unmount());
   });
 
-  it("hides the health badge for stopped services", () => {
+  it("hides the health badge for stopped services", async () => {
     const sections = buildWorkspaceRuntimeControlSections({
       runtimeConfig: {
         commands: [
@@ -417,7 +417,7 @@ describe("WorkspaceRuntimeControls", () => {
     act(() => root.unmount());
   });
 
-  it("can render square plain surfaces for embedded configuration pages", () => {
+  it("can render square plain surfaces for embedded configuration pages", async () => {
     const sections = buildWorkspaceRuntimeControlSections({
       runtimeConfig: {
         commands: [
@@ -453,7 +453,7 @@ describe("WorkspaceRuntimeControls", () => {
     act(() => root.unmount());
   });
 
-  it("accepts the legacy items prop without crashing", () => {
+  it("accepts the legacy items prop without crashing", async () => {
     const items = buildWorkspaceRuntimeControlItems({
       runtimeConfig: {
         commands: [

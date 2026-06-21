@@ -55,7 +55,7 @@ vi.mock("@/components/PageTabBar", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -125,7 +125,7 @@ async function renderSettings(container: HTMLDivElement) {
     defaultOptions: { queries: { retry: false } },
   });
 
-  await act(async () => {
+  act(async () => {
     root.render(
       <QueryClientProvider client={queryClient}>
         <PluginSettings />
@@ -165,12 +165,12 @@ describe("PluginSettings", () => {
   it("routes environment-provider plugins to company environments when they have no instance config", async () => {
     const root = await renderSettings(container);
 
-    expect(container.textContent).toContain("Configure this plugin from Company Environments.");
+    expect(container.textContent).toContain("Configure this plugin from Node Org Environments.");
     expect(container.textContent).toContain("company-scoped instead of instance-global");
     const link = container.querySelector('a[href="/company/settings/environments"]');
     expect(link?.textContent).toContain("Open Company Environments");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -206,7 +206,7 @@ describe("PluginSettings", () => {
     expect(container.textContent).toContain("Missing directories: raw, wiki");
     expect(container.textContent).toContain("Missing files: WIKI.md, index.md");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -248,7 +248,7 @@ describe("PluginSettings", () => {
     expect(container.textContent).toContain("Required file is missing.");
     expect(container.textContent).toContain("Missing files: WIKI.md");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -287,7 +287,7 @@ describe("PluginSettings", () => {
     expect(container.textContent).toContain("Configured root was not inspected.");
     expect(container.textContent).not.toContain("Present");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -331,7 +331,7 @@ describe("PluginSettings", () => {
     expect(container.textContent).toContain("Present");
     expect(container.textContent).not.toContain("Validation problems");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

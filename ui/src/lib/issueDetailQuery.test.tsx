@@ -76,7 +76,7 @@ function IssueDetailQueryHarness({
 async function flush() {
   // Multiple act cycles to allow React Query to process the async queryFn
   for (let i = 0; i < 5; i++) {
-    await act(async () => {
+    act(async () => {
       await new Promise((r) => setTimeout(r, 0));
     });
   }
@@ -105,7 +105,7 @@ describe("getIssueDetailQueryOptions", () => {
     queryClient.setQueryData(queryKeys.issues.detail("PAP-1442"), partialIssue);
     vi.mocked(issuesApi.get).mockResolvedValue(fullIssue);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetailQueryHarness
@@ -121,7 +121,7 @@ describe("getIssueDetailQueryOptions", () => {
     expect(issuesApi.get).toHaveBeenCalledWith("PAP-1442");
     expect(container.textContent).toContain("GitHub Security Advisory body");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
     queryClient.clear();

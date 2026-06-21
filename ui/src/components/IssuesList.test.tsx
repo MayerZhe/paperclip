@@ -195,7 +195,7 @@ function createIssue(overrides: Partial<Issue> = {}): Issue {
 }
 
 async function flush() {
-  await act(async () => {
+  act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 }
@@ -225,7 +225,7 @@ async function waitForMicrotaskAssertion(assertion: () => void, attempts = 20) {
       return;
     } catch (error) {
       lastError = error;
-      await act(async () => {
+      act(async () => {
         await Promise.resolve();
       });
     }
@@ -393,7 +393,7 @@ describe("IssuesList", () => {
       expect(button).not.toBeUndefined();
     });
 
-    await act(async () => {
+    act(async () => {
       const button = Array.from(container.querySelectorAll("button")).find(
         (candidate) => candidate.textContent?.includes("New Sub-issue"),
       );
@@ -457,7 +457,7 @@ describe("IssuesList", () => {
       expect(button).not.toBeNull();
     });
 
-    await act(async () => {
+    act(async () => {
       const button = container.querySelector<HTMLButtonElement>('button[aria-label="New task in Feature Branch"]');
       button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       await Promise.resolve();
@@ -906,7 +906,7 @@ describe("IssuesList", () => {
 
     expect(onSearchChange).not.toHaveBeenCalled();
 
-    await act(async () => {
+    act(async () => {
       vi.advanceTimersByTime(1);
       await Promise.resolve();
     });
@@ -1539,7 +1539,7 @@ describe("IssuesList", () => {
       expect(workspaceButton).not.toBeUndefined();
     });
 
-    await act(async () => {
+    act(async () => {
       const workspaceButton = Array.from(container.querySelectorAll("button")).find(
         (button) => button.textContent === "Alpha",
       );
@@ -1624,7 +1624,7 @@ describe("IssuesList", () => {
       expect(container.textContent).toContain("Routine issue");
     });
 
-    await act(async () => {
+    act(async () => {
       const filterButton = Array.from(document.body.querySelectorAll("button")).find(
         (button) => button.getAttribute("title") === "Filter",
       );
@@ -1639,7 +1639,7 @@ describe("IssuesList", () => {
       expect(toggle).not.toBeUndefined();
     });
 
-    await act(async () => {
+    act(async () => {
       const toggle = Array.from(document.body.querySelectorAll("label")).find(
         (label) => label.textContent?.includes("Hide routine runs"),
       );

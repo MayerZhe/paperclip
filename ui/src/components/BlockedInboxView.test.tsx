@@ -131,7 +131,7 @@ const blockedViewProps = {
 async function waitFor(predicate: () => boolean, attempts = 30): Promise<void> {
   for (let i = 0; i < attempts; i += 1) {
     if (predicate()) return;
-    await act(async () => {
+    act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 5));
     });
   }

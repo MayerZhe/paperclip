@@ -46,7 +46,7 @@ vi.mock("../context/ThemeContext", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -81,7 +81,7 @@ describe("SidebarAccountMenu", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <SidebarAccountMenu
@@ -101,7 +101,7 @@ describe("SidebarAccountMenu", () => {
     const trigger = container.querySelector('button[aria-label="Open account menu"]');
     expect(trigger).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -113,7 +113,7 @@ describe("SidebarAccountMenu", () => {
     expect(document.body.querySelector('[data-slot="popover-content"]')?.className)
       .toContain("w-[277px]");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

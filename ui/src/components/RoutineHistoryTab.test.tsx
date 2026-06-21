@@ -75,7 +75,7 @@ vi.mock("../context/ToastContext", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flush() {
-  await act(async () => {
+  act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 }
@@ -176,7 +176,7 @@ describe("RoutineHistoryTab", () => {
     const root = createRoot(container);
     const queryClient = makeQueryClient();
     const routine = props.routine ?? createRoutine();
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <RoutineHistoryTab
@@ -244,7 +244,7 @@ describe("RoutineHistoryTab", () => {
       "[data-testid='revision-row-1']",
     ) as HTMLButtonElement | null;
     expect(oldRow).not.toBeNull();
-    await act(async () => {
+    act(async () => {
       oldRow?.click();
     });
     await flush();
@@ -291,7 +291,7 @@ describe("RoutineHistoryTab", () => {
     const oldRow = container.querySelector(
       "[data-testid='revision-row-1']",
     ) as HTMLButtonElement | null;
-    await act(async () => {
+    act(async () => {
       oldRow?.click();
     });
     await flush();
@@ -299,7 +299,7 @@ describe("RoutineHistoryTab", () => {
       (button) => button.textContent === "Restore as new revision",
     );
     expect(restoreButtons.length).toBeGreaterThan(0);
-    await act(async () => {
+    act(async () => {
       restoreButtons[0].click();
     });
     await flush();
@@ -308,7 +308,7 @@ describe("RoutineHistoryTab", () => {
       (b.textContent ?? "").includes("Restore as revision 3"),
     );
     expect(confirmButtons.length).toBeGreaterThan(0);
-    await act(async () => {
+    act(async () => {
       confirmButtons[0].click();
     });
     await flush();
@@ -372,7 +372,7 @@ describe("RoutineHistoryTab", () => {
     const oldRow = container.querySelector(
       "[data-testid='revision-row-1']",
     ) as HTMLButtonElement | null;
-    await act(async () => {
+    act(async () => {
       oldRow?.click();
     });
     await flush();
@@ -380,7 +380,7 @@ describe("RoutineHistoryTab", () => {
       (button) => button.textContent === "Restore as new revision",
     );
     expect(restoreButtons.length).toBeGreaterThan(0);
-    await act(async () => {
+    act(async () => {
       restoreButtons[0].click();
     });
     await flush();
@@ -454,14 +454,14 @@ describe("RoutineHistoryTab", () => {
     const oldRow = container.querySelector(
       "[data-testid='revision-row-1']",
     ) as HTMLButtonElement | null;
-    await act(async () => {
+    act(async () => {
       oldRow?.click();
     });
     await flush();
     const compareButton = Array.from(container.querySelectorAll("button")).find(
       (button) => button.textContent === "Compare with current",
     );
-    await act(async () => {
+    act(async () => {
       compareButton?.click();
     });
     await flush();
@@ -499,21 +499,21 @@ describe("RoutineHistoryTab", () => {
     const oldRow = container.querySelector(
       "[data-testid='revision-row-1']",
     ) as HTMLButtonElement | null;
-    await act(async () => {
+    act(async () => {
       oldRow?.click();
     });
     await flush();
     const restoreButtons = Array.from(container.querySelectorAll("button")).filter(
       (button) => button.textContent === "Restore as new revision",
     );
-    await act(async () => {
+    act(async () => {
       restoreButtons[0].click();
     });
     await flush();
     const confirmButtons = Array.from(container.querySelectorAll("button")).filter((b) =>
       (b.textContent ?? "").includes("Restore as revision 3"),
     );
-    await act(async () => {
+    act(async () => {
       confirmButtons[0].click();
     });
     await flush();

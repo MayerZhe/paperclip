@@ -206,7 +206,7 @@ describe("ProjectWorkspaceDetail plugin tabs", () => {
 
   async function render() {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    await act(async () => {
+    act(async () => {
       root = createRoot(container);
       root.render(
         <QueryClientProvider client={queryClient}>
@@ -214,7 +214,7 @@ describe("ProjectWorkspaceDetail plugin tabs", () => {
         </QueryClientProvider>,
       );
     });
-    await act(async () => {
+    act(async () => {
       await flush();
     });
   }
@@ -283,7 +283,7 @@ describe("ProjectWorkspaceDetail plugin tabs", () => {
 
     await render();
 
-    await act(async () => {
+    act(async () => {
       (container.querySelector('[data-tab-value="plugin:paperclip.quality:quality-tab"]') as HTMLButtonElement).click();
     });
 

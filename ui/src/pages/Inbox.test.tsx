@@ -273,7 +273,7 @@ describe("Inbox toolbar", () => {
     });
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Inbox />
@@ -304,7 +304,7 @@ describe("Inbox toolbar", () => {
     });
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Inbox />
@@ -315,7 +315,7 @@ describe("Inbox toolbar", () => {
     const groupButton = container.querySelector<HTMLButtonElement>('button[title="Group"]');
     expect(groupButton).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       groupButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -338,7 +338,7 @@ describe("Inbox toolbar", () => {
     });
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Inbox />
@@ -358,7 +358,7 @@ describe("Inbox toolbar", () => {
     expect(linkOf(rows[0]!)?.className).toContain("hover:bg-accent/50");
     expect(linkOf(rows[1]!)?.className).toContain("hover:bg-accent/50");
 
-    await act(async () => {
+    act(async () => {
       rows[1]!.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
     });
 
@@ -366,7 +366,7 @@ describe("Inbox toolbar", () => {
     expect(linkOf(rows[1]!)?.className).toContain("hover:bg-transparent");
     expect(linkOf(rows[0]!)?.className).toContain("hover:bg-accent/50");
 
-    await act(async () => {
+    act(async () => {
       rows[0]!.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
     });
 

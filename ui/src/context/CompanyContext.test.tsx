@@ -144,7 +144,7 @@ describe("NodeOrgProvider", () => {
   });
 
   afterEach(async () => {
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
     queryClient.clear();
@@ -157,7 +157,7 @@ describe("NodeOrgProvider", () => {
     mockCompaniesApi.list.mockImplementation(() => new Promise(() => {}));
     const seen: Array<string | null> = [];
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <NodeOrgProvider>
@@ -179,7 +179,7 @@ describe("NodeOrgProvider", () => {
     mockCompaniesApi.list.mockImplementation(() => new Promise(() => {}));
     const seen: Array<string | null> = [];
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <NodeOrgProvider>

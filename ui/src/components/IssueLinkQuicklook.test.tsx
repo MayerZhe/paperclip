@@ -93,7 +93,7 @@ describe("IssueLinkQuicklook", () => {
     vi.clearAllMocks();
   });
 
-  it("keeps portaled quicklook links mounted until after blur click handling", () => {
+  it("keeps portaled quicklook links mounted until after blur click handling", async () => {
     const issue = createIssue();
 
     act(() => {

@@ -7,6 +7,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { InviteLandingPage } from "./InviteLanding";
 import { queryKeys } from "../lib/queryKeys";
+import { act } from "react";
 
 const getInviteMock = vi.hoisted(() => vi.fn());
 const acceptInviteMock = vi.hoisted(() => vi.fn());
@@ -61,16 +62,9 @@ vi.mock("@/context/NodeOrgContext", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -142,7 +136,7 @@ describe("InviteLandingPage", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/invite/pcp_invite_test"]}>
           <QueryClientProvider client={queryClient}>
@@ -156,7 +150,7 @@ describe("InviteLandingPage", () => {
     await flushReact();
     await flushReact();
 
-    expect(container.textContent).toContain("You've been invited to join Paperclip");
+    expect(container.textContent).toContain("You've been invited to join Super Node");
     expect(container.textContent).toContain("Join Acme Robotics");
     expect(container.textContent).toContain("Create account");
     expect(container.textContent).toContain("I already have an account");
@@ -177,7 +171,7 @@ describe("InviteLandingPage", () => {
     const inputValueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
     expect(inputValueSetter).toBeTypeOf("function");
 
-    await act(async () => {
+    act(async () => {
       inputValueSetter!.call(nameInput, "Jane Example");
       nameInput!.dispatchEvent(new Event("input", { bubbles: true }));
       nameInput!.dispatchEvent(new Event("change", { bubbles: true }));
@@ -192,7 +186,7 @@ describe("InviteLandingPage", () => {
     const authForm = container.querySelector('[data-testid="invite-inline-auth"]') as HTMLFormElement | null;
     expect(authForm).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       authForm?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
     });
     await flushReact();
@@ -209,7 +203,7 @@ describe("InviteLandingPage", () => {
     expect(container.textContent).toContain("Sign in to continue");
     expect(localStorage.getItem("paperclip:pending-invite-token")).toBe("pcp_invite_test");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -220,7 +214,7 @@ describe("InviteLandingPage", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/invite/pcp_invite_test"]}>
           <QueryClientProvider client={queryClient}>
@@ -259,7 +253,7 @@ describe("InviteLandingPage", () => {
     expect(passwordInput.getAttribute("aria-required")).toBe("true");
     expect(nameInput.required).toBe(true);
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -277,7 +271,7 @@ describe("InviteLandingPage", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/invite/pcp_invite_test"]}>
           <QueryClientProvider client={queryClient}>
@@ -296,7 +290,7 @@ describe("InviteLandingPage", () => {
     const existingAccountButton = Array.from(container.querySelectorAll("button")).find(
       (button) => button.textContent === "I already have an account",
     );
-    await act(async () => {
+    act(async () => {
       existingAccountButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -304,7 +298,7 @@ describe("InviteLandingPage", () => {
     const emailInput = container.querySelector('input[name="email"]') as HTMLInputElement;
     const passwordInput = container.querySelector('input[name="password"]') as HTMLInputElement;
 
-    await act(async () => {
+    act(async () => {
       inputValueSetter!.call(emailInput, "jane@example.com");
       emailInput.dispatchEvent(new Event("input", { bubbles: true }));
       inputValueSetter!.call(passwordInput, "wrongpass");
@@ -312,7 +306,7 @@ describe("InviteLandingPage", () => {
     });
 
     const authForm = container.querySelector('[data-testid="invite-inline-auth"]') as HTMLFormElement;
-    await act(async () => {
+    act(async () => {
       authForm.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
     });
     await flushReact();
@@ -329,7 +323,7 @@ describe("InviteLandingPage", () => {
     expect(passwordInput.getAttribute("aria-describedby")).toBe(errorId);
     expect(passwordInput.getAttribute("aria-invalid")).toBe("true");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -352,7 +346,7 @@ describe("InviteLandingPage", () => {
       companyIds: [],
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/invite/pcp_invite_test"]}>
           <QueryClientProvider client={queryClient}>
@@ -374,7 +368,7 @@ describe("InviteLandingPage", () => {
     );
     expect(existingAccountButton).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       existingAccountButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -384,7 +378,7 @@ describe("InviteLandingPage", () => {
     expect(emailInput).not.toBeNull();
     expect(passwordInput).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       inputValueSetter!.call(emailInput, "jane@example.com");
       emailInput!.dispatchEvent(new Event("input", { bubbles: true }));
       emailInput!.dispatchEvent(new Event("change", { bubbles: true }));
@@ -396,7 +390,7 @@ describe("InviteLandingPage", () => {
     const authForm = container.querySelector('[data-testid="invite-inline-auth"]') as HTMLFormElement | null;
     expect(authForm).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       authForm?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
     });
     await flushReact();
@@ -407,10 +401,10 @@ describe("InviteLandingPage", () => {
       password: "wrongpass",
     });
     expect(container.textContent).toContain(
-      "That email and password did not match an existing Paperclip account. Check both fields, or create an account first if you are new here.",
+      "That email and password did not match an existing Super Node account. Check both fields, or create an account first if you are new here.",
     );
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -443,7 +437,7 @@ describe("InviteLandingPage", () => {
       companyIds: [],
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/invite/pcp_invite_test"]}>
           <QueryClientProvider client={queryClient}>
@@ -467,7 +461,7 @@ describe("InviteLandingPage", () => {
     expect(emailInput).not.toBeNull();
     expect(passwordInput).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       inputValueSetter!.call(nameInput, "Jane Example");
       nameInput!.dispatchEvent(new Event("input", { bubbles: true }));
       inputValueSetter!.call(emailInput, "jane@example.com");
@@ -479,7 +473,7 @@ describe("InviteLandingPage", () => {
     const authForm = container.querySelector('[data-testid="invite-inline-auth"]') as HTMLFormElement | null;
     expect(authForm).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       authForm?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
     });
     await flushReact();
@@ -501,7 +495,7 @@ describe("InviteLandingPage", () => {
     });
     expect(localStorage.getItem("paperclip:pending-invite-token")).toBeNull();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -528,7 +522,7 @@ describe("InviteLandingPage", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/invite/pcp_invite_test"]}>
           <QueryClientProvider client={queryClient}>
@@ -562,7 +556,7 @@ describe("InviteLandingPage", () => {
       expect(link.getAttribute("href")).toBe(expectedApprovalUrl);
     }
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -608,7 +602,7 @@ describe("InviteLandingPage", () => {
       companyIds: [],
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/invite/pcp_invite_test"]}>
           <QueryClientProvider client={queryClient}>
@@ -629,7 +623,7 @@ describe("InviteLandingPage", () => {
     expect(queryClient.getQueryState(queryKeys.access.currentBoardAccess)?.isInvalidated).toBe(true);
     expect(localStorage.getItem("paperclip:pending-invite-token")).toBeNull();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -655,7 +649,7 @@ describe("InviteLandingPage", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/invite/pcp_invite_test"]}>
           <QueryClientProvider client={queryClient}>
@@ -674,7 +668,7 @@ describe("InviteLandingPage", () => {
     expect(container.textContent).toContain("Create your account");
     expect(container.querySelector('[data-testid="invite-pending-approval"]')).toBeNull();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -697,7 +691,7 @@ describe("InviteLandingPage", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/invite/pcp_invite_test"]}>
           <QueryClientProvider client={queryClient}>
@@ -719,7 +713,7 @@ describe("InviteLandingPage", () => {
     );
     expect(existingAccountButton).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       existingAccountButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -729,7 +723,7 @@ describe("InviteLandingPage", () => {
     expect(emailInput).not.toBeNull();
     expect(passwordInput).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       inputValueSetter!.call(emailInput, "jane@example.com");
       emailInput!.dispatchEvent(new Event("input", { bubbles: true }));
       inputValueSetter!.call(passwordInput, "supersecret");
@@ -739,7 +733,7 @@ describe("InviteLandingPage", () => {
     const authForm = container.querySelector('[data-testid="invite-inline-auth"]') as HTMLFormElement | null;
     expect(authForm).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       authForm?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
     });
     await flushReact();
@@ -757,7 +751,7 @@ describe("InviteLandingPage", () => {
     });
     expect(localStorage.getItem("paperclip:pending-invite-token")).toBeNull();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -779,7 +773,7 @@ describe("InviteLandingPage", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/invite/pcp_invite_test"]}>
           <QueryClientProvider client={queryClient}>
@@ -803,14 +797,14 @@ describe("InviteLandingPage", () => {
     );
     expect(openButton).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       openButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
 
     expect(setSelectedCompanyIdMock).toHaveBeenCalledWith("company-1", { source: "manual" });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -821,7 +815,7 @@ describe("InviteLandingPage", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/invite/pcp_invite_test"]}>
           <QueryClientProvider client={queryClient}>
@@ -838,7 +832,7 @@ describe("InviteLandingPage", () => {
     const logo = container.querySelector('img[alt="Acme Robotics logo"]') as HTMLImageElement | null;
     expect(logo).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       logo?.dispatchEvent(new Event("error"));
     });
     await flushReact();
@@ -846,7 +840,7 @@ describe("InviteLandingPage", () => {
     expect(container.querySelector('img[alt="Acme Robotics logo"]')).toBeNull();
     expect(container.querySelector('img[aria-hidden="true"]')).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -877,7 +871,7 @@ describe("InviteLandingPage", () => {
       unauthorized: false,
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/invite/pcp_invite_test"]}>
           <QueryClientProvider client={queryClient}>
@@ -895,7 +889,7 @@ describe("InviteLandingPage", () => {
     expect(acceptInviteMock).toHaveBeenCalledWith("pcp_invite_test", { requestType: "human" });
     expect(container.textContent).toContain("Request to join Acme Robotics");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -929,7 +923,7 @@ describe("InviteLandingPage", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/invite/pcp_invite_test"]}>
           <QueryClientProvider client={queryClient}>
@@ -946,7 +940,7 @@ describe("InviteLandingPage", () => {
     expect(container.textContent).not.toContain("Accept company invite");
     expect(acceptInviteMock).not.toHaveBeenCalled();
 
-    await act(async () => {
+    act(async () => {
       resolveCompanies?.([]);
     });
     await flushReact();
@@ -956,7 +950,7 @@ describe("InviteLandingPage", () => {
     expect(acceptInviteMock).toHaveBeenCalledWith("pcp_invite_test", { requestType: "human" });
     expect(container.textContent).toContain("Request to join Acme Robotics");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

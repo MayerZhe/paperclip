@@ -9,7 +9,7 @@ import { ApprovalPayloadRenderer, approvalLabel } from "./ApprovalPayload";
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 describe("approvalLabel", () => {
-  it("uses payload titles for generic board approvals", () => {
+  it("uses payload titles for generic board approvals", async () => {
     expect(
       approvalLabel("request_board_approval", {
         title: "Reply with an ASCII frog",
@@ -30,7 +30,7 @@ describe("ApprovalPayloadRenderer", () => {
     container.remove();
   });
 
-  it("renders request_board_approval payload fields without falling back to raw JSON", () => {
+  it("renders request_board_approval payload fields without falling back to raw JSON", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -62,7 +62,7 @@ describe("ApprovalPayloadRenderer", () => {
     });
   });
 
-  it("can hide the repeated title when the card header already shows it", () => {
+  it("can hide the repeated title when the card header already shows it", async () => {
     const root = createRoot(container);
 
     act(() => {

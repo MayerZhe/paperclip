@@ -112,26 +112,26 @@ function buildAction(overrides: Partial<IssueRecoveryAction> = {}): IssueRecover
 }
 
 describe("deriveRecoveryCardState", () => {
-  it("maps active missing_disposition to needed", () => {
+  it("maps active missing_disposition to needed", async () => {
     expect(deriveRecoveryCardState(buildAction())).toBe("needed");
   });
 
-  it("maps active_run_watchdog to observe_only", () => {
+  it("maps active_run_watchdog to observe_only", async () => {
     expect(deriveRecoveryCardState(buildAction({ kind: "active_run_watchdog" }))).toBe("observe_only");
   });
 
-  it("maps escalated status to escalated", () => {
+  it("maps escalated status to escalated", async () => {
     expect(deriveRecoveryCardState(buildAction({ status: "escalated" }))).toBe("escalated");
   });
 
-  it("maps resolved/cancelled to resolved", () => {
+  it("maps resolved/cancelled to resolved", async () => {
     expect(deriveRecoveryCardState(buildAction({ status: "resolved" }))).toBe("resolved");
     expect(deriveRecoveryCardState(buildAction({ status: "cancelled" }))).toBe("resolved");
   });
 });
 
 describe("IssueRecoveryActionCard", () => {
-  it("renders required fields and an aria-label naming the state", () => {
+  it("renders required fields and an aria-label naming the state", async () => {
     const node = render(
       <IssueRecoveryActionCard
         action={buildAction()}
@@ -154,14 +154,14 @@ describe("IssueRecoveryActionCard", () => {
     expect(node.textContent).toContain("Corrective wake queued");
   });
 
-  it("falls back to em dash when wake policy is absent", () => {
+  it("falls back to em dash when wake policy is absent", async () => {
     const node = render(
       <IssueRecoveryActionCard action={buildAction({ wakePolicy: null })} />,
     );
     expect(node.textContent).toContain("—");
   });
 
-  it("renders observe_only tone for active_run_watchdog", () => {
+  it("renders observe_only tone for active_run_watchdog", async () => {
     const node = render(
       <IssueRecoveryActionCard action={buildAction({ kind: "active_run_watchdog" })} />,
     );
@@ -170,7 +170,7 @@ describe("IssueRecoveryActionCard", () => {
     expect(node.textContent).toContain("OBSERVING ACTIVE RUN");
   });
 
-  it("renders a workspace-specific label and headline for workspace_validation", () => {
+  it("renders a workspace-specific label and headline for workspace_validation", async () => {
     const node = render(
       <IssueRecoveryActionCard
         action={buildAction({
@@ -197,7 +197,7 @@ describe("IssueRecoveryActionCard", () => {
     expect(node.textContent).toContain("Manual repair required");
   });
 
-  it("renders the resolved label and outcome when resolved", () => {
+  it("renders the resolved label and outcome when resolved", async () => {
     const node = render(
       <IssueRecoveryActionCard action={buildAction({ status: "resolved", outcome: "restored", resolvedAt: "2026-05-09T19:35:00.000Z" })} />,
     );
@@ -205,7 +205,7 @@ describe("IssueRecoveryActionCard", () => {
     expect(node.textContent).toContain("Resolved as restored");
   });
 
-  it("calls resolve with todo and does not offer delegated recovery", () => {
+  it("calls resolve with todo and does not offer delegated recovery", async () => {
     const onResolve = vi.fn();
     const node = render(
       <IssueRecoveryActionCard action={buildAction()} onResolve={onResolve} />,
@@ -221,7 +221,7 @@ describe("IssueRecoveryActionCard", () => {
     expect(onResolve).toHaveBeenCalledWith("todo");
   });
 
-  it("does not offer blocked recovery resolution without a blocker selection flow", () => {
+  it("does not offer blocked recovery resolution without a blocker selection flow", async () => {
     const node = render(
       <IssueRecoveryActionCard action={buildAction()} onResolve={() => {}} canFalsePositive />,
     );
@@ -235,7 +235,7 @@ describe("IssueRecoveryActionCard", () => {
     expect(document.body.textContent).not.toContain("Mark blocked");
   });
 
-  it("hides false-positive options unless canFalsePositive is set", () => {
+  it("hides false-positive options unless canFalsePositive is set", async () => {
     const first = render(
       <IssueRecoveryActionCard action={buildAction()} onResolve={() => {}} />,
     );

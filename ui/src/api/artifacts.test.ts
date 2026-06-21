@@ -9,6 +9,7 @@ vi.mock("./client", () => ({
 }));
 
 import { artifactsApi, type CompanyArtifact } from "./artifacts";
+import { act } from "react";
 
 function sampleArtifact(overrides: Partial<CompanyArtifact> = {}): CompanyArtifact {
   return {

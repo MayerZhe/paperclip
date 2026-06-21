@@ -128,7 +128,7 @@ describe("IssueWorkspaceCard", () => {
     container.remove();
   });
 
-  it("locks the environment selector and clears the issue override when reusing a workspace", () => {
+  it("locks the environment selector and clears the issue override when reusing a workspace", async () => {
     const root = createRoot(container);
     const onUpdate = vi.fn();
     const reusableWorkspace = createExecutionWorkspace();
@@ -201,7 +201,7 @@ describe("IssueWorkspaceCard", () => {
     });
   });
 
-  it("hides environment UI when environments are disabled", () => {
+  it("hides environment UI when environments are disabled", async () => {
     const root = createRoot(container);
 
     useQueryMock.mockImplementation((options: { queryKey: unknown[] }) => {

@@ -20,6 +20,7 @@ vi.mock("@/lib/router", () => ({
     <button type="button" data-to={to} onClick={onClick}>{children}</button>
   ),
   useLocation: () => ({ pathname: '/', search: '', hash: '', state: null }),
+  useNavigate: () => vi.fn(),
   NavLink: ({ to, children, className, ...props }: {
     to: string;
     children: ReactNode;
@@ -46,8 +47,10 @@ vi.mock("../context/DialogContext", () => ({
 
 vi.mock("../context/NodeOrgContext", () => ({
   useNodeOrg: () => ({
+    companies: [{ id: "company-1", status: "active", name: "Super Node", issuePrefix: "PAP" }],
     selectedCompanyId: "company-1",
-    selectedCompany: { id: "company-1", issuePrefix: "PAP", name: "Paperclip" },
+    selectedCompany: { id: "company-1", issuePrefix: "PAP", name: "Super Node" },
+    setSelectedCompanyId: vi.fn(),
   }),
 }));
 
@@ -193,7 +196,7 @@ describe("Sidebar", () => {
       container.querySelector('[data-testid="sidebar-agents"]')?.getAttribute("data-streamlined"),
     ).toBe("true");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -220,7 +223,7 @@ describe("Sidebar", () => {
       container.querySelector('[data-testid="sidebar-agents"]')?.getAttribute("data-streamlined"),
     ).toBe("false");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

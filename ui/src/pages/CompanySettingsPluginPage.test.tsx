@@ -51,7 +51,7 @@ vi.mock("@/plugins/slots", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -63,7 +63,7 @@ async function renderPage(container: HTMLDivElement) {
     defaultOptions: { queries: { retry: false } },
   });
 
-  await act(async () => {
+  act(async () => {
     root.render(
       <QueryClientProvider client={queryClient}>
         <NodeOrgSettingsPluginPage />
@@ -118,7 +118,7 @@ describe("NodeOrgSettingsPluginPage", () => {
       { label: "Permissions" },
     ]);
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -133,7 +133,7 @@ describe("NodeOrgSettingsPluginPage", () => {
 
     expect(container.textContent).toContain("Page not found");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

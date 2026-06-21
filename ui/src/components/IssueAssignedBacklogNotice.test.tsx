@@ -33,7 +33,7 @@ afterEach(() => {
 });
 
 describe("IssueAssignedBacklogNotice", () => {
-  it("renders nothing when status is not backlog", () => {
+  it("renders nothing when status is not backlog", async () => {
     act(() => {
       root.render(
         <IssueAssignedBacklogNotice
@@ -46,7 +46,7 @@ describe("IssueAssignedBacklogNotice", () => {
     expect(container.querySelector('[data-testid="issue-assigned-backlog-notice"]')).toBeNull();
   });
 
-  it("renders nothing when there is no assignee", () => {
+  it("renders nothing when there is no assignee", async () => {
     act(() => {
       root.render(
         <IssueAssignedBacklogNotice
@@ -59,7 +59,7 @@ describe("IssueAssignedBacklogNotice", () => {
     expect(container.querySelector('[data-testid="issue-assigned-backlog-notice"]')).toBeNull();
   });
 
-  it("warns when an agent is assigned and the issue is parked in backlog", () => {
+  it("warns when an agent is assigned and the issue is parked in backlog", async () => {
     act(() => {
       root.render(
         <IssueAssignedBacklogNotice
@@ -75,7 +75,7 @@ describe("IssueAssignedBacklogNotice", () => {
     expect(notice?.textContent).toContain("ClaudeCoder");
   });
 
-  it("calls onResume when the resume button is clicked", () => {
+  it("calls onResume when the resume button is clicked", async () => {
     const onResume = vi.fn();
     act(() => {
       root.render(
@@ -95,7 +95,7 @@ describe("IssueAssignedBacklogNotice", () => {
     expect(onResume).toHaveBeenCalledTimes(1);
   });
 
-  it("disables the resume button while resuming", () => {
+  it("disables the resume button while resuming", async () => {
     act(() => {
       root.render(
         <IssueAssignedBacklogNotice

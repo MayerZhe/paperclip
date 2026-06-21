@@ -41,7 +41,7 @@ describe("ResizableSidebarPane", () => {
     return container.querySelector('[role="separator"]') as HTMLDivElement | null;
   }
 
-  it("uses a persisted width when open", () => {
+  it("uses a persisted width when open", async () => {
     window.localStorage.setItem("test.sidebar.width", "320");
 
     act(() => {
@@ -56,7 +56,7 @@ describe("ResizableSidebarPane", () => {
     expect(handle()?.getAttribute("aria-valuenow")).toBe("320");
   });
 
-  it("resizes by dragging and persists the new width", () => {
+  it("resizes by dragging and persists the new width", async () => {
     act(() => {
       root.render(
         <ResizableSidebarPane open resizable storageKey="test.sidebar.width">
@@ -79,7 +79,7 @@ describe("ResizableSidebarPane", () => {
     expect(window.localStorage.getItem("test.sidebar.width")).toBe("320");
   });
 
-  it("supports keyboard resizing and clamps to the configured bounds", () => {
+  it("supports keyboard resizing and clamps to the configured bounds", async () => {
     act(() => {
       root.render(
         <ResizableSidebarPane open resizable storageKey="test.sidebar.width">
@@ -106,7 +106,7 @@ describe("ResizableSidebarPane", () => {
     expect(pane().style.width).toBe("420px");
   });
 
-  it("can render without a resize handle", () => {
+  it("can render without a resize handle", async () => {
     act(() => {
       root.render(
         <ResizableSidebarPane open resizable={false}>

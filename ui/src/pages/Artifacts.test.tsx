@@ -7,6 +7,7 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Artifacts } from "./Artifacts";
 import type { CompanyArtifact, CompanyArtifactGroup } from "../api/artifacts";
+import { act } from "react";
 
 const companyState = vi.hoisted(() => ({
   selectedCompanyId: "company-1",

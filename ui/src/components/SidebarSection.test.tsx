@@ -31,7 +31,7 @@ if (!globalThis.PointerEvent) {
 }
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -41,7 +41,7 @@ async function openSectionMenu(container: HTMLElement) {
   const trigger = container.querySelector('button[aria-label="Projects section actions"]');
   expect(trigger).not.toBeNull();
 
-  await act(async () => {
+  act(async () => {
     trigger?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
     trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
@@ -62,7 +62,7 @@ describe("SidebarSection", () => {
   afterEach(async () => {
     const currentRoot = root;
     if (currentRoot) {
-      await act(async () => {
+      act(async () => {
         currentRoot.unmount();
       });
     }
@@ -75,7 +75,7 @@ describe("SidebarSection", () => {
     const currentRoot = createRoot(container);
     root = currentRoot;
 
-    await act(async () => {
+    act(async () => {
       currentRoot.render(
         <div>
           <SidebarSection label="Work">
@@ -105,7 +105,7 @@ describe("SidebarSection", () => {
     const currentRoot = createRoot(container);
     root = currentRoot;
 
-    await act(async () => {
+    act(async () => {
       currentRoot.render(
         <SidebarSection
           label="Projects"
@@ -127,7 +127,7 @@ describe("SidebarSection", () => {
     expect(document.body.textContent).toContain("Browse projects");
 
     const caret = container.querySelector('button[aria-label="Collapse Projects"]');
-    await act(async () => {
+    act(async () => {
       caret?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -138,7 +138,7 @@ describe("SidebarSection", () => {
     const currentRoot = createRoot(container);
     root = currentRoot;
 
-    await act(async () => {
+    act(async () => {
       currentRoot.render(
         <SidebarSection label="Work">
           <a href="/issues">Issues</a>
@@ -161,7 +161,7 @@ describe("SidebarSection", () => {
     const currentRoot = createRoot(container);
     root = currentRoot;
 
-    await act(async () => {
+    act(async () => {
       currentRoot.render(
         <SidebarSection
           label="Projects"
@@ -189,7 +189,7 @@ describe("SidebarSection", () => {
     expect(sectionMenuTrigger?.getAttribute("class")).toContain("hover:bg-accent/50");
     expect(newProjectButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       newProjectButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -207,7 +207,7 @@ describe("SidebarSection", () => {
     const currentRoot = createRoot(container);
     root = currentRoot;
 
-    await act(async () => {
+    act(async () => {
       currentRoot.render(
         <SidebarSection
           label="Projects"
@@ -245,7 +245,7 @@ describe("SidebarSection", () => {
       .find((element) => element.textContent?.includes("Alphabetical"));
     expect(alphabeticalItem).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       alphabeticalItem?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     expect(onRadioValueChange).toHaveBeenCalledWith("alphabetical");
@@ -254,7 +254,7 @@ describe("SidebarSection", () => {
     const reopenedNewProjectItem = Array.from(document.body.querySelectorAll('[data-slot="dropdown-menu-item"]'))
       .find((element) => element.textContent?.includes("New project"));
 
-    await act(async () => {
+    act(async () => {
       reopenedNewProjectItem?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     expect(onAction).toHaveBeenCalledTimes(1);
@@ -265,7 +265,7 @@ describe("SidebarSection", () => {
     const currentRoot = createRoot(container);
     root = currentRoot;
 
-    await act(async () => {
+    act(async () => {
       currentRoot.render(
         <SidebarSection
           label="Projects"

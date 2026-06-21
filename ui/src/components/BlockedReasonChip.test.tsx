@@ -19,7 +19,7 @@ describe("BlockedReasonChip", () => {
     container.remove();
   });
 
-  it("renders the canonical group label and exposes severity via aria-label", () => {
+  it("renders the canonical group label and exposes severity via aria-label", async () => {
     const root = createRoot(container);
     act(() => {
       root.render(
@@ -37,7 +37,7 @@ describe("BlockedReasonChip", () => {
     });
   });
 
-  it("includes a severity dot for critical and high but not medium/low", () => {
+  it("includes a severity dot for critical and high but not medium/low", async () => {
     const cases: Array<["critical" | "high" | "medium" | "low", boolean]> = [
       ["critical", true],
       ["high", true],
@@ -68,7 +68,7 @@ describe("BlockedReasonChip", () => {
     }
   });
 
-  it("hides the icon when compact is true", () => {
+  it("hides the icon when compact is true", async () => {
     const root = createRoot(container);
     act(() => {
       root.render(

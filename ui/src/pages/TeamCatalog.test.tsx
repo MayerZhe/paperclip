@@ -10,6 +10,7 @@ import type {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TeamCatalog, parseTeamRoute, teamRoute } from "./TeamCatalog";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { act } from "react";
 
 const mockTeamCatalogApi = vi.hoisted(() => ({
   catalogList: vi.fn(),
@@ -98,16 +99,9 @@ describe("TeamCatalog routes", () => {
   });
 });
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -241,7 +235,7 @@ describe("TeamCatalog install preview path", () => {
   async function renderPage() {
     const root = createRoot(container);
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
@@ -269,7 +263,7 @@ describe("TeamCatalog install preview path", () => {
     // Open the installer from the detail CTA.
     const installCta = findButton("Install team");
     expect(installCta).toBeTruthy();
-    await act(async () => {
+    act(async () => {
       installCta!.click();
     });
     await flushReact();
@@ -292,7 +286,7 @@ describe("TeamCatalog install preview path", () => {
       (b.textContent ?? "").includes("Install team"),
     );
     // Last "Install team" is the wizard footer submit.
-    await act(async () => {
+    act(async () => {
       submit[submit.length - 1].click();
     });
     await flushReact();
@@ -320,7 +314,7 @@ describe("TeamCatalog install preview path", () => {
     await renderPage();
 
     const installCta = findButton("Install team");
-    await act(async () => {
+    act(async () => {
       installCta!.click();
     });
     await flushReact();
@@ -333,13 +327,13 @@ describe("TeamCatalog install preview path", () => {
 
     const secretInput = document.querySelector('input[aria-label="OPENAI_API_KEY value"]') as HTMLInputElement;
     expect(secretInput).toBeTruthy();
-    await act(async () => {
+    act(async () => {
       setInputValue(secretInput, "sk-imported");
     });
     await flushReact();
 
     expect(footerInstall.disabled).toBe(false);
-    await act(async () => {
+    act(async () => {
       footerInstall.click();
     });
     await flushReact();
@@ -389,7 +383,7 @@ describe("TeamCatalog install preview path", () => {
     await renderPage();
 
     const installCta = findButton("Install team");
-    await act(async () => {
+    act(async () => {
       installCta!.click();
     });
     await flushReact();

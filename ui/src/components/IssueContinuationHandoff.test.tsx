@@ -66,7 +66,7 @@ describe("IssueContinuationHandoff", () => {
     const root = createRoot(container);
     const handoff = createHandoffDocument();
 
-    await act(async () => {
+    act(async () => {
       root.render(<IssueContinuationHandoff document={handoff} />);
     });
 
@@ -78,14 +78,14 @@ describe("IssueContinuationHandoff", () => {
       .find((button) => button.textContent?.includes("Copy"));
     expect(copyButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       copyButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(handoff.body);
     expect(container.textContent).toContain("Copied");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -95,7 +95,7 @@ describe("IssueContinuationHandoff", () => {
     const scrollIntoView = vi.fn();
     Element.prototype.scrollIntoView = scrollIntoView;
 
-    await act(async () => {
+    act(async () => {
       root.render(<IssueContinuationHandoff document={createHandoffDocument()} focusSignal={1} />);
     });
 
@@ -103,7 +103,7 @@ describe("IssueContinuationHandoff", () => {
     expect(container.textContent).toContain("Resume from the activity tab.");
     expect(scrollIntoView).toHaveBeenCalled();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

@@ -118,7 +118,7 @@ function createTouchEvent(type: string, touches: Array<{ clientX: number; client
 }
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -180,7 +180,7 @@ describe("OrgChart mobile gestures", () => {
 
   afterEach(async () => {
     if (root) {
-      await act(async () => {
+      act(async () => {
         root.unmount();
       });
     }
@@ -192,7 +192,7 @@ describe("OrgChart mobile gestures", () => {
 
   async function renderOrgChart() {
     root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <OrgChart />
@@ -210,7 +210,7 @@ describe("OrgChart mobile gestures", () => {
   it("pans the chart with one-finger touch drag", async () => {
     const { viewport, layer } = await renderOrgChart();
 
-    await act(async () => {
+    act(async () => {
       viewport.dispatchEvent(createTouchEvent("touchstart", [{ clientX: 100, clientY: 100 }]));
       viewport.dispatchEvent(createTouchEvent("touchmove", [{ clientX: 130, clientY: 145 }]));
       viewport.dispatchEvent(createTouchEvent("touchend", []));
@@ -223,7 +223,7 @@ describe("OrgChart mobile gestures", () => {
     const { viewport } = await renderOrgChart();
     const card = container.querySelector("[data-org-card]") as HTMLDivElement;
 
-    await act(async () => {
+    act(async () => {
       viewport.dispatchEvent(createTouchEvent("touchstart", [{ clientX: 100, clientY: 100 }]));
       viewport.dispatchEvent(createTouchEvent("touchmove", [{ clientX: 130, clientY: 145 }]));
       viewport.dispatchEvent(createTouchEvent("touchend", []));
@@ -237,7 +237,7 @@ describe("OrgChart mobile gestures", () => {
     const { viewport } = await renderOrgChart();
     const card = container.querySelector("[data-org-card]") as HTMLDivElement;
 
-    await act(async () => {
+    act(async () => {
       viewport.dispatchEvent(createTouchEvent("touchstart", [{ clientX: 100, clientY: 100 }]));
       viewport.dispatchEvent(createTouchEvent("touchend", []));
       card.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
@@ -248,7 +248,7 @@ describe("OrgChart mobile gestures", () => {
   it("pinch-zooms toward the touch center", async () => {
     const { viewport, layer } = await renderOrgChart();
 
-    await act(async () => {
+    act(async () => {
       viewport.dispatchEvent(createTouchEvent("touchstart", [
         { clientX: 100, clientY: 100 },
         { clientX: 200, clientY: 100 },

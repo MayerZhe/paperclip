@@ -123,13 +123,6 @@ if (!globalThis.PointerEvent) {
   (globalThis as any).PointerEvent = MouseEvent;
 }
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 function makeProject(overrides: Partial<Project>): Project {
   return {
@@ -172,7 +165,7 @@ function makeProject(overrides: Partial<Project>): Project {
 }
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -188,7 +181,7 @@ async function openProjectsMenu(container: HTMLElement) {
   const trigger = container.querySelector('button[aria-label="Projects section actions"]');
   expect(trigger).not.toBeNull();
 
-  await act(async () => {
+  act(async () => {
     trigger?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
     trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
@@ -199,7 +192,7 @@ async function openProjectMenu(label = "Open actions for Alpha") {
   const trigger = document.body.querySelector(`button[aria-label="${label}"]`);
   expect(trigger).not.toBeNull();
 
-  await act(async () => {
+  act(async () => {
     trigger?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
     trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
@@ -211,7 +204,7 @@ async function chooseSortMode(label: string) {
     .find((element) => element.textContent?.includes(label));
   expect(item).toBeTruthy();
 
-  await act(async () => {
+  act(async () => {
     item?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
   await flushReact();
@@ -301,7 +294,7 @@ describe("SidebarProjects", () => {
   afterEach(async () => {
     const currentRoot = root;
     if (currentRoot) {
-      await act(async () => {
+      act(async () => {
         currentRoot.unmount();
       });
     }
@@ -316,7 +309,7 @@ describe("SidebarProjects", () => {
     const currentRoot = createRoot(container);
     root = currentRoot;
 
-    await act(async () => {
+    act(async () => {
       currentRoot.render(
         <QueryClientProvider client={queryClient}>
           <SidebarProjects />
@@ -361,7 +354,7 @@ describe("SidebarProjects", () => {
 
     const newProjectButton = container.querySelector('button[aria-label="New project"]');
     expect(newProjectButton).toBeTruthy();
-    await act(async () => {
+    act(async () => {
       newProjectButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     expect(mockOpenNewProject).toHaveBeenCalledTimes(1);
@@ -402,7 +395,7 @@ describe("SidebarProjects", () => {
     await renderSidebarProjects();
     expect(projectLinkLabels(container)).toEqual(["Bravo", "Alpha", "Charlie"]);
 
-    await act(async () => {
+    act(async () => {
       resolveMemberships({
         projectMemberships: { "project-a": "left" },
         agentMemberships: {},
@@ -422,7 +415,7 @@ describe("SidebarProjects", () => {
       .find((element) => element.textContent?.includes("Leave project"));
     expect(leaveItem).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       leaveItem?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();

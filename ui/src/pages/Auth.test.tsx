@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthPage } from "./Auth";
+import { act } from "react";
 
 const getSessionMock = vi.hoisted(() => vi.fn());
 const signInEmailMock = vi.hoisted(() => vi.fn());
@@ -43,16 +44,9 @@ vi.mock("@/context/NodeOrgContext", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -86,7 +80,7 @@ describe("AuthPage", () => {
 
   async function mount() {
     const { root, queryClient } = renderAuthPage(container);
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter initialEntries={["/auth"]}>
           <QueryClientProvider client={queryClient}>
@@ -130,7 +124,7 @@ describe("AuthPage", () => {
     expect(container.querySelector('label[for="email"]')).not.toBeNull();
     expect(container.querySelector('label[for="password"]')).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -143,7 +137,7 @@ describe("AuthPage", () => {
     );
     expect(createOne).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       createOne?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -155,7 +149,7 @@ describe("AuthPage", () => {
     expect(nameInput.required).toBe(true);
     expect(passwordInput.getAttribute("autocomplete")).toBe("new-password");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -170,7 +164,7 @@ describe("AuthPage", () => {
     const emailInput = container.querySelector('input[name="email"]') as HTMLInputElement;
     const passwordInput = container.querySelector('input[name="password"]') as HTMLInputElement;
 
-    await act(async () => {
+    act(async () => {
       inputValueSetter!.call(emailInput, "jane@example.com");
       emailInput.dispatchEvent(new Event("input", { bubbles: true }));
       inputValueSetter!.call(passwordInput, "wrongpass");
@@ -180,7 +174,7 @@ describe("AuthPage", () => {
     signInEmailMock.mockRejectedValueOnce(new Error("Invalid email or password"));
 
     const form = container.querySelector("form") as HTMLFormElement;
-    await act(async () => {
+    act(async () => {
       form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
     });
     await flushReact();
@@ -198,7 +192,7 @@ describe("AuthPage", () => {
     expect(passwordInput.getAttribute("aria-describedby")).toBe(errorId);
     expect(passwordInput.getAttribute("aria-invalid")).toBe("true");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

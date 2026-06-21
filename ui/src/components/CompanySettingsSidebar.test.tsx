@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NodeOrgSettingsSidebar } from "./NodeOrgSettingsSidebar";
+import { act } from "react";
 
 const sidebarNavItemMock = vi.hoisted(() => vi.fn());
 const mockSidebarBadgesApi = vi.hoisted(() => ({
@@ -76,11 +77,6 @@ vi.mock("@/plugins/slots", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  await callback();
-  await Promise.resolve();
-  await new Promise((resolve) => window.setTimeout(resolve, 0));
-}
 
 async function flushReact() {
   for (let i = 0; i < 3; i += 1) {
@@ -126,7 +122,7 @@ describe("NodeOrgSettingsSidebar", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <NodeOrgSettingsSidebar />
@@ -135,8 +131,8 @@ describe("NodeOrgSettingsSidebar", () => {
     });
     await flushReact();
 
-    expect(container.textContent).toContain("Paperclip");
-    expect(container.textContent).toContain("Company Settings");
+    expect(container.textContent).toContain("Super Node");
+    expect(container.textContent).toContain("Node Org Settings");
     expect(container.textContent).toContain("General");
     expect(container.textContent).toContain("Environments");
     expect(container.textContent).not.toContain("Cloud upstream");
@@ -181,7 +177,7 @@ describe("NodeOrgSettingsSidebar", () => {
       }),
     );
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -195,7 +191,7 @@ describe("NodeOrgSettingsSidebar", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <NodeOrgSettingsSidebar />
@@ -213,7 +209,7 @@ describe("NodeOrgSettingsSidebar", () => {
       }),
     );
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -241,7 +237,7 @@ describe("NodeOrgSettingsSidebar", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <NodeOrgSettingsSidebar />
@@ -259,7 +255,7 @@ describe("NodeOrgSettingsSidebar", () => {
       }),
     );
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -273,7 +269,7 @@ describe("NodeOrgSettingsSidebar", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <NodeOrgSettingsSidebar />
@@ -291,7 +287,7 @@ describe("NodeOrgSettingsSidebar", () => {
       }),
     );
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

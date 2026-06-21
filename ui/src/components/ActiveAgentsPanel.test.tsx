@@ -50,7 +50,7 @@ vi.mock("./transcript/useLiveRunTranscripts", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -139,7 +139,7 @@ describe("ActiveAgentsPanel", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ActiveAgentsPanel companyId="company-1" />
@@ -158,7 +158,7 @@ describe("ActiveAgentsPanel", () => {
     );
     expect(moreLink?.getAttribute("href")).toBe("/dashboard/live");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -169,7 +169,7 @@ describe("ActiveAgentsPanel", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ActiveAgentsPanel
@@ -191,7 +191,7 @@ describe("ActiveAgentsPanel", () => {
     });
     expect(container.textContent).not.toContain("more active/recent");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -211,7 +211,7 @@ describe("ActiveAgentsPanel", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ActiveAgentsPanel companyId="company-1" />
@@ -229,7 +229,7 @@ describe("ActiveAgentsPanel", () => {
       expect(issueLink?.getAttribute("href")).toBe("/issues/PAP-3562");
     });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

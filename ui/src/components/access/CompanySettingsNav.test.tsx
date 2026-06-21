@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NodeOrgSettingsNav, getCompanySettingsTab } from "./NodeOrgSettingsNav";
+import { act } from "react";
 
 let currentPathname = "/company/settings";
 const navigateMock = vi.hoisted(() => vi.fn());
@@ -40,13 +41,6 @@ vi.mock("@/components/PageTabBar", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 describe("NodeOrgSettingsNav", () => {
   let container: HTMLDivElement;
@@ -63,7 +57,7 @@ describe("NodeOrgSettingsNav", () => {
     vi.clearAllMocks();
   });
 
-  it("maps company settings routes to the expected shared tab value", () => {
+  it("maps company settings routes to the expected shared tab value", async () => {
     expect(getCompanySettingsTab("/company/settings")).toBe("general");
     expect(getCompanySettingsTab("/PAP/company/settings")).toBe("general");
     expect(getCompanySettingsTab("/company/settings/environments")).toBe("environments");
@@ -81,7 +75,7 @@ describe("NodeOrgSettingsNav", () => {
     currentPathname = "/PAP/company/settings/members";
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(<NodeOrgSettingsNav />);
     });
 
@@ -103,13 +97,13 @@ describe("NodeOrgSettingsNav", () => {
     const button = container.querySelector("button");
     expect(button).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
     expect(navigateMock).toHaveBeenCalledWith("/company/settings/invites");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

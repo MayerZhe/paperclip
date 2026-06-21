@@ -99,7 +99,7 @@ vi.mock("../context/SidebarContext", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -143,7 +143,7 @@ describe("SidebarNodeOrgMenu", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <SidebarNodeOrgMenu />
@@ -158,7 +158,7 @@ describe("SidebarNodeOrgMenu", () => {
     const trigger = container.querySelector('button[aria-label="Open Acme Labs workspace switcher"]');
     expect(trigger).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       trigger?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
       trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -170,21 +170,21 @@ describe("SidebarNodeOrgMenu", () => {
     expect(document.body.textContent).toContain("ANA");
     expect(document.body.textContent).toContain("Add company...");
     expect(document.body.textContent).toContain("Invite people to Acme Labs");
-    expect(document.body.textContent).toContain("Company settings");
+    expect(document.body.textContent).toContain("Node Org settings");
     expect(document.body.textContent).toContain("Sign out");
 
     const signOutButton = Array.from(document.body.querySelectorAll('[data-slot="dropdown-menu-item"]'))
       .find((element) => element.textContent?.includes("Sign out"));
     expect(signOutButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       signOutButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
 
     expect(mockAuthApi.signOut).toHaveBeenCalledTimes(1);
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -195,7 +195,7 @@ describe("SidebarNodeOrgMenu", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <SidebarNodeOrgMenu />
@@ -208,7 +208,7 @@ describe("SidebarNodeOrgMenu", () => {
     const trigger = container.querySelector('button[aria-label="Open Acme Labs workspace switcher"]');
     expect(trigger).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       trigger?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
       trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -218,7 +218,7 @@ describe("SidebarNodeOrgMenu", () => {
       .find((element) => element.textContent === "Edit");
     expect(editButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       editButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -232,7 +232,7 @@ describe("SidebarNodeOrgMenu", () => {
       .find((element) => element.textContent?.includes("Strata"));
     expect(strataItem).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       strataItem?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -240,7 +240,7 @@ describe("SidebarNodeOrgMenu", () => {
     expect(mockSetSelectedCompanyId).not.toHaveBeenCalled();
     expect(mockNavigate).not.toHaveBeenCalled();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -252,7 +252,7 @@ describe("SidebarNodeOrgMenu", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <SidebarNodeOrgMenu />
@@ -265,7 +265,7 @@ describe("SidebarNodeOrgMenu", () => {
     const trigger = container.querySelector('button[aria-label="Open Acme Labs workspace switcher"]');
     expect(trigger).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       trigger?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
       trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -275,7 +275,7 @@ describe("SidebarNodeOrgMenu", () => {
       .find((element) => element.textContent?.includes("Strata"));
     expect(strataItem).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       strataItem?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -283,7 +283,7 @@ describe("SidebarNodeOrgMenu", () => {
     expect(mockSetSelectedCompanyId).toHaveBeenCalledWith("company-2");
     expect(mockNavigate).toHaveBeenCalledWith("/STR/dashboard");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

@@ -85,7 +85,7 @@ function createRun(overrides: Partial<HeartbeatRun> = {}): HeartbeatRun {
 }
 
 describe("ActivityCharts", () => {
-  it("renders empty run charts when dashboard aggregate data is temporarily missing", () => {
+  it("renders empty run charts when dashboard aggregate data is temporarily missing", async () => {
     render(<RunActivityChart activity={undefined} />);
     expect(container.textContent).toContain("No runs yet");
 
@@ -93,7 +93,7 @@ describe("ActivityCharts", () => {
     expect(container.textContent).toContain("No runs yet");
   });
 
-  it("still aggregates raw agent runs for detail charts", () => {
+  it("still aggregates raw agent runs for detail charts", async () => {
     render(
       <RunActivityChart
         runs={[

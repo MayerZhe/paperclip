@@ -169,7 +169,7 @@ function renderLedger(props: Partial<ComponentProps<typeof IssueRunLedgerContent
 }
 
 describe("IssueRunLedger", () => {
-  it("renders every liveness state with exhausted continuation context", () => {
+  it("renders every liveness state with exhausted continuation context", async () => {
     const states: RunLivenessState[] = [
       "advanced",
       "plan_only",
@@ -205,7 +205,7 @@ describe("IssueRunLedger", () => {
     expect(container.textContent).toContain("Continuation attempt 3");
   });
 
-  it("renders historical runs without liveness metadata as unavailable", () => {
+  it("renders historical runs without liveness metadata as unavailable", async () => {
     renderLedger({
       runs: [
         createRun({
@@ -224,7 +224,7 @@ describe("IssueRunLedger", () => {
     expect(container.textContent).toContain("Last useful action Unavailable");
   });
 
-  it("interleaves run rows and activity rows by timestamp", () => {
+  it("interleaves run rows and activity rows by timestamp", async () => {
     renderLedger({
       runs: [
         createRun({
@@ -260,7 +260,7 @@ describe("IssueRunLedger", () => {
     expect(oldestIndex).toBeGreaterThan(activityIndex);
   });
 
-  it("shows live runs as pending final checks without missing-data language", () => {
+  it("shows live runs as pending final checks without missing-data language", async () => {
     renderLedger({
       runs: [
         createRun({
@@ -284,7 +284,7 @@ describe("IssueRunLedger", () => {
     expect(container.textContent).not.toContain("initial attempt");
   });
 
-  it("surfaces scheduled retry timing and exhaustion state without opening logs", () => {
+  it("surfaces scheduled retry timing and exhaustion state without opening logs", async () => {
     renderLedger({
       runs: [
         createRun({
@@ -319,7 +319,7 @@ describe("IssueRunLedger", () => {
     expect(container.textContent).toContain("Manual intervention required");
   });
 
-  it("labels max-turn stops and continuation retries without confusing them with per-run turns", () => {
+  it("labels max-turn stops and continuation retries without confusing them with per-run turns", async () => {
     renderLedger({
       runs: [
         createRun({
@@ -357,7 +357,7 @@ describe("IssueRunLedger", () => {
     expect(container.textContent).toContain("Continuation exhausted");
   });
 
-  it("shows timeout, cancel, and budget stop reasons without raw logs", () => {
+  it("shows timeout, cancel, and budget stop reasons without raw logs", async () => {
     renderLedger({
       runs: [
         createRun({
@@ -388,7 +388,7 @@ describe("IssueRunLedger", () => {
     expect(container.textContent).toContain("paused by board");
   });
 
-  it("surfaces active and completed child issue summaries", () => {
+  it("surfaces active and completed child issue summaries", async () => {
     renderLedger({
       childIssues: [
         createIssue({ id: "child-1", identifier: "PAP-2", title: "Implement worker handoff", status: "in_progress" }),
@@ -412,7 +412,7 @@ describe("IssueRunLedger", () => {
     expect(container.textContent).toContain("all 2 terminal (1 done, 1 cancelled)");
   });
 
-  it("uses wrapping-friendly markup for long next action text", () => {
+  it("uses wrapping-friendly markup for long next action text", async () => {
     renderLedger({
       runs: [
         createRun({
@@ -427,7 +427,7 @@ describe("IssueRunLedger", () => {
     expect(container.textContent).toContain("Next action:");
   });
 
-  it("shows when older runs are clipped from the ledger", () => {
+  it("shows when older runs are clipped from the ledger", async () => {
     renderLedger({
       runs: Array.from({ length: 22 }, (_, index) =>
         createRun({
@@ -440,7 +440,7 @@ describe("IssueRunLedger", () => {
     expect(container.textContent).toContain("2 older items not shown");
   });
 
-  it("renders stale-run banner, watchdog actions, and silence badge for live runs", () => {
+  it("renders stale-run banner, watchdog actions, and silence badge for live runs", async () => {
     const onWatchdogDecision = vi.fn();
     renderLedger({
       runs: [createRun({ runId: "run-live-1", status: "running", finishedAt: null })],
@@ -471,7 +471,7 @@ describe("IssueRunLedger", () => {
     });
   });
 
-  it("renders requested/applied model profile and surfaces fallback reasons", () => {
+  it("renders requested/applied model profile and surfaces fallback reasons", async () => {
     renderLedger({
       runs: [
         createRun({
@@ -506,7 +506,7 @@ describe("IssueRunLedger", () => {
     expect(container.textContent).toContain("agent_runtime_profile_disabled");
   });
 
-  it("hides watchdog decision actions for known non-owner viewers", () => {
+  it("hides watchdog decision actions for known non-owner viewers", async () => {
     const onWatchdogDecision = vi.fn();
     renderLedger({
       runs: [createRun({ runId: "run-live-1", status: "running", finishedAt: null })],

@@ -114,7 +114,7 @@ vi.mock("@/components/ui/command", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flush() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
   });
 }

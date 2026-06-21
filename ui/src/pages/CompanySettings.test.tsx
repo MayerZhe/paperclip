@@ -99,7 +99,7 @@ vi.mock("../context/NodeOrgContext", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -142,7 +142,7 @@ describe("NodeOrgEnvironments", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
@@ -160,7 +160,7 @@ describe("NodeOrgEnvironments", () => {
     expect(container.textContent).not.toContain("Fake sandbox");
     expect(container.textContent).not.toContain("Fake is the deterministic test provider");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -208,7 +208,7 @@ describe("NodeOrgEnvironments", () => {
       }),
     );
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
@@ -228,7 +228,7 @@ describe("NodeOrgEnvironments", () => {
       .find((button) => button.textContent?.trim() === "Edit");
     expect(editButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       editButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -237,7 +237,7 @@ describe("NodeOrgEnvironments", () => {
       .find((select) => Array.from(select.options).some((option) => option.value === "secure-plugin")) as HTMLSelectElement | undefined;
     expect(providerSelect).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       providerSelect!.value = "secure-plugin";
       providerSelect!.dispatchEvent(new Event("change", { bubbles: true }));
     });
@@ -247,7 +247,7 @@ describe("NodeOrgEnvironments", () => {
       .find((input) => (input as HTMLInputElement).value === "saved-template") as HTMLInputElement | undefined;
     expect(templateInput?.value).toBe("saved-template");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

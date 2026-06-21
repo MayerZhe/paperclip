@@ -147,7 +147,7 @@ vi.mock("../lib/paste-normalization", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flush() {
-  await act(async () => {
+  act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 }
@@ -198,7 +198,7 @@ describe("MarkdownEditor", () => {
   it("applies async external value updates once the editor ref becomes ready", async () => {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MarkdownEditor
           value=""
@@ -208,7 +208,7 @@ describe("MarkdownEditor", () => {
       );
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MarkdownEditor
           value="Loaded plan body"
@@ -221,7 +221,7 @@ describe("MarkdownEditor", () => {
     await flush();
     expect(container.textContent).toContain("Loaded plan body");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -231,7 +231,7 @@ describe("MarkdownEditor", () => {
     const handleChange = vi.fn();
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MarkdownEditor
           value="Loaded plan body"
@@ -245,7 +245,7 @@ describe("MarkdownEditor", () => {
     expect(container.textContent).toContain("Loaded plan body");
     expect(handleChange).not.toHaveBeenCalled();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -253,7 +253,7 @@ describe("MarkdownEditor", () => {
   it("converts advisory-style html image tags to markdown image syntax before mounting the editor", async () => {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MarkdownEditor
           value={`Before\n\n<img width="10" height="10" alt="image" src="https://example.com/test.png" />\n\nAfter`}
@@ -270,7 +270,7 @@ describe("MarkdownEditor", () => {
     expect(container.textContent).toContain("Before");
     expect(container.textContent).toContain("After");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -278,7 +278,7 @@ describe("MarkdownEditor", () => {
   it("keeps arbitrary HTML-like tags in the rich editor instead of falling back to raw source", async () => {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MarkdownEditor
           value={'<section data-source="paste">\n## My take\n\n<p>Benchmark notes</p>\n</section>'}
@@ -294,7 +294,7 @@ describe("MarkdownEditor", () => {
     expect(container.textContent).toContain("Benchmark notes");
     expect(container.textContent).not.toContain("Rich editor unavailable for this markdown");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -302,7 +302,7 @@ describe("MarkdownEditor", () => {
   it("keeps scriptable pasted HTML inert in the rich editor", async () => {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MarkdownEditor
           value={'<script>fetch("/api/secrets")</script>\n<iframe src="https://example.com"></iframe>\n<p onclick="steal()">Plain text</p>'}
@@ -319,7 +319,7 @@ describe("MarkdownEditor", () => {
     expect(container.textContent).toContain('fetch("/api/secrets")');
     expect(container.textContent).toContain("Plain text");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -329,7 +329,7 @@ describe("MarkdownEditor", () => {
     const handleChange = vi.fn();
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MarkdownEditor
           value="Affected versions: <= v0.3.1"
@@ -349,7 +349,7 @@ describe("MarkdownEditor", () => {
     expect(container.textContent).toContain("Rich editor unavailable for this markdown");
     expect(handleChange).not.toHaveBeenCalled();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -359,7 +359,7 @@ describe("MarkdownEditor", () => {
     const handleChange = vi.fn();
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MarkdownEditor
           value="Affected versions: <= v0.3.1"
@@ -379,7 +379,7 @@ describe("MarkdownEditor", () => {
     expect(container.textContent).toContain("Rich editor unavailable for this markdown");
     expect(handleChange).not.toHaveBeenCalled();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -387,7 +387,7 @@ describe("MarkdownEditor", () => {
   it("shows the editor-scoped dropzone by default when files are dragged over it", async () => {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MarkdownEditor
           value=""
@@ -416,7 +416,7 @@ describe("MarkdownEditor", () => {
 
     expect(scope?.className).not.toContain("ring-1");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -424,7 +424,7 @@ describe("MarkdownEditor", () => {
   it("defers file-drop visuals to a parent container when requested", async () => {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MarkdownEditor
           value=""
@@ -448,7 +448,7 @@ describe("MarkdownEditor", () => {
     expect(scope?.className).not.toContain("ring-1");
     expect(container.textContent).not.toContain("Drop image to upload");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -457,7 +457,7 @@ describe("MarkdownEditor", () => {
     mdxEditorMockState.emitMountSilentEmptyState = true;
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MarkdownEditor
           value="![Screenshot](/api/attachments/image/content)"
@@ -473,12 +473,12 @@ describe("MarkdownEditor", () => {
     expect(container.querySelector("textarea")).toBeNull();
     expect(container.textContent).not.toContain("Rich editor unavailable for this markdown");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
 
-  it("places the menu top on the caret line and offsets the left a space-width past the caret", () => {
+  it("places the menu top on the caret line and offsets the left a space-width past the caret", async () => {
     expect(
       computeMentionMenuPosition(
         { viewportTop: 100, viewportBottom: 118, viewportLeft: 240 },
@@ -490,7 +490,7 @@ describe("MarkdownEditor", () => {
     });
   });
 
-  it("applies visual viewport offsets when present", () => {
+  it("applies visual viewport offsets when present", async () => {
     expect(
       computeMentionMenuPosition(
         { viewportTop: 20, viewportBottom: 38, viewportLeft: 120 },
@@ -502,7 +502,7 @@ describe("MarkdownEditor", () => {
     });
   });
 
-  it("clamps the mention menu back into view near the viewport edges", () => {
+  it("clamps the mention menu back into view near the viewport edges", async () => {
     expect(
       computeMentionMenuPosition(
         { viewportTop: 260, viewportBottom: 278, viewportLeft: 240 },
@@ -514,7 +514,7 @@ describe("MarkdownEditor", () => {
     });
   });
 
-  it("flips the menu above the caret line when it would overflow below", () => {
+  it("flips the menu above the caret line when it would overflow below", async () => {
     expect(
       computeMentionMenuPosition(
         { viewportTop: 560, viewportBottom: 580, viewportLeft: 200 },
@@ -526,7 +526,7 @@ describe("MarkdownEditor", () => {
     });
   });
 
-  it("keeps a short mention menu on the same line when it fits below the caret", () => {
+  it("keeps a short mention menu on the same line when it fits below the caret", async () => {
     expect(
       computeMentionMenuPosition(
         { viewportTop: 160, viewportBottom: 178, viewportLeft: 120 },
@@ -539,8 +539,8 @@ describe("MarkdownEditor", () => {
     });
   });
 
-  it("keeps mention queries active across spaces", () => {
-    expect(findMentionMatch("Ping @Paperclip App", "Ping @Paperclip App".length)).toEqual({
+  it("keeps mention queries active across spaces", async () => {
+    expect(findMentionMatch("Ping @Super Node App", "Ping @Super Node App".length)).toEqual({
       trigger: "mention",
       marker: "@",
       query: "Paperclip App",
@@ -549,11 +549,11 @@ describe("MarkdownEditor", () => {
     });
   });
 
-  it("still rejects slash commands once spaces are typed", () => {
+  it("still rejects slash commands once spaces are typed", async () => {
     expect(findMentionMatch("/open issue", "/open issue".length)).toBeNull();
   });
 
-  it("keeps routine slash queries active across spaces", () => {
+  it("keeps routine slash queries active across spaces", async () => {
     expect(findMentionMatch("/routine:Weekly release review", "/routine:Weekly release review".length)).toEqual({
       trigger: "skill",
       marker: "/",
@@ -563,14 +563,14 @@ describe("MarkdownEditor", () => {
     });
   });
 
-  it("does not treat Enter as skill autocomplete accept", () => {
+  it("does not treat Enter as skill autocomplete accept", async () => {
     expect(shouldAcceptAutocompleteKey("Enter", "skill")).toBe(false);
     expect(shouldAcceptAutocompleteKey("Enter", "skill", true)).toBe(true);
     expect(shouldAcceptAutocompleteKey("Enter", "mention")).toBe(true);
     expect(shouldAcceptAutocompleteKey("Tab", "skill")).toBe(true);
   });
 
-  it("keeps the same autocomplete session active while the slash query is unchanged", () => {
+  it("keeps the same autocomplete session active while the slash query is unchanged", async () => {
     const textNode = document.createTextNode("/agent");
     expect(isSameAutocompleteSession(
       {
@@ -611,7 +611,7 @@ describe("MarkdownEditor", () => {
     )).toBe(false);
   });
 
-  it("finds skill anchors by mention metadata instead of visible text", () => {
+  it("finds skill anchors by mention metadata instead of visible text", async () => {
     const editable = document.createElement("div");
     const skillLink = document.createElement("a");
     skillLink.setAttribute("href", buildSkillMentionHref("skill-123", "agent-browser"));
@@ -633,7 +633,7 @@ describe("MarkdownEditor", () => {
     expect(found).toBe(skillLink);
   });
 
-  it("finds routine anchors by mention metadata instead of visible text", () => {
+  it("finds routine anchors by mention metadata instead of visible text", async () => {
     const editable = document.createElement("div");
     const routineLink = document.createElement("a");
     routineLink.setAttribute("href", buildRoutineMentionHref("routine-123"));
@@ -653,7 +653,7 @@ describe("MarkdownEditor", () => {
     expect(found).toBe(routineLink);
   });
 
-  it("places the caret after the mention's trailing space when present", () => {
+  it("places the caret after the mention's trailing space when present", async () => {
     const editable = document.createElement("div");
     editable.contentEditable = "true";
     document.body.appendChild(editable);
@@ -698,7 +698,7 @@ describe("MarkdownEditor", () => {
   ): Promise<{ option: HTMLButtonElement; root: ReturnType<typeof createRoot>; menu: HTMLElement }> {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MarkdownEditor
           value="@Pap"
@@ -751,7 +751,7 @@ describe("MarkdownEditor", () => {
       `[@Paperclip App](${buildProjectMentionHref("project-123", "#336699")}) `,
     );
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -764,7 +764,7 @@ describe("MarkdownEditor", () => {
     expect(menu).toBeTruthy();
     expect(menu?.className).toContain("pointer-events-auto");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -781,7 +781,7 @@ describe("MarkdownEditor", () => {
     expect(touchstart.defaultPrevented).toBe(false);
     expect(handleChange).not.toHaveBeenCalled();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -809,7 +809,7 @@ describe("MarkdownEditor", () => {
     });
     expect(wheel.defaultPrevented).toBe(false);
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -829,7 +829,7 @@ describe("MarkdownEditor", () => {
     expect(options).toHaveLength(50);
     expect(menu.className).toContain("overflow-y-auto");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -866,7 +866,7 @@ describe("MarkdownEditor", () => {
 
     expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest" });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
     if (originalScrollIntoView) {
@@ -897,7 +897,7 @@ describe("MarkdownEditor", () => {
 
     expect(handleChange).not.toHaveBeenCalled();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

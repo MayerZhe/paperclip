@@ -97,7 +97,7 @@ describe("useLiveRunTranscripts", () => {
     document.body.appendChild(container);
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(<Harness />);
       await Promise.resolve();
     });
@@ -136,7 +136,7 @@ describe("useLiveRunTranscripts", () => {
     document.body.appendChild(container);
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(<Harness />);
       await Promise.resolve();
     });
@@ -173,14 +173,14 @@ describe("useLiveRunTranscripts", () => {
     document.body.appendChild(container);
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(<Harness />);
       await Promise.resolve();
     });
 
     expect(latestIsInitialHydrating).toBe(true);
 
-    await act(async () => {
+    act(async () => {
       resolveLog?.({ runId: "run-1", store: "memory", logRef: "log-1", content: "", nextOffset: 0 });
       await Promise.resolve();
     });
@@ -209,14 +209,14 @@ describe("useLiveRunTranscripts", () => {
     document.body.appendChild(container);
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(<Harness />);
       await Promise.resolve();
     });
 
     expect(logMock).toHaveBeenCalledTimes(1);
 
-    await act(async () => {
+    act(async () => {
       root.render(<Harness />);
       await Promise.resolve();
     });
@@ -244,7 +244,7 @@ describe("useLiveRunTranscripts", () => {
     document.body.appendChild(container);
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(<Harness />);
       await Promise.resolve();
     });
@@ -273,7 +273,7 @@ describe("useLiveRunTranscripts", () => {
     document.body.appendChild(container);
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(<Harness />);
       await Promise.resolve();
     });
@@ -302,7 +302,7 @@ describe("useLiveRunTranscripts", () => {
     document.body.appendChild(container);
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(<Harness />);
       await Promise.resolve();
       await Promise.resolve();
@@ -312,7 +312,7 @@ describe("useLiveRunTranscripts", () => {
     expect(buildTranscriptMock).toHaveBeenCalledTimes(2);
     buildTranscriptMock.mockClear();
 
-    await act(async () => {
+    act(async () => {
       FakeWebSocket.instances[0]!.onmessage?.(
         new MessageEvent("message", {
           data: JSON.stringify({

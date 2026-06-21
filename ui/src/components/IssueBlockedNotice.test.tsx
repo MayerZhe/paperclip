@@ -119,7 +119,7 @@ function render(element: ReactElement) {
 }
 
 describe("IssueBlockedNotice", () => {
-  it("renders a successful-run next-step notice without requiring blockers", () => {
+  it("renders a successful-run next-step notice without requiring blockers", async () => {
     const node = render(
       <IssueBlockedNotice
         issueStatus="in_progress"
@@ -182,7 +182,7 @@ describe("IssueBlockedNotice", () => {
     });
   });
 
-  it("does not render when the issue is done even if a stale handoff state is required", () => {
+  it("does not render when the issue is done even if a stale handoff state is required", async () => {
     const node = render(
       <IssueBlockedNotice
         issueStatus="done"
@@ -203,7 +203,7 @@ describe("IssueBlockedNotice", () => {
     expect(node.textContent).toBe("");
   });
 
-  it("does not render when the issue is cancelled even if blockers remain", () => {
+  it("does not render when the issue is cancelled even if blockers remain", async () => {
     const node = render(
       <IssueBlockedNotice
         issueStatus="cancelled"
@@ -224,7 +224,7 @@ describe("IssueBlockedNotice", () => {
     expect(node.textContent).toBe("");
   });
 
-  it("renders a recovery indicator on a blocker chip when the blocker has an active recovery action", () => {
+  it("renders a recovery indicator on a blocker chip when the blocker has an active recovery action", async () => {
     const node = render(
       <IssueBlockedNotice
         issueStatus="blocked"
@@ -279,7 +279,7 @@ describe("IssueBlockedNotice", () => {
     expect(indicator?.textContent).toContain("Recovery needed");
   });
 
-  it("labels a workspace_validation blocker recovery distinctly", () => {
+  it("labels a workspace_validation blocker recovery distinctly", async () => {
     const node = render(
       <IssueBlockedNotice
         issueStatus="blocked"

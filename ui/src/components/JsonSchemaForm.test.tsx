@@ -53,7 +53,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
   it("renders multiline secret-ref fields as textareas alongside the picker", async () => {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <JsonSchemaForm
           schema={{
@@ -78,7 +78,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     expect(container.querySelector("textarea")).not.toBeNull();
     expect(container.querySelector('input[type="password"]')).toBeNull();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -86,7 +86,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
   it("renders the picker and hides the raw input when the value is a UUID secret ref", async () => {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <JsonSchemaForm
           schema={{
@@ -111,7 +111,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     expect(container.querySelector('input[type="password"]')).toBeNull();
     expect(container.querySelector("textarea")).toBeNull();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -120,7 +120,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     const root = createRoot(container);
     const onChange = vi.fn();
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <JsonSchemaForm
           schema={{
@@ -149,7 +149,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     )?.set;
     expect(setSelectValue).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       setSelectValue!.call(picker!, "11111111-1111-4111-8111-111111111111");
       picker!.dispatchEvent(new Event("change", { bubbles: true }));
     });
@@ -158,7 +158,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
       apiKey: "11111111-1111-4111-8111-111111111111",
     });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -177,7 +177,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     };
 
     // First render with empty value — picker visible, no raw input.
-    await act(async () => {
+    act(async () => {
       root.render(
         <JsonSchemaForm schema={schema} values={{ apiKey: "" }} onChange={() => {}} />,
       );
@@ -185,7 +185,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     expect(container.querySelector('input[type="password"]')).toBeNull();
 
     // Parent fills in a previously-saved raw value (the async load case).
-    await act(async () => {
+    act(async () => {
       root.render(
         <JsonSchemaForm
           schema={schema}
@@ -199,7 +199,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     expect(input).not.toBeNull();
     expect(input?.value).toBe("loaded-from-api");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -207,7 +207,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
   it("renders no Advanced disclosure when no field opts in", async () => {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <JsonSchemaForm
           schema={{
@@ -237,7 +237,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     ).not.toBeNull();
     expect(container.querySelector('input[type="text"]')).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -245,7 +245,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
   it("hides advanced fields behind a collapsed disclosure with group headings", async () => {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <JsonSchemaForm
           schema={{
@@ -283,7 +283,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     expect(container.textContent).not.toContain("More options");
 
     // Expand and verify both groups + the default bucket appear.
-    await act(async () => {
+    act(async () => {
       advancedButton!.click();
     });
 
@@ -292,7 +292,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     expect(container.textContent).toContain("SSH access");
     expect(container.textContent).toContain("More options");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -312,7 +312,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     };
 
     // No errors -> collapsed
-    await act(async () => {
+    act(async () => {
       root.render(
         <JsonSchemaForm
           schema={schema}
@@ -328,7 +328,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     expect(advancedButton!.getAttribute("aria-expanded")).toBe("false");
 
     // Submit validation error on the hidden advanced field -> forced open
-    await act(async () => {
+    act(async () => {
       root.render(
         <JsonSchemaForm
           schema={schema}
@@ -345,7 +345,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     expect(advancedButton!.getAttribute("aria-expanded")).toBe("true");
     expect(container.textContent).toContain("Must be at least 1");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -378,7 +378,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
   it("keeps the password fallback for short raw values", async () => {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <JsonSchemaForm
           schema={{
@@ -402,7 +402,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     expect(input).not.toBeNull();
     expect(input?.value).toBe("raw-value");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

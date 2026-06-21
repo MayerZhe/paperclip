@@ -6,6 +6,7 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ArtifactGroupCard } from "./ArtifactGroupCard";
 import type { CompanyArtifact, CompanyArtifactGroup } from "@/api/artifacts";
+import { act } from "react";
 
 vi.mock("@/context/NodeOrgContext", () => ({
   useNodeOrg: () => ({ selectedCompany: null, selectedCompanyId: "company-1" }),

@@ -323,7 +323,7 @@ describe("IssueChatThread", () => {
     markdownBodyRenderMock.mockClear();
   });
 
-  it("drops the count heading and does not use an internal scrollbox", () => {
+  it("drops the count heading and does not use an internal scrollbox", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -355,7 +355,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("renders footer content inside the thread viewport before the bottom anchor", () => {
+  it("renders footer content inside the thread viewport before the bottom anchor", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -388,7 +388,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("renders the composer in planning mode when the issue is in planning mode", () => {
+  it("renders the composer in planning mode when the issue is in planning mode", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -425,7 +425,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("hides the planning chip on a standard issue and exposes the toggle through the menu", () => {
+  it("hides the planning chip on a standard issue and exposes the toggle through the menu", async () => {
     const root = createRoot(container);
     const onWorkModeChange = vi.fn();
 
@@ -486,7 +486,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("virtualizes long merged threads so only a windowed slice mounts", () => {
+  it("virtualizes long merged threads so only a windowed slice mounts", async () => {
     const root = createRoot(container);
     const totalMergedRows =
       issueChatLongThreadComments.length
@@ -589,7 +589,7 @@ describe("IssueChatThread", () => {
       }),
     });
 
-    await act(async () => {
+    act(async () => {
       virtualRows[0].dispatchEvent(new MouseEvent("click", { bubbles: true }));
       await Promise.resolve();
     });
@@ -604,7 +604,7 @@ describe("IssueChatThread", () => {
     requestAnimationFrameMock.mockRestore();
   });
 
-  it("scrolls loaded hash targets through the virtualized message index", () => {
+  it("scrolls loaded hash targets through the virtualized message index", async () => {
     const root = createRoot(container);
     const targetComment = issueChatLongThreadComments.at(-1);
     expect(targetComment).toBeDefined();
@@ -639,7 +639,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("uses the virtualizer when jumping to the latest long-thread row", () => {
+  it("uses the virtualizer when jumping to the latest long-thread row", async () => {
     const root = createRoot(container);
     const scrollToMock = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
 
@@ -684,7 +684,7 @@ describe("IssueChatThread", () => {
   // to that ancestor's scroll instead of `window` (which never moves on
   // desktop). When mounted inside an overflow-auto ancestor the jump-to-latest
   // action must drive that element's scrollTo, not window.scrollTo.
-  it("targets an overflow-auto ancestor instead of window scroll on jump-to-latest", () => {
+  it("targets an overflow-auto ancestor instead of window scroll on jump-to-latest", async () => {
     container.remove();
     const scrollHost = document.createElement("main");
     scrollHost.id = "main-content";
@@ -741,7 +741,7 @@ describe("IssueChatThread", () => {
     scrollHost.remove();
   });
 
-  it("cancels jump-to-latest settling when the user scrolls manually", () => {
+  it("cancels jump-to-latest settling when the user scrolls manually", async () => {
     vi.useFakeTimers();
     container.remove();
     const scrollHost = document.createElement("main");
@@ -809,7 +809,7 @@ describe("IssueChatThread", () => {
   // Regression for PAP-2672: when the merged feed ends with a non-comment row
   // (run/timeline/embedded output) we still want Jump to latest to land on the
   // last comment, not whichever activity row sorts last.
-  it("targets the latest comment row when trailing rows are non-comments (PAP-2672)", () => {
+  it("targets the latest comment row when trailing rows are non-comments (PAP-2672)", async () => {
     const lastComment = issueChatLongThreadComments.at(-1);
     expect(lastComment).toBeDefined();
     const trailingRunStart = new Date(new Date(lastComment!.createdAt).getTime() + 60_000);
@@ -1011,7 +1011,7 @@ describe("IssueChatThread", () => {
     }
 
     const root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <RefreshingThread />
@@ -1024,7 +1024,7 @@ describe("IssueChatThread", () => {
     ) as HTMLButtonElement | undefined;
     expect(jump).toBeDefined();
 
-    await act(async () => {
+    act(async () => {
       jump?.click();
       await new Promise((resolve) => window.requestAnimationFrame(resolve));
     });
@@ -1037,7 +1037,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("findLatestCommentMessageIndex prefers the last comment-anchored row (PAP-2672)", () => {
+  it("findLatestCommentMessageIndex prefers the last comment-anchored row (PAP-2672)", async () => {
     const messages = [
       { metadata: { custom: { anchorId: "comment-a" } } },
       { metadata: { custom: { anchorId: "run-1" } } },
@@ -1054,7 +1054,7 @@ describe("IssueChatThread", () => {
     expect(findLatestCommentMessageIndex([] as never)).toBe(-1);
   });
 
-  it("keeps the direct render path for short threads under the virtualization threshold", () => {
+  it("keeps the direct render path for short threads under the virtualization threshold", async () => {
     const root = createRoot(container);
     const directComments = issueChatLongThreadComments.slice(0, 12);
 
@@ -1088,7 +1088,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("renders virtualized rows with the same role/kind metadata as the direct path", () => {
+  it("renders virtualized rows with the same role/kind metadata as the direct path", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -1131,7 +1131,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("does not re-render long-thread markdown rows for unrelated layout updates", () => {
+  it("does not re-render long-thread markdown rows for unrelated layout updates", async () => {
     const root = createRoot(container);
     const onAdd = async () => {};
     const hasOutputForRun = (runId: string) => issueChatLongThreadTranscriptsByRunId.has(runId);
@@ -1188,7 +1188,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("does not re-render unchanged markdown when feedback votes change", () => {
+  it("does not re-render unchanged markdown when feedback votes change", async () => {
     const root = createRoot(container);
     const onAdd = async () => {};
     const onVote = async () => {};
@@ -1319,7 +1319,7 @@ describe("IssueChatThread", () => {
     const deleteButtons = Array.from(container.querySelectorAll("button[aria-label='Delete comment']"));
     expect(deleteButtons).toHaveLength(1);
 
-    await act(async () => {
+    act(async () => {
       deleteButtons[0]?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -1328,7 +1328,7 @@ describe("IssueChatThread", () => {
       .find((button) => button.textContent === "Delete comment");
     expect(confirmButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       confirmButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -1339,7 +1339,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("renders deleted comments as tombstones without the original body", () => {
+  it("renders deleted comments as tombstones without the original body", async () => {
     const root = createRoot(container);
 
     flushAct(() => {
@@ -1385,7 +1385,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("clears a deleted comment deep-link hash instead of highlighting it", () => {
+  it("clears a deleted comment deep-link hash instead of highlighting it", async () => {
     const root = createRoot(container);
     const replaceStateSpy = vi.spyOn(window.history, "replaceState").mockImplementation(() => {});
 
@@ -1429,7 +1429,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("shows explicit follow-up badges and event copy", () => {
+  it("shows explicit follow-up badges and event copy", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -1476,7 +1476,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("shows unresolved blocker context above the composer", () => {
+  it("shows unresolved blocker context above the composer", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -1517,7 +1517,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("shows terminal blocker context when an immediate blocker is transitively blocked", () => {
+  it("shows terminal blocker context when an immediate blocker is transitively blocked", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -1570,7 +1570,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("shows paused assigned agent context above the composer", () => {
+  it("shows paused assigned agent context above the composer", async () => {
     const root = createRoot(container);
     const pausedAgent = {
       id: "agent-1",
@@ -1606,7 +1606,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("supports the embedded read-only variant without the jump control", () => {
+  it("supports the embedded read-only variant without the jump control", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -1643,7 +1643,7 @@ describe("IssueChatThread", () => {
     const root = createRoot(container);
     const onAcceptInteraction = vi.fn(async () => undefined);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <IssueChatThread
@@ -1666,7 +1666,7 @@ describe("IssueChatThread", () => {
     );
     expect(acceptButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       acceptButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -1687,7 +1687,7 @@ describe("IssueChatThread", () => {
     const root = createRoot(container);
     const onAcceptInteraction = vi.fn(async () => undefined);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <IssueChatThread
@@ -1723,14 +1723,14 @@ describe("IssueChatThread", () => {
     const childCheckbox = container.querySelector('[aria-label="Include Child task"]');
     expect(childCheckbox).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       childCheckbox?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     const acceptButton = Array.from(container.querySelectorAll("button")).find((button) =>
       button.textContent?.includes("Accept selected drafts"),
     );
     expect(acceptButton).toBeTruthy();
-    await act(async () => {
+    act(async () => {
       acceptButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -1751,7 +1751,7 @@ describe("IssueChatThread", () => {
     const root = createRoot(container);
     const onSubmitInteractionAnswers = vi.fn(async () => undefined);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <IssueChatThread
@@ -1778,10 +1778,10 @@ describe("IssueChatThread", () => {
     expect(optionButton).toBeTruthy();
     expect(submitButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       optionButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    await act(async () => {
+    act(async () => {
       submitButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -1802,7 +1802,7 @@ describe("IssueChatThread", () => {
     const root = createRoot(container);
     const onSubmitInteractionAnswers = vi.fn(async () => undefined);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <IssueChatThread
@@ -1825,14 +1825,14 @@ describe("IssueChatThread", () => {
     );
     expect(otherButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       otherButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
     const textarea = container.querySelector("textarea") as HTMLTextAreaElement | null;
     expect(textarea).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       const valueSetter = Object.getOwnPropertyDescriptor(
         HTMLTextAreaElement.prototype,
         "value",
@@ -1845,7 +1845,7 @@ describe("IssueChatThread", () => {
       button.textContent?.includes("Submit answers"),
     );
 
-    await act(async () => {
+    act(async () => {
       submitButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -1866,7 +1866,7 @@ describe("IssueChatThread", () => {
     const root = createRoot(container);
     const onCancelInteraction = vi.fn(async () => undefined);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <IssueChatThread
@@ -1889,7 +1889,7 @@ describe("IssueChatThread", () => {
     );
     expect(cancelButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       cancelButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -1908,7 +1908,7 @@ describe("IssueChatThread", () => {
   it("folds expired request confirmations into an activity row by default", async () => {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <IssueChatThread
@@ -1937,7 +1937,7 @@ describe("IssueChatThread", () => {
     );
     expect(toggleButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       toggleButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -1949,7 +1949,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("renders the transcript directly from stable Paperclip messages", () => {
+  it("renders the transcript directly from stable Super Node messages", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -1988,7 +1988,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("shows deferred wake badge only for hold-deferred queued comments", () => {
+  it("shows deferred wake badge only for hold-deferred queued comments", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -2061,7 +2061,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("stores and restores the composer draft per issue key", () => {
+  it("stores and restores the composer draft per issue key", async () => {
     vi.useFakeTimers();
     const root = createRoot(container);
 
@@ -2129,7 +2129,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("keeps the composer floating with a capped editor height", () => {
+  it("keeps the composer floating with a capped editor height", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -2170,7 +2170,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("shows full-composer drop instructions while dragging files over the issue composer", () => {
+  it("shows full-composer drop instructions while dragging files over the issue composer", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -2233,7 +2233,7 @@ describe("IssueChatThread", () => {
       updatedAt: new Date("2026-04-24T12:00:00.000Z"),
     }));
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <IssueChatThread
@@ -2252,7 +2252,7 @@ describe("IssueChatThread", () => {
     const composer = container.querySelector('[data-testid="issue-chat-composer"]') as HTMLDivElement | null;
     const file = new File(["report body"], "report.pdf", { type: "application/pdf" });
 
-    await act(async () => {
+    act(async () => {
       composer?.dispatchEvent(createFileDragEvent("drop", [file]));
     });
 
@@ -2262,12 +2262,12 @@ describe("IssueChatThread", () => {
     expect(container.textContent).toContain("report.pdf");
     expect(container.textContent).toContain("Attached to task");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
 
-  it("shows only the outer composer drop overlay when dragging over the reply editor", () => {
+  it("shows only the outer composer drop overlay when dragging over the reply editor", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -2332,7 +2332,7 @@ describe("IssueChatThread", () => {
       updatedAt: new Date("2026-04-24T12:00:00.000Z"),
     }));
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <IssueChatThread
@@ -2351,7 +2351,7 @@ describe("IssueChatThread", () => {
     const editor = container.querySelector('textarea[aria-label="Issue chat editor"]') as HTMLTextAreaElement | null;
     const file = new File(["report body"], "report.pdf", { type: "application/pdf" });
 
-    await act(async () => {
+    act(async () => {
       editor?.dispatchEvent(createFileDragEvent("drop", [file]));
     });
 
@@ -2362,12 +2362,12 @@ describe("IssueChatThread", () => {
     expect(container.textContent).toContain("report.pdf");
     expect(container.textContent).toContain("Attached to task");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
 
-  it("renders the bottom spacer with zero height until the user has submitted", () => {
+  it("renders the bottom spacer with zero height until the user has submitted", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -2406,7 +2406,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("omits the bottom spacer when the composer is hidden", () => {
+  it("omits the bottom spacer when the composer is hidden", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -2471,7 +2471,7 @@ describe("IssueChatThread", () => {
       editor?.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
-    await act(async () => {
+    act(async () => {
       submitButton?.click();
     });
 
@@ -2535,14 +2535,14 @@ describe("IssueChatThread", () => {
       editor?.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
-    await act(async () => {
+    act(async () => {
       submitButton?.click();
     });
 
     expect(appendMock).not.toHaveBeenCalled();
     expect(document.body.textContent).toContain("No assignee selected");
 
-    await act(async () => {
+    act(async () => {
       submitButton?.click();
     });
 
@@ -2600,7 +2600,7 @@ describe("IssueChatThread", () => {
       editor?.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
-    await act(async () => {
+    act(async () => {
       submitButton?.click();
     });
 
@@ -2612,7 +2612,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("exposes a composer focus handle that forwards to the editor", () => {
+  it("exposes a composer focus handle that forwards to the editor", async () => {
     const root = createRoot(container);
     const composerRef = createRef<{ focus: () => void; restoreDraft: (submittedBody: string) => void }>();
     const scrollByMock = vi.spyOn(window, "scrollBy").mockImplementation(() => {});
@@ -2661,7 +2661,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("restores a cancelled queued draft into the composer handle", () => {
+  it("restores a cancelled queued draft into the composer handle", async () => {
     const root = createRoot(container);
     const composerRef = createRef<{ focus: () => void; restoreDraft: (submittedBody: string) => void }>();
     const scrollByMock = vi.spyOn(window, "scrollBy").mockImplementation(() => {});
@@ -2706,7 +2706,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("does not restore the composer viewport for passive live updates by default", () => {
+  it("does not restore the composer viewport for passive live updates by default", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -2758,7 +2758,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("requests composer viewport restoration when live messages arrive during active composer interaction", () => {
+  it("requests composer viewport restoration when live messages arrive during active composer interaction", async () => {
     const root = createRoot(container);
     const scrollByMock = vi.spyOn(window, "scrollBy").mockImplementation(() => {});
     shouldPreserveComposerViewportMock.mockReturnValue(true);
@@ -2814,7 +2814,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("keeps a running chain-of-thought in the Working state between commands", () => {
+  it("keeps a running chain-of-thought in the Working state between commands", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -2874,7 +2874,7 @@ describe("IssueChatThread", () => {
     });
   });
 
-  it("folds chain-of-thought when the same message transitions from running to complete", () => {
+  it("folds chain-of-thought when the same message transitions from running to complete", async () => {
     expect(resolveAssistantMessageFoldedState({
       messageId: "message-1",
       currentFolded: false,
@@ -2884,7 +2884,7 @@ describe("IssueChatThread", () => {
     })).toBe(true);
   });
 
-  it("preserves a manually opened completed message across rerenders", () => {
+  it("preserves a manually opened completed message across rerenders", async () => {
     expect(resolveAssistantMessageFoldedState({
       messageId: "message-1",
       currentFolded: false,
@@ -2894,7 +2894,7 @@ describe("IssueChatThread", () => {
     })).toBe(false);
   });
 
-  it("shows the stop-run action for active run-linked messages even without embedded run status", () => {
+  it("shows the stop-run action for active run-linked messages even without embedded run status", async () => {
     expect(canStopIssueChatRun({
       runId: "run-1",
       runStatus: null,
@@ -2902,7 +2902,7 @@ describe("IssueChatThread", () => {
     })).toBe(true);
   });
 
-  it("hides the stop-run action for completed historical runs", () => {
+  it("hides the stop-run action for completed historical runs", async () => {
     expect(canStopIssueChatRun({
       runId: "run-1",
       runStatus: "cancelled",
@@ -2910,7 +2910,7 @@ describe("IssueChatThread", () => {
     })).toBe(false);
   });
 
-  it("uses company profile data to distinguish the current user from other humans", () => {
+  it("uses company profile data to distinguish the current user from other humans", async () => {
     const userProfileMap = new Map([
       ["user-1", { label: "Dotta", image: "/avatars/dotta.png" }],
       ["user-2", { label: "Alice", image: "/avatars/alice.png" }],

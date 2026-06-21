@@ -86,14 +86,14 @@ function makePreview(
 }
 
 async function flush() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
 }
 
 async function flushDebounce() {
-  await act(async () => {
+  act(async () => {
     await new Promise((resolve) => window.setTimeout(resolve, 300));
   });
 }
@@ -156,7 +156,7 @@ describe("ImportFromVaultDialog", () => {
 
     const { queryClient } = makeWrapper();
     const root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ImportFromVaultDialog
@@ -182,7 +182,7 @@ describe("ImportFromVaultDialog", () => {
       '[data-testid="vault-row-arn:aws:secretsmanager:us-east-1:1:secret:prod/stripe-ABC"]',
     ) as HTMLElement | null;
     expect(stripeRow).not.toBeNull();
-    await act(async () => {
+    act(async () => {
       stripeRow?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -191,7 +191,7 @@ describe("ImportFromVaultDialog", () => {
     // Load more page
     const loadMore = document.querySelector('[data-testid="vault-load-more"]') as HTMLButtonElement | null;
     expect(loadMore).not.toBeNull();
-    await act(async () => {
+    act(async () => {
       loadMore!.click();
     });
     await flush();
@@ -201,7 +201,7 @@ describe("ImportFromVaultDialog", () => {
     // Selection persisted through pagination.
     expect(document.body.textContent).toContain("1 selected");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -236,7 +236,7 @@ describe("ImportFromVaultDialog", () => {
 
     const { queryClient } = makeWrapper();
     const root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ImportFromVaultDialog
@@ -264,7 +264,7 @@ describe("ImportFromVaultDialog", () => {
     expect(document.body.textContent).toContain("Conflict");
     expect(document.body.textContent).toContain("Name already in use");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -308,7 +308,7 @@ describe("ImportFromVaultDialog", () => {
 
     const { queryClient } = makeWrapper();
     const root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ImportFromVaultDialog
@@ -328,7 +328,7 @@ describe("ImportFromVaultDialog", () => {
     const row = document.querySelector(
       '[data-testid="vault-row-arn:aws:secretsmanager:us-east-1:1:secret:prod/openai-XYZ"]',
     ) as HTMLElement | null;
-    await act(async () => {
+    act(async () => {
       row?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -338,7 +338,7 @@ describe("ImportFromVaultDialog", () => {
       (btn) => btn.textContent?.includes("Continue"),
     );
     expect(continueBtn).toBeTruthy();
-    await act(async () => {
+    act(async () => {
       continueBtn!.click();
     });
     await flush();
@@ -352,7 +352,7 @@ describe("ImportFromVaultDialog", () => {
     expect(importBtn).toBeTruthy();
     expect(importBtn?.disabled).toBe(true);
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -372,7 +372,7 @@ describe("ImportFromVaultDialog", () => {
 
     const { queryClient } = makeWrapper();
     const root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ImportFromVaultDialog
@@ -391,7 +391,7 @@ describe("ImportFromVaultDialog", () => {
     const row = document.querySelector(
       `[data-testid="vault-row-${externalRef}"]`,
     ) as HTMLElement | null;
-    await act(async () => {
+    act(async () => {
       row?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -399,7 +399,7 @@ describe("ImportFromVaultDialog", () => {
     const continueBtn = Array.from(document.querySelectorAll("button")).find(
       (btn) => btn.textContent?.includes("Continue"),
     );
-    await act(async () => {
+    act(async () => {
       continueBtn!.click();
     });
     await flush();
@@ -411,7 +411,7 @@ describe("ImportFromVaultDialog", () => {
       window.HTMLInputElement.prototype,
       "value",
     )?.set;
-    await act(async () => {
+    act(async () => {
       valueSetter?.call(keyInput, "MY_KEY");
       keyInput!.dispatchEvent(new Event("input", { bubbles: true }));
     });
@@ -423,7 +423,7 @@ describe("ImportFromVaultDialog", () => {
     ) as HTMLButtonElement | undefined;
     expect(importBtn?.disabled).toBe(true);
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -464,7 +464,7 @@ describe("ImportFromVaultDialog", () => {
 
     const { queryClient } = makeWrapper();
     const root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ImportFromVaultDialog
@@ -483,7 +483,7 @@ describe("ImportFromVaultDialog", () => {
     const row = document.querySelector(
       `[data-testid="vault-row-${externalRef}"]`,
     ) as HTMLElement | null;
-    await act(async () => {
+    act(async () => {
       row?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -491,7 +491,7 @@ describe("ImportFromVaultDialog", () => {
     const continueBtn = Array.from(document.querySelectorAll("button")).find(
       (btn) => btn.textContent?.includes("Continue"),
     );
-    await act(async () => {
+    act(async () => {
       continueBtn!.click();
     });
     await flush();
@@ -504,7 +504,7 @@ describe("ImportFromVaultDialog", () => {
       window.HTMLInputElement.prototype,
       "value",
     )?.set;
-    await act(async () => {
+    act(async () => {
       valueSetter?.call(descriptionInput, "Operator-entered OpenAI key");
       descriptionInput!.dispatchEvent(new Event("input", { bubbles: true }));
     });
@@ -513,7 +513,7 @@ describe("ImportFromVaultDialog", () => {
     const importBtn = Array.from(document.querySelectorAll("button")).find(
       (btn) => btn.textContent?.startsWith("Import "),
     ) as HTMLButtonElement | undefined;
-    await act(async () => {
+    act(async () => {
       importBtn!.click();
     });
     await flush();
@@ -530,7 +530,7 @@ describe("ImportFromVaultDialog", () => {
       ],
     });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -601,7 +601,7 @@ describe("ImportFromVaultDialog", () => {
 
     const { queryClient } = makeWrapper();
     const root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ImportFromVaultDialog
@@ -622,7 +622,7 @@ describe("ImportFromVaultDialog", () => {
       '[data-testid="vault-table-body"]',
     )?.parentElement?.querySelector('thead button[role="checkbox"]') as HTMLButtonElement | null;
     expect(headerCheckbox).toBeTruthy();
-    await act(async () => {
+    act(async () => {
       headerCheckbox!.click();
     });
     await flush();
@@ -631,7 +631,7 @@ describe("ImportFromVaultDialog", () => {
     const continueBtn = Array.from(document.querySelectorAll("button")).find(
       (btn) => btn.textContent?.includes("Continue"),
     );
-    await act(async () => {
+    act(async () => {
       continueBtn!.click();
     });
     await flush();
@@ -641,7 +641,7 @@ describe("ImportFromVaultDialog", () => {
       (btn) => btn.textContent?.startsWith("Import "),
     ) as HTMLButtonElement | undefined;
     expect(importBtn).toBeTruthy();
-    await act(async () => {
+    act(async () => {
       importBtn!.click();
     });
     await flush();
@@ -656,7 +656,7 @@ describe("ImportFromVaultDialog", () => {
     expect(document.body.textContent).not.toContain("AccessDeniedException");
     expect(document.body.textContent).not.toContain("123456789012");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -664,7 +664,7 @@ describe("ImportFromVaultDialog", () => {
   it("shows an empty state when no AWS vault is configured", async () => {
     const { queryClient } = makeWrapper();
     const root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ImportFromVaultDialog
@@ -683,7 +683,7 @@ describe("ImportFromVaultDialog", () => {
     expect(document.querySelector('[data-testid="select-empty-vaults"]')).not.toBeNull();
     expect(mockSecretsApi.remoteImportPreview).not.toHaveBeenCalled();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -698,7 +698,7 @@ describe("ImportFromVaultDialog", () => {
 
     const { queryClient } = makeWrapper();
     const root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ImportFromVaultDialog
@@ -718,7 +718,7 @@ describe("ImportFromVaultDialog", () => {
     expect(banner).not.toBeNull();
     expect(banner?.textContent).toContain("Could not load remote secrets");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -736,7 +736,7 @@ describe("ImportFromVaultDialog", () => {
 
     const { queryClient } = makeWrapper();
     const root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ImportFromVaultDialog
@@ -760,7 +760,7 @@ describe("ImportFromVaultDialog", () => {
     expect(banner?.textContent).not.toContain("arn:aws");
     expect(banner?.textContent).not.toContain("123456789012");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -779,7 +779,7 @@ describe("ImportFromVaultDialog", () => {
 
     const { queryClient } = makeWrapper();
     const root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ImportFromVaultDialog
@@ -801,7 +801,7 @@ describe("ImportFromVaultDialog", () => {
       window.HTMLInputElement.prototype,
       "value",
     )?.set;
-    await act(async () => {
+    act(async () => {
       search.focus();
       valueSetter?.call(search, "stripe");
       search.dispatchEvent(new Event("input", { bubbles: true }));
@@ -813,7 +813,7 @@ describe("ImportFromVaultDialog", () => {
     const lastCall = mockSecretsApi.remoteImportPreview.mock.calls.at(-1);
     expect(lastCall?.[1]).toMatchObject({ query: "stripe" });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

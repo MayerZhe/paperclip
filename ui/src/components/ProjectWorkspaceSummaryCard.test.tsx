@@ -106,7 +106,7 @@ describe("ProjectWorkspaceSummaryCard", () => {
     document.body.innerHTML = "";
   });
 
-  it("renders a stacked mobile-friendly summary with metadata labels and compact issue pills", () => {
+  it("renders a stacked mobile-friendly summary with metadata labels and compact issue pills", async () => {
     const root = createRoot(container);
     act(() => {
       root.render(
@@ -141,7 +141,7 @@ describe("ProjectWorkspaceSummaryCard", () => {
     });
   });
 
-  it("uses project workspace routes and omits close controls for project workspaces", () => {
+  it("uses project workspace routes and omits close controls for project workspaces", async () => {
     const runtimeSpy = vi.fn();
     const closeSpy = vi.fn();
     const root = createRoot(container);
@@ -176,7 +176,7 @@ describe("ProjectWorkspaceSummaryCard", () => {
     });
   });
 
-  it("shows retry close for cleanup failures", () => {
+  it("shows retry close for cleanup failures", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -208,7 +208,7 @@ describe("ProjectWorkspaceSummaryCard", () => {
       cwd: "/Users/dotta/paperclip/.worktrees/PAP-1552-workspace-polish",
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <ProjectWorkspaceSummaryCard
           projectRef="paperclip-app"
@@ -232,19 +232,19 @@ describe("ProjectWorkspaceSummaryCard", () => {
     expect(branchIconButton).not.toBeNull();
     expect(pathIconButton).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       branchTextButton!.click();
     });
     expect(writeClipboard).toHaveBeenLastCalledWith(summary.branchName);
     expect(branchTextButton?.nextElementSibling?.className).toContain("opacity-100");
 
-    await act(async () => {
+    act(async () => {
       pathTextButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     expect(writeClipboard).toHaveBeenLastCalledWith(summary.cwd);
     expect(pathTextButton?.nextElementSibling?.className).toContain("opacity-100");
 
-    await act(async () => {
+    act(async () => {
       branchIconButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       pathIconButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -255,7 +255,7 @@ describe("ProjectWorkspaceSummaryCard", () => {
       root.unmount();
     });
   });
-  it("colors live service urls green", () => {
+  it("colors live service urls green", async () => {
     const root = createRoot(container);
 
     act(() => {

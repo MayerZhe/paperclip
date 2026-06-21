@@ -70,13 +70,6 @@ vi.mock("../adapters/adapter-display-registry", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 function makeAgent(overrides: Partial<Agent>): Agent {
   return {
@@ -135,7 +128,7 @@ const invalidOrgChainHealth: AgentOrgChainHealth = {
 };
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -187,7 +180,7 @@ describe("Agents", () => {
   afterEach(async () => {
     const currentRoot = root;
     if (currentRoot) {
-      await act(async () => {
+      act(async () => {
         currentRoot.unmount();
       });
     }
@@ -199,7 +192,7 @@ describe("Agents", () => {
 
   it("shows the configured model beside the adapter on the all agents page", async () => {
     root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root!.render(
         <QueryClientProvider client={queryClient}>
           <ToastProvider>
@@ -223,7 +216,7 @@ describe("Agents", () => {
 
   it("gives list-view rows a fixed-width title so meta columns align (PAP-86)", async () => {
     root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root!.render(
         <QueryClientProvider client={queryClient}>
           <ToastProvider>
@@ -240,7 +233,7 @@ describe("Agents", () => {
       (btn) => btn.querySelector("svg.lucide-list"),
     );
     expect(listToggle).toBeDefined();
-    await act(async () => {
+    act(async () => {
       listToggle!.click();
     });
     await flushReact();
@@ -260,7 +253,7 @@ describe("Agents", () => {
     ]);
 
     root = createRoot(container);
-    await act(async () => {
+    act(async () => {
       root!.render(
         <QueryClientProvider client={queryClient}>
           <ToastProvider>

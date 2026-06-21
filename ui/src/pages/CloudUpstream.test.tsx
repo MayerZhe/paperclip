@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { CloudUpstreamRun, CloudUpstreamsState } from "@paperclipai/shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CloudUpstream, buildActivationRows } from "./CloudUpstream";
+import { act } from "react";
 
 const mockCloudUpstreamsApi = vi.hoisted(() => ({
   list: vi.fn(),
@@ -64,14 +65,9 @@ vi.mock("@/lib/router", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  await callback();
-  await Promise.resolve();
-  await new Promise((resolve) => window.setTimeout(resolve, 0));
-}
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -117,7 +113,7 @@ describe("CloudUpstream", () => {
     const root = createRoot(container);
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <CloudUpstream />
@@ -139,7 +135,7 @@ describe("CloudUpstream", () => {
       .find((button) => button.textContent?.trim() === "Activate") as HTMLButtonElement | undefined;
     expect(activateButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       activateButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -150,7 +146,7 @@ describe("CloudUpstream", () => {
       { companyId: "company-1", entityType: "agents" },
     );
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -164,7 +160,7 @@ describe("CloudUpstream", () => {
     const root = createRoot(container);
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <CloudUpstream />
@@ -176,7 +172,7 @@ describe("CloudUpstream", () => {
 
     const input = container.querySelector<HTMLInputElement>("input[aria-label='Paperclip Cloud stack URL']");
     expect(input).toBeTruthy();
-    await act(async () => {
+    act(async () => {
       const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
       setter.call(input!, "https://cloud.example/PAP/dashboard");
       input!.dispatchEvent(new Event("input", { bubbles: true }));
@@ -187,7 +183,7 @@ describe("CloudUpstream", () => {
       .find((button) => button.textContent?.trim() === "Connect") as HTMLButtonElement | undefined;
     expect(connectButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       connectButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -198,7 +194,7 @@ describe("CloudUpstream", () => {
       redirectUri: `${window.location.origin}/PAP/company/settings/cloud-upstream`,
     });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -239,7 +235,7 @@ describe("CloudUpstream", () => {
       const root = createRoot(container);
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-      await act(async () => {
+      act(async () => {
         root.render(
           <QueryClientProvider client={queryClient}>
             <CloudUpstream />
@@ -256,7 +252,7 @@ describe("CloudUpstream", () => {
       });
       expect(replaceStateSpy).toHaveBeenCalledWith(null, "", "/PAP/company/settings/cloud-upstream");
 
-      await act(async () => {
+      act(async () => {
         root.unmount();
       });
     } finally {
@@ -276,7 +272,7 @@ describe("CloudUpstream", () => {
       const root = createRoot(container);
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-      await act(async () => {
+      act(async () => {
         root.render(
           <QueryClientProvider client={queryClient}>
             <CloudUpstream />
@@ -290,7 +286,7 @@ describe("CloudUpstream", () => {
       expect(mockCloudUpstreamsApi.finishConnect).toHaveBeenCalledTimes(1);
       expect(container.textContent).toContain("state expired");
 
-      await act(async () => {
+      act(async () => {
         root.unmount();
       });
     } finally {
@@ -303,7 +299,7 @@ describe("CloudUpstream", () => {
     const root = createRoot(container);
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <CloudUpstream />
@@ -317,7 +313,7 @@ describe("CloudUpstream", () => {
     expect(container.textContent).not.toContain("Re-run");
     expect(container.textContent).not.toContain("Activation checklist");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

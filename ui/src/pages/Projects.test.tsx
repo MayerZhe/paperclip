@@ -55,13 +55,6 @@ if (!globalThis.PointerEvent) {
   (globalThis as any).PointerEvent = MouseEvent;
 }
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 function makeProject(overrides: Partial<Project>): Project {
   return {
@@ -104,7 +97,7 @@ function makeProject(overrides: Partial<Project>): Project {
 }
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -159,7 +152,7 @@ describe("Projects", () => {
   afterEach(async () => {
     const currentRoot = root;
     if (currentRoot) {
-      await act(async () => {
+      act(async () => {
         currentRoot.unmount();
       });
     }
@@ -173,7 +166,7 @@ describe("Projects", () => {
     const currentRoot = createRoot(container);
     root = currentRoot;
 
-    await act(async () => {
+    act(async () => {
       currentRoot.render(
         <QueryClientProvider client={queryClient}>
           <ToastProvider>
@@ -190,7 +183,7 @@ describe("Projects", () => {
     const trigger = container.querySelector<HTMLButtonElement>('button[title="Sort"]');
     expect(trigger).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       trigger?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
       trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
@@ -202,7 +195,7 @@ describe("Projects", () => {
       .find((element) => element.textContent?.includes(label));
     expect(item).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       item?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();

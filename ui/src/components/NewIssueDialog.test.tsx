@@ -238,13 +238,13 @@ function act(callback: () => void | Promise<void>): void | Promise<void> {
 }
 
 async function flush() {
-  await act(async () => {
+  act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 }
 
 async function typeTextareaValue(textarea: HTMLTextAreaElement, value: string) {
-  await act(async () => {
+  act(async () => {
     const valueSetter = Object.getOwnPropertyDescriptor(
       window.HTMLTextAreaElement.prototype,
       "value",
@@ -427,7 +427,7 @@ describe("NewIssueDialog", () => {
       expect(submitButton?.hasAttribute("disabled")).toBe(false);
     });
 
-    await act(async () => {
+    act(async () => {
       submitButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -466,7 +466,7 @@ describe("NewIssueDialog", () => {
       expect(submitButton?.hasAttribute("disabled")).toBe(false);
     });
 
-    await act(async () => {
+    act(async () => {
       submitButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -541,7 +541,7 @@ describe("NewIssueDialog", () => {
       .find((button) => button.textContent?.includes("Create Task"));
     expect(submitButton).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       submitButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -586,7 +586,7 @@ describe("NewIssueDialog", () => {
     await typeTextareaValue(titleInput!, "Typed issue");
     await typeTextareaValue(descriptionInput!, "Typed description");
 
-    await act(async () => {
+    act(async () => {
       resolveProjects([
         {
           id: "project-1",
@@ -607,7 +607,7 @@ describe("NewIssueDialog", () => {
       expect(submitButton?.hasAttribute("disabled")).toBe(false);
     });
 
-    await act(async () => {
+    act(async () => {
       submitButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -650,7 +650,7 @@ describe("NewIssueDialog", () => {
       expect(submitButton?.hasAttribute("disabled")).toBe(false);
     });
 
-    await act(async () => {
+    act(async () => {
       submitButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -677,7 +677,7 @@ describe("NewIssueDialog", () => {
 
     const planningButton = container.querySelector('[data-issue-work-mode="planning"]');
     expect(planningButton).not.toBeNull();
-    await act(async () => {
+    act(async () => {
       planningButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -689,7 +689,7 @@ describe("NewIssueDialog", () => {
       expect(submitButton?.hasAttribute("disabled")).toBe(false);
     });
 
-    await act(async () => {
+    act(async () => {
       submitButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -723,7 +723,7 @@ describe("NewIssueDialog", () => {
       .find((button) => button.textContent?.includes("Create Sub-Task"));
     expect(submitButton).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       submitButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -778,7 +778,7 @@ describe("NewIssueDialog", () => {
     const highPriorityOption = container.querySelector('[data-testid="new-issue-more-priority-high"]');
     expect(highPriorityOption?.textContent).toContain("High");
 
-    await act(async () => {
+    act(async () => {
       highPriorityOption?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -868,7 +868,7 @@ describe("NewIssueDialog", () => {
     const modeSelect = selects[0] as HTMLSelectElement | undefined;
     expect(modeSelect).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       modeSelect!.value = "shared_workspace";
       modeSelect!.dispatchEvent(new Event("change", { bubbles: true }));
     });

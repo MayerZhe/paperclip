@@ -428,7 +428,7 @@ describe("Routines page", () => {
       },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Routines />
@@ -440,7 +440,7 @@ describe("Routines page", () => {
     let sortButton = container.querySelector<HTMLButtonElement>('button[title="Sort"]');
     let groupButton = container.querySelector<HTMLButtonElement>('button[title="Group"]');
     for (let attempts = 0; attempts < 5 && (!sortButton || !groupButton); attempts += 1) {
-      await act(async () => {
+      act(async () => {
         await flush();
       });
       sortButton = container.querySelector<HTMLButtonElement>('button[title="Sort"]');
@@ -451,7 +451,7 @@ describe("Routines page", () => {
     expect(groupButton).not.toBeNull();
     expect(sortButton!.compareDocumentPosition(groupButton!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -471,7 +471,7 @@ describe("Routines page", () => {
       },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Routines />
@@ -481,7 +481,7 @@ describe("Routines page", () => {
     });
 
     for (let attempts = 0; attempts < 5 && !container.textContent?.includes("Project Alpha"); attempts += 1) {
-      await act(async () => {
+      act(async () => {
         await flush();
       });
     }
@@ -492,7 +492,7 @@ describe("Routines page", () => {
     expect(text.indexOf("Project Alpha")).toBeLessThan(text.indexOf("Morning sync"));
     expect(text.indexOf("Weekly digest")).toBeLessThan(text.indexOf("Project Beta"));
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -511,7 +511,7 @@ describe("Routines page", () => {
       },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Routines />
@@ -521,7 +521,7 @@ describe("Routines page", () => {
     });
 
     for (let attempts = 0; attempts < 5 && !container.textContent?.includes("Morning sync"); attempts += 1) {
-      await act(async () => {
+      act(async () => {
         await flush();
       });
     }
@@ -531,7 +531,7 @@ describe("Routines page", () => {
     expect(text).toContain("Morning sync");
     expect(text).not.toContain("Archived cleanup");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -547,7 +547,7 @@ describe("Routines page", () => {
       },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Routines />
@@ -560,7 +560,7 @@ describe("Routines page", () => {
       button.textContent?.includes("Run now"),
     );
     for (let attempts = 0; attempts < 5 && !runNowButton; attempts += 1) {
-      await act(async () => {
+      act(async () => {
         await flush();
       });
       runNowButton = Array.from(container.querySelectorAll("button")).find((button) =>
@@ -571,7 +571,7 @@ describe("Routines page", () => {
     expect(runNowButton).toBeTruthy();
     expect(runNowButton?.getAttribute("data-variant")).toBe("outline");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -587,7 +587,7 @@ describe("Routines page", () => {
       },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Routines />
@@ -600,7 +600,7 @@ describe("Routines page", () => {
       button.textContent?.includes("Create routine"),
     );
     for (let attempts = 0; attempts < 5 && !createButton; attempts += 1) {
-      await act(async () => {
+      act(async () => {
         await flush();
       });
       createButton = Array.from(container.querySelectorAll("button")).find((button) =>
@@ -610,7 +610,7 @@ describe("Routines page", () => {
 
     expect(createButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       createButton?.click();
       await flush();
     });
@@ -618,7 +618,7 @@ describe("Routines page", () => {
     for (let attempts = 0; attempts < 5; attempts += 1) {
       const hasMentionOptions = markdownEditorRenderMock.mock.calls.some(([props]) => (props.mentions ?? []).length > 0);
       if (hasMentionOptions) break;
-      await act(async () => {
+      act(async () => {
         await flush();
       });
     }
@@ -635,7 +635,7 @@ describe("Routines page", () => {
       "project:project-2",
     ]);
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -655,7 +655,7 @@ describe("Routines page", () => {
       },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Routines />
@@ -665,14 +665,14 @@ describe("Routines page", () => {
     });
 
     for (let attempts = 0; attempts < 5 && issuesListMock.mock.calls.length === 0; attempts += 1) {
-      await act(async () => {
+      act(async () => {
         await flush();
       });
     }
 
     expect(issuesListMock).toHaveBeenCalledWith("company-1", { originKind: "routine_execution" });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

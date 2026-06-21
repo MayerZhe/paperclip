@@ -31,7 +31,7 @@ describe("InviteUxLab", () => {
   it("renders the invite/signup review sections", async () => {
     const root = createRoot(container);
 
-    await act(async () => {
+    act(async () => {
       root.render(<InviteUxLab />);
     });
 
@@ -41,11 +41,11 @@ describe("InviteUxLab", () => {
     expect(container.textContent).toContain("Split-screen invite flows");
     expect(container.textContent).toContain("Approval and completion screens");
     expect(container.textContent).toContain("Auth page states");
-    expect(container.textContent).toContain("Company invite management");
+    expect(container.textContent).toContain("Node Org invite management");
     expect(container.textContent).toContain("Create your account");
     expect(container.textContent).toContain("Invite history");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

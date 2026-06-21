@@ -100,7 +100,7 @@ describe("IssueMonitorActivityCard", () => {
     container.remove();
   });
 
-  it("renders the scheduled monitor details and check-now action", () => {
+  it("renders the scheduled monitor details and check-now action", async () => {
     const onCheckNow = vi.fn();
     const root = createRoot(container);
 
@@ -127,7 +127,7 @@ describe("IssueMonitorActivityCard", () => {
     act(() => root.unmount());
   });
 
-  it("does not render external references from monitor metadata", () => {
+  it("does not render external references from monitor metadata", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -158,7 +158,7 @@ describe("IssueMonitorActivityCard", () => {
     act(() => root.unmount());
   });
 
-  it("renders without throwing when monitorNextCheckAt arrives as an ISO string", () => {
+  it("renders without throwing when monitorNextCheckAt arrives as an ISO string", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -196,7 +196,7 @@ describe("IssueMonitorActivityCard", () => {
     act(() => root.unmount());
   });
 
-  it("renders nothing when the issue has no scheduled monitor", () => {
+  it("renders nothing when the issue has no scheduled monitor", async () => {
     const root = createRoot(container);
 
     act(() => {

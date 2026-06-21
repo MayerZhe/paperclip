@@ -366,13 +366,6 @@ vi.mock("@/components/ui/textarea", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 function createDeferred<T>() {
   let resolve!: (value: T) => void;
@@ -845,7 +838,7 @@ function createCancelPreview(issueCount = 8): IssueTreeControlPreview {
 }
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -926,7 +919,7 @@ describe("IssueDetail", () => {
   });
 
   afterEach(async () => {
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
     queryClient.clear();
@@ -939,7 +932,7 @@ describe("IssueDetail", () => {
     const issueRequest = createDeferred<Issue>();
     mockIssuesApi.get.mockReturnValueOnce(issueRequest.promise);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -963,7 +956,7 @@ describe("IssueDetail", () => {
   it("hides the plan decomposition panel by default", async () => {
     mockIssuesApi.get.mockResolvedValue(createIssue());
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1015,7 +1008,7 @@ describe("IssueDetail", () => {
       },
     ]);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1067,7 +1060,7 @@ describe("IssueDetail", () => {
       return Promise.resolve([]);
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1123,7 +1116,7 @@ describe("IssueDetail", () => {
       return Promise.resolve([]);
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1158,7 +1151,7 @@ describe("IssueDetail", () => {
       },
     }));
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1224,7 +1217,7 @@ describe("IssueDetail", () => {
       user: { id: "user-1" },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1244,7 +1237,7 @@ describe("IssueDetail", () => {
       .find((button) => button.textContent?.trim() === "Resume subtree");
     expect(resumeButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       resumeButton!.click();
     });
     await flushReact();
@@ -1255,7 +1248,7 @@ describe("IssueDetail", () => {
     expect(applyResumeButton).toBeTruthy();
     expect(container.textContent).toContain("CodexCoder");
 
-    await act(async () => {
+    act(async () => {
       applyResumeButton!.click();
     });
     await flushReact();
@@ -1304,7 +1297,7 @@ describe("IssueDetail", () => {
       user: { id: "user-1" },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1317,7 +1310,7 @@ describe("IssueDetail", () => {
     const moreButton = container.querySelector('button[aria-label="More task actions"]') as HTMLButtonElement | null;
     expect(moreButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       moreButton!.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     });
     await flushReact();
@@ -1326,7 +1319,7 @@ describe("IssueDetail", () => {
       .find((button) => button.textContent?.trim() === "Pause subtree...");
     expect(pauseMenuButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       pauseMenuButton!.click();
     });
     await flushReact();
@@ -1348,7 +1341,7 @@ describe("IssueDetail", () => {
       .find((button) => button.textContent?.trim() === "Pause and stop work");
     expect(pauseApplyButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       pauseApplyButton!.click();
     });
     await flushReact();
@@ -1392,7 +1385,7 @@ describe("IssueDetail", () => {
       user: { id: "user-1" },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1412,7 +1405,7 @@ describe("IssueDetail", () => {
       .find((button) => button.textContent?.trim() === "Pause work");
     expect(chatPauseButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       chatPauseButton!.click();
     });
     await flushReact();
@@ -1426,7 +1419,7 @@ describe("IssueDetail", () => {
 
     const moreButton = container.querySelector('button[aria-label="More task actions"]') as HTMLButtonElement | null;
     expect(moreButton).toBeTruthy();
-    await act(async () => {
+    act(async () => {
       moreButton!.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     });
     await flushReact();
@@ -1438,7 +1431,7 @@ describe("IssueDetail", () => {
 
   it("passes planning work mode to the issue chat thread", async () => {
     mockIssuesApi.get.mockResolvedValue(createIssue({ workMode: "planning" }));
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1472,7 +1465,7 @@ describe("IssueDetail", () => {
     localStorage.setItem("paperclip:issue-comment-draft:issue-1", "Draft follow-up message");
     mockIssuesApi.update.mockResolvedValue(createIssue({ workMode: "planning" }));
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1486,7 +1479,7 @@ describe("IssueDetail", () => {
     expect(lastChatThreadProps?.issueWorkMode).toBe("standard");
     expect(typeof lastChatThreadProps?.onWorkModeChange).toBe("function");
 
-    await act(async () => {
+    act(async () => {
       lastChatThreadProps?.onWorkModeChange?.("planning");
     });
     await flushReact();
@@ -1538,7 +1531,7 @@ describe("IssueDetail", () => {
       }),
     ]);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1594,7 +1587,7 @@ describe("IssueDetail", () => {
       user: { id: "user-1" },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1614,7 +1607,7 @@ describe("IssueDetail", () => {
       .find((button) => button.textContent?.trim() === "Resume work");
     expect(resumeButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       resumeButton!.click();
     });
     await flushReact();
@@ -1628,7 +1621,7 @@ describe("IssueDetail", () => {
       .at(-1);
     expect(applyResumeButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       applyResumeButton!.click();
     });
     await flushReact();
@@ -1680,7 +1673,7 @@ describe("IssueDetail", () => {
       user: { id: "user-1" },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1693,7 +1686,7 @@ describe("IssueDetail", () => {
     const moreButton = container.querySelector('button[aria-label="More task actions"]') as HTMLButtonElement | null;
     expect(moreButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       moreButton!.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     });
     await flushReact();
@@ -1702,7 +1695,7 @@ describe("IssueDetail", () => {
       .find((button) => button.textContent?.trim() === "Restore subtree...");
     expect(restoreMenuButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       restoreMenuButton!.click();
     });
     await flushReact();
@@ -1719,7 +1712,7 @@ describe("IssueDetail", () => {
       .find((button) => button.textContent?.trim() === "Restore 1 tasks");
     expect(restoreApplyButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       restoreApplyButton!.click();
     });
     await flushReact();
@@ -1751,7 +1744,7 @@ describe("IssueDetail", () => {
       user: { id: "user-1" },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDetail />
@@ -1765,7 +1758,7 @@ describe("IssueDetail", () => {
       .find((button) => button.textContent?.trim() === "Cancel subtree...");
     expect(cancelMenuButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       cancelMenuButton!.click();
     });
     await flushReact();
@@ -1798,7 +1791,7 @@ describe("IssueDetail", () => {
 
     const confirmationCheckbox = dialogContent!.querySelector('input[type="checkbox"]') as HTMLInputElement | null;
     expect(confirmationCheckbox).toBeTruthy();
-    await act(async () => {
+    act(async () => {
       confirmationCheckbox!.click();
     });
     await flushReact();

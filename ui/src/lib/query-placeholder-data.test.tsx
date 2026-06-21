@@ -73,7 +73,7 @@ describe("keepPreviousDataForSameQueryTail", () => {
       return Promise.resolve([]);
     };
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Harness issueId="issue-a" fetchIssueRuns={fetchIssueRuns} />
@@ -88,7 +88,7 @@ describe("keepPreviousDataForSameQueryTail", () => {
       isLoading: false,
     }));
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Harness issueId="issue-b" fetchIssueRuns={fetchIssueRuns} />

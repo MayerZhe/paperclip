@@ -193,7 +193,7 @@ describe("RoutineRunVariablesDialog", () => {
       },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <RoutineRunVariablesDialog
@@ -220,7 +220,7 @@ describe("RoutineRunVariablesDialog", () => {
     expect(document.body.textContent).not.toContain("Search agents...");
     expect(document.body.textContent).not.toContain("Search projects...");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -235,7 +235,7 @@ describe("RoutineRunVariablesDialog", () => {
       },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <RoutineRunVariablesDialog
@@ -288,7 +288,7 @@ describe("RoutineRunVariablesDialog", () => {
     expect(footer?.contains(formScrollRegion ?? null)).toBe(false);
     expect(footer?.textContent).toContain("Run routine");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -310,7 +310,7 @@ describe("RoutineRunVariablesDialog", () => {
       },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <RoutineRunVariablesDialog
@@ -342,7 +342,7 @@ describe("RoutineRunVariablesDialog", () => {
     });
 
     for (let i = 0; i < 10 && !document.querySelector('[data-testid="workspace-card"]'); i += 1) {
-      await act(async () => {
+      act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
     }
@@ -356,7 +356,7 @@ describe("RoutineRunVariablesDialog", () => {
       .find((button) => button.textContent === "Run routine");
     expect(runButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       runButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -371,7 +371,7 @@ describe("RoutineRunVariablesDialog", () => {
       executionWorkspaceSettings: { mode: "isolated_workspace" },
     });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -394,7 +394,7 @@ describe("RoutineRunVariablesDialog", () => {
       },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <RoutineRunVariablesDialog
@@ -418,7 +418,7 @@ describe("RoutineRunVariablesDialog", () => {
     });
 
     for (let i = 0; i < 10 && latestWorkspaceIssue === null; i += 1) {
-      await act(async () => {
+      act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
     }
@@ -430,7 +430,7 @@ describe("RoutineRunVariablesDialog", () => {
       projectWorkspaceId: workspace.projectWorkspaceId,
     });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

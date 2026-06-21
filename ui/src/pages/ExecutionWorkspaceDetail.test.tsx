@@ -231,7 +231,7 @@ describe("ExecutionWorkspaceDetail plugin slots", () => {
 
   async function render() {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    await act(async () => {
+    act(async () => {
       root = createRoot(container);
       root.render(
         <QueryClientProvider client={queryClient}>
@@ -239,7 +239,7 @@ describe("ExecutionWorkspaceDetail plugin slots", () => {
         </QueryClientProvider>,
       );
     });
-    await act(async () => {
+    act(async () => {
       await flush();
     });
   }

@@ -47,7 +47,7 @@ vi.mock("../context/NodeOrgContext", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -93,7 +93,7 @@ describe("ProfileSettings", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <ProfileSettings />
@@ -114,7 +114,7 @@ describe("ProfileSettings", () => {
       value: [file],
     });
 
-    await act(async () => {
+    act(async () => {
       avatarInput?.dispatchEvent(new Event("change", { bubbles: true }));
     });
     await flushReact();
@@ -126,7 +126,7 @@ describe("ProfileSettings", () => {
       image: "/api/assets/asset-1/content",
     });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

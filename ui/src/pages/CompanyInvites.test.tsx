@@ -43,7 +43,7 @@ vi.mock("@/context/ToastContext", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -124,7 +124,7 @@ describe("NodeOrgInvites", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <QueryClientProvider client={queryClient}>
@@ -165,7 +165,7 @@ describe("NodeOrgInvites", () => {
       (button) => button.textContent === "View more",
     );
 
-    await act(async () => {
+    act(async () => {
       viewMoreButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -176,7 +176,7 @@ describe("NodeOrgInvites", () => {
     expect(container.textContent).toContain("Board User 16");
     expect(container.textContent).toContain("View more");
 
-    await act(async () => {
+    act(async () => {
       const viewerRadio = container.querySelector('input[type="radio"][value="viewer"]') as HTMLInputElement | null;
       viewerRadio?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       viewerRadio?.dispatchEvent(new Event("change", { bubbles: true }));
@@ -189,7 +189,7 @@ describe("NodeOrgInvites", () => {
     expect(createButton).toBeTruthy();
     expect(revokeButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       createButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -202,7 +202,7 @@ describe("NodeOrgInvites", () => {
     });
     expect(clipboardWriteTextMock).toHaveBeenCalledWith("https://paperclip.local/invite/new-token");
     expect(container.textContent).toContain("Latest invite link");
-    expect(container.textContent).toContain("This URL includes the current Paperclip domain returned by the server.");
+    expect(container.textContent).toContain("This URL includes the current Super Node domain returned by the server.");
     expect(container.querySelector('input[aria-label="Latest invite URL"]')).toHaveProperty(
       "value",
       "https://paperclip.local/invite/new-token",
@@ -219,7 +219,7 @@ describe("NodeOrgInvites", () => {
       (button) => button.textContent === "Copy link",
     );
 
-    await act(async () => {
+    act(async () => {
       copyLinkButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -227,14 +227,14 @@ describe("NodeOrgInvites", () => {
     expect(clipboardWriteTextMock).toHaveBeenCalledTimes(2);
     expect(container.textContent).toContain("Copied");
 
-    await act(async () => {
+    act(async () => {
       revokeButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
 
     expect(revokeInviteMock).toHaveBeenCalledWith("invite-25");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -258,7 +258,7 @@ describe("NodeOrgInvites", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <QueryClientProvider client={queryClient}>
@@ -274,7 +274,7 @@ describe("NodeOrgInvites", () => {
       (button) => button.textContent === "Create invite",
     );
 
-    await act(async () => {
+    act(async () => {
       createButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -289,7 +289,7 @@ describe("NodeOrgInvites", () => {
       tone: "success",
     });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -301,7 +301,7 @@ describe("NodeOrgInvites", () => {
     });
     queryClient.setQueryData(["access", "invites", "company-1", "all"], inviteHistory.slice(0, 2));
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <QueryClientProvider client={queryClient}>
@@ -325,7 +325,7 @@ describe("NodeOrgInvites", () => {
       ],
     });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

@@ -9,13 +9,6 @@ import { MembershipAction } from "./MembershipAction";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 describe("MembershipAction", () => {
   let container: HTMLDivElement;
@@ -30,7 +23,7 @@ describe("MembershipAction", () => {
   afterEach(async () => {
     const currentRoot = root;
     if (currentRoot) {
-      await act(async () => {
+      act(async () => {
         currentRoot.unmount();
       });
     }
@@ -41,7 +34,7 @@ describe("MembershipAction", () => {
   async function renderAction(element: ReactNode) {
     const currentRoot = createRoot(container);
     root = currentRoot;
-    await act(async () => {
+    act(async () => {
       currentRoot.render(element);
     });
   }
@@ -94,7 +87,7 @@ describe("MembershipAction", () => {
       </a>,
     );
 
-    await act(async () => {
+    act(async () => {
       button().dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     });
 

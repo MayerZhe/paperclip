@@ -85,7 +85,7 @@ describe("IssueRow", () => {
     container.remove();
   });
 
-  it("suppresses accent hover styling when the row is selected", () => {
+  it("suppresses accent hover styling when the row is selected", async () => {
     const root = createRoot(container);
     const issue = createIssue();
 
@@ -103,7 +103,7 @@ describe("IssueRow", () => {
     });
   });
 
-  it("neutralizes selected status and unread dot accents", () => {
+  it("neutralizes selected status and unread dot accents", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -129,7 +129,7 @@ describe("IssueRow", () => {
     });
   });
 
-  it("preserves the issue detail breadcrumb source and href in the link target", () => {
+  it("preserves the issue detail breadcrumb source and href in the link target", async () => {
     const root = createRoot(container);
     const issue = createIssue();
     const state = {
@@ -150,7 +150,7 @@ describe("IssueRow", () => {
     });
   });
 
-  it("opts issue quicklook out for dense inbox rows", () => {
+  it("opts issue quicklook out for dense inbox rows", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -166,7 +166,7 @@ describe("IssueRow", () => {
     });
   });
 
-  it("passes the visible row issue into the navigation prefetch path", () => {
+  it("passes the visible row issue into the navigation prefetch path", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -181,7 +181,7 @@ describe("IssueRow", () => {
     });
   });
 
-  it("renders titleSuffix inline after the issue title", () => {
+  it("renders titleSuffix inline after the issue title", async () => {
     const root = createRoot(container);
     const issue = createIssue({ title: "Parent task" });
 
@@ -204,7 +204,7 @@ describe("IssueRow", () => {
     });
   });
 
-  it("renders checklist step numbers beside the issue identifier", () => {
+  it("renders checklist step numbers beside the issue identifier", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -229,7 +229,7 @@ describe("IssueRow", () => {
     });
   });
 
-  it("does not render a planning mode marker for planning work mode issues", () => {
+  it("does not render a planning mode marker for planning work mode issues", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -245,7 +245,7 @@ describe("IssueRow", () => {
     });
   });
 
-  it("renders without error when titleSuffix is omitted", () => {
+  it("renders without error when titleSuffix is omitted", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -260,7 +260,7 @@ describe("IssueRow", () => {
     });
   });
 
-  it("flags rows blocked by an assigned-backlog leaf with a parked-work badge", () => {
+  it("flags rows blocked by an assigned-backlog leaf with a parked-work badge", async () => {
     const root = createRoot(container);
     const issue = createIssue({
       blockedBy: [
@@ -289,7 +289,7 @@ describe("IssueRow", () => {
     });
   });
 
-  it("does not show the parked-work badge when assigned blocker is not in backlog", () => {
+  it("does not show the parked-work badge when assigned blocker is not in backlog", async () => {
     const root = createRoot(container);
     const issue = createIssue({
       blockedBy: [

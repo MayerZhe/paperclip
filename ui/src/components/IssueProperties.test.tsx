@@ -117,7 +117,7 @@ vi.mock("@/components/ui/popover", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flush() {
-  await act(async () => {
+  act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 }
@@ -403,7 +403,7 @@ describe("IssueProperties", () => {
       .find((button) => button.textContent?.includes("Add sub-task"));
     expect(addButton).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       addButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -474,7 +474,7 @@ describe("IssueProperties", () => {
       .find((button) => button.textContent?.includes("Add blocker"));
     expect(addButton).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       addButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -485,7 +485,7 @@ describe("IssueProperties", () => {
       .find((button) => button.textContent?.includes("PAP-3 New blocker"));
     expect(candidateButton).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       candidateButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -515,7 +515,7 @@ describe("IssueProperties", () => {
       .find((button) => button.textContent?.includes("Add blocker"));
     expect(addButton).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       addButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -523,7 +523,7 @@ describe("IssueProperties", () => {
     const searchInput = container.querySelector('input[aria-label="Search tasks to add as blockers"]') as HTMLInputElement | null;
     expect(searchInput).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
       nativeSetter?.call(searchInput, "remote");
       searchInput!.dispatchEvent(new Event("input", { bubbles: true }));
@@ -539,7 +539,7 @@ describe("IssueProperties", () => {
       .find((button) => button.textContent?.includes("PAP-99 Remote blocker"));
     expect(candidateButton).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       candidateButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -582,7 +582,7 @@ describe("IssueProperties", () => {
     const removeButton = container.querySelector('button[aria-label="Remove PAP-2 as blocker"]');
     expect(removeButton).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       removeButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -592,7 +592,7 @@ describe("IssueProperties", () => {
       .find((button) => button.textContent?.includes("Remove blocker"));
     expect(confirmButton).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       confirmButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -840,7 +840,7 @@ describe("IssueProperties", () => {
     expect(addLabelButton).not.toBeNull();
     expect(container.querySelector('input[placeholder="Search labels..."]')).toBeNull();
 
-    await act(async () => {
+    act(async () => {
       addLabelButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -942,7 +942,7 @@ describe("IssueProperties", () => {
       .find((button) => button.textContent?.includes("GPT-5.5"));
     expect(modelButton).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       modelButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -989,7 +989,7 @@ describe("IssueProperties", () => {
     const clearButton = container.querySelector('button[aria-label="Clear adapter options"]');
     expect(clearButton).not.toBeNull();
 
-    await act(async () => {
+    act(async () => {
       clearButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -1017,7 +1017,7 @@ describe("IssueProperties", () => {
 
     const addLabelButton = container.querySelector('button[aria-label="Add label"]');
     expect(addLabelButton).not.toBeNull();
-    await act(async () => {
+    act(async () => {
       addLabelButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -1050,7 +1050,7 @@ describe("IssueProperties", () => {
       .find((button) => button.textContent?.includes("No parent"));
     expect(parentTrigger).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       parentTrigger!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -1059,7 +1059,7 @@ describe("IssueProperties", () => {
       .find((button) => button.textContent?.includes("PAP-2 Candidate parent"));
     expect(candidateButton).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       candidateButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -1103,7 +1103,7 @@ describe("IssueProperties", () => {
     expect(parentLink).not.toBeNull();
     expect(selectedParentTrigger!.contains(parentLink)).toBe(false);
 
-    await act(async () => {
+    act(async () => {
       selectedParentTrigger!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -1112,7 +1112,7 @@ describe("IssueProperties", () => {
       .find((button) => button.textContent?.includes("No parent"));
     expect(clearParentButton).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       clearParentButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -1144,7 +1144,7 @@ describe("IssueProperties", () => {
       .find((button) => button.textContent?.includes("Run review now"));
     expect(runReviewButton).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       runReviewButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -1283,7 +1283,7 @@ describe("IssueProperties", () => {
       .find((button) => button.textContent?.includes("Next check"));
     expect(monitorTrigger).not.toBeUndefined();
 
-    await act(async () => {
+    act(async () => {
       monitorTrigger!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();

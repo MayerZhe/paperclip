@@ -52,7 +52,7 @@ describe("IssueFiltersPopover", () => {
     document.body.innerHTML = "";
   });
 
-  it("uses a scrollable popover and a three-column desktop grid", () => {
+  it("uses a scrollable popover and a three-column desktop grid", async () => {
     const root = createRoot(container);
 
     act(() => {

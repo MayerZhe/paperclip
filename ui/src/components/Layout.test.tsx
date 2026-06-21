@@ -5,6 +5,7 @@ import { flushSync } from "react-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Layout } from "./Layout";
+import { act } from "react";
 
 const mockHealthApi = vi.hoisted(() => ({
   get: vi.fn(),
@@ -214,16 +215,9 @@ vi.mock("../lib/main-content-focus", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -266,7 +260,7 @@ describe("Layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Layout />
@@ -279,13 +273,13 @@ describe("Layout", () => {
     expect(mockHealthApi.get).toHaveBeenCalled();
     expect(container.textContent).toContain("Breadcrumbs");
     expect(container.textContent).toContain("Outlet content");
-    expect(container.textContent).not.toContain("Company rail");
+    expect(container.textContent).not.toContain("Node Org rail");
     expect(container.textContent).not.toContain("Authenticated private");
     expect(container.textContent).not.toContain(
       "Sign-in is required and this instance is intended for private-network access.",
     );
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -321,7 +315,7 @@ describe("Layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Layout />
@@ -331,13 +325,13 @@ describe("Layout", () => {
     await flushReact();
     await flushReact();
 
-    expect(container.textContent).toContain("Company settings sidebar");
-    expect(container.textContent).not.toContain("Company rail");
+    expect(container.textContent).toContain("Node Org settings sidebar");
+    expect(container.textContent).not.toContain("Node Org rail");
     expect(container.textContent).not.toContain("Instance sidebar");
-    expect(container.textContent).not.toContain("Main company nav");
+    expect(container.textContent).not.toContain("Main node org nav");
     expect(container.textContent).not.toContain("Plugin route sidebar");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -351,7 +345,7 @@ describe("Layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Layout />
@@ -371,7 +365,7 @@ describe("Layout", () => {
     expect(selector?.textContent).toContain("Invites");
     expect(selector?.textContent).toContain("Secrets");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -383,7 +377,7 @@ describe("Layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Layout />
@@ -394,12 +388,12 @@ describe("Layout", () => {
     await flushReact();
 
     expect(container.textContent).toContain("Instance sidebar");
-    expect(container.textContent).not.toContain("Company rail");
-    expect(container.textContent).not.toContain("Company settings sidebar");
-    expect(container.textContent).not.toContain("Main company nav");
+    expect(container.textContent).not.toContain("Node Org rail");
+    expect(container.textContent).not.toContain("Node Org settings sidebar");
+    expect(container.textContent).not.toContain("Main node org nav");
     expect(container.textContent).not.toContain("Plugin route sidebar");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -435,7 +429,7 @@ describe("Layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Layout />
@@ -447,11 +441,11 @@ describe("Layout", () => {
 
     expect(container.textContent).toContain("Plugin route sidebar: Wiki Sidebar");
     expect(container.querySelector("[data-plugin-slot-class='h-full w-full']")).not.toBeNull();
-    expect(container.textContent).not.toContain("Main company nav");
-    expect(container.textContent).not.toContain("Company settings sidebar");
+    expect(container.textContent).not.toContain("Main node org nav");
+    expect(container.textContent).not.toContain("Node Org settings sidebar");
     expect(container.textContent).not.toContain("Instance sidebar");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -487,7 +481,7 @@ describe("Layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Layout />
@@ -504,9 +498,9 @@ describe("Layout", () => {
       }),
     );
     expect(container.textContent).toContain("Plugin route sidebar: Wiki Sidebar");
-    expect(container.textContent).not.toContain("Main company nav");
+    expect(container.textContent).not.toContain("Main node org nav");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -548,7 +542,7 @@ describe("Layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Layout />
@@ -573,7 +567,7 @@ describe("Layout", () => {
       companyPrefix: "PAP",
     });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -620,7 +614,7 @@ describe("Layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Layout />
@@ -630,10 +624,10 @@ describe("Layout", () => {
     await flushReact();
     await flushReact();
 
-    expect(container.textContent).toContain("Main company nav");
+    expect(container.textContent).toContain("Main node org nav");
     expect(container.textContent).not.toContain("Plugin route sidebar");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

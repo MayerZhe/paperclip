@@ -34,13 +34,6 @@ vi.mock("@/components/ui/button", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 function makeAttachment(overrides: Partial<IssueAttachment> = {}): IssueAttachment {
   return {
@@ -65,7 +58,7 @@ function makeAttachment(overrides: Partial<IssueAttachment> = {}): IssueAttachme
 }
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -108,7 +101,7 @@ describe("IssueAttachmentsSection", () => {
   });
 
   afterEach(async () => {
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
     queryClient.clear();
@@ -124,7 +117,7 @@ describe("IssueAttachmentsSection", () => {
       contentPath: "/api/attachments/markdown-attachment/content",
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueAttachmentsSection
@@ -161,7 +154,7 @@ describe("IssueAttachmentsSection", () => {
       downloadPath: "/api/attachments/zip-markdown/content?download=1",
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueAttachmentsSection
@@ -188,7 +181,7 @@ describe("IssueAttachmentsSection", () => {
       contentPath: "/api/attachments/video-attachment/content",
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueAttachmentsSection
@@ -215,7 +208,7 @@ describe("IssueAttachmentsSection", () => {
       contentPath: "/api/attachments/misclassified-mp4/content",
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueAttachmentsSection
@@ -244,7 +237,7 @@ describe("IssueAttachmentsSection", () => {
       downloadPath: "/api/attachments/zip-mp4/content?download=1",
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueAttachmentsSection
@@ -271,7 +264,7 @@ describe("IssueAttachmentsSection", () => {
       contentPath: "/api/attachments/pdf-attachment/content",
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueAttachmentsSection

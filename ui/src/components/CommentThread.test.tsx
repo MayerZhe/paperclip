@@ -88,7 +88,7 @@ describe("CommentThread", () => {
     container.remove();
   });
 
-  it("renders historical runs as timeline rows using the finished time", () => {
+  it("renders historical runs as timeline rows using the finished time", async () => {
     const root = createRoot(container);
     const agent: Agent = {
       id: "agent-1",
@@ -154,7 +154,7 @@ describe("CommentThread", () => {
     });
   });
 
-  it("replaces the composer with a warning when comments are disabled", () => {
+  it("replaces the composer with a warning when comments are disabled", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -178,7 +178,7 @@ describe("CommentThread", () => {
     });
   });
 
-  it("shows follow-up badges on explicit follow-up comments and timeline rows", () => {
+  it("shows follow-up badges on explicit follow-up comments and timeline rows", async () => {
     const root = createRoot(container);
 
     act(() => {
@@ -256,7 +256,7 @@ describe("CommentThread", () => {
       editor?.dispatchEvent(new Event("input", { bubbles: true }));
     });
 
-    await act(async () => {
+    act(async () => {
       submitButton?.click();
     });
 
@@ -267,7 +267,7 @@ describe("CommentThread", () => {
     });
   });
 
-  it("renders linked approvals inline in the timeline", () => {
+  it("renders linked approvals inline in the timeline", async () => {
     const root = createRoot(container);
     const agent: Agent = {
       id: "agent-1",
@@ -377,7 +377,7 @@ describe("CommentThread", () => {
       configurable: true,
     });
 
-    await act(async () => {
+    act(async () => {
       copyButton?.click();
     });
 

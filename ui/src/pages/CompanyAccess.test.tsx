@@ -74,7 +74,7 @@ vi.mock("@/context/ToastContext", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -198,7 +198,7 @@ describe("CompanyAccess", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <CompanyAccess />
@@ -209,7 +209,7 @@ describe("CompanyAccess", () => {
     await flushReact();
 
     expect(container.textContent).toContain("Manage the people who can work in Paperclip");
-    expect(container.textContent).toContain("Members can collaborate across the company by default");
+    expect(container.textContent).toContain("Members can collaborate across the node org by default");
     expect(container.textContent).toContain("Core keeps this page focused on membership");
     expect(container.textContent).toContain("Humans");
     expect(container.textContent).toContain("Pending human joins");
@@ -230,16 +230,16 @@ describe("CompanyAccess", () => {
     );
     expect(editButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       editButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
 
-    expect(document.body.textContent).toContain("Update company role and membership status");
+    expect(document.body.textContent).toContain("Update node org role and membership status");
     expect(document.body.textContent).not.toContain("Implicit grants from role");
     expect(document.body.textContent).not.toContain("permissionKey");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -250,7 +250,7 @@ describe("CompanyAccess", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <CompanyAccess />
@@ -265,7 +265,7 @@ describe("CompanyAccess", () => {
     );
     expect(editButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       editButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -275,7 +275,7 @@ describe("CompanyAccess", () => {
     );
     expect(saveButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       saveButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -285,7 +285,7 @@ describe("CompanyAccess", () => {
       status: "active",
     });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -296,7 +296,7 @@ describe("CompanyAccess", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <CompanyAccess />
@@ -311,7 +311,7 @@ describe("CompanyAccess", () => {
     );
     expect(removeButtons.length).toBeGreaterThan(0);
 
-    await act(async () => {
+    act(async () => {
       removeButtons[0]?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -321,7 +321,7 @@ describe("CompanyAccess", () => {
 
     const reassignmentSelect = document.body.querySelector("select");
     expect(reassignmentSelect).toBeTruthy();
-    await act(async () => {
+    act(async () => {
       reassignmentSelect!.value = "user:user-2";
       reassignmentSelect!.dispatchEvent(new Event("change", { bubbles: true }));
     });
@@ -331,7 +331,7 @@ describe("CompanyAccess", () => {
     );
     expect(confirmButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       confirmButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -340,7 +340,7 @@ describe("CompanyAccess", () => {
       reassignment: { assigneeAgentId: null, assigneeUserId: "user-2" },
     });
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -366,7 +366,7 @@ describe("CompanyAccess", () => {
           grants: [],
           removal: {
             canArchive: false,
-            reason: "Company admins cannot be removed from company access.",
+            reason: "Node Org admins cannot be removed from node org access.",
           },
         },
       ],
@@ -383,7 +383,7 @@ describe("CompanyAccess", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <CompanyAccess />
@@ -393,14 +393,14 @@ describe("CompanyAccess", () => {
     await flushReact();
     await flushReact();
 
-    expect(container.textContent).toContain("Company admins cannot be removed from company access.");
+    expect(container.textContent).toContain("Node Org admins cannot be removed from node org access.");
     const removeButton = Array.from(container.querySelectorAll("button")).find(
       (button) => button.textContent?.includes("Remove"),
     );
     expect(removeButton).toBeTruthy();
     expect(removeButton).toHaveProperty("disabled", true);
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -424,7 +424,7 @@ describe("CompanyAccess", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <CompanyAccessLegacyRoute />
@@ -436,7 +436,7 @@ describe("CompanyAccess", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/company/settings/permissions", true);
     expect(container.textContent).toContain("/company/settings/permissions");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -447,7 +447,7 @@ describe("CompanyAccess", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <CompanyAccessLegacyRoute />
@@ -461,7 +461,7 @@ describe("CompanyAccess", () => {
     expect(container.textContent).toContain("Open Members");
     expect(container.textContent).toContain("Open Invites");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

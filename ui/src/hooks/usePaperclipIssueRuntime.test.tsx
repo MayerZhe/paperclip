@@ -116,7 +116,7 @@ describe("usePaperclipIssueRuntime", () => {
     const secondAdapter = runtimeCalls[1]![0];
     expect(secondAdapter).toBe(firstAdapter);
 
-    await act(async () => {
+    act(async () => {
       await secondAdapter.onNew?.(createAppendMessage("latest callback"));
     });
 

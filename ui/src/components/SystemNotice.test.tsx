@@ -30,7 +30,7 @@ function render(element: ReactElement) {
 }
 
 describe("SystemNotice", () => {
-  it("renders the warning tone label and body in a single status container", () => {
+  it("renders the warning tone label and body in a single status container", async () => {
     const node = render(
       <SystemNotice
         tone="warning"
@@ -46,7 +46,7 @@ describe("SystemNotice", () => {
     );
   });
 
-  it("uses System alert label for danger tone", () => {
+  it("uses System alert label for danger tone", async () => {
     const node = render(
       <SystemNotice tone="danger" body="Recovery escalated to CTO." />,
     );
@@ -55,7 +55,7 @@ describe("SystemNotice", () => {
     expect(status?.getAttribute("aria-label")).toBe("System alert");
   });
 
-  it("uses neutral System notice label by default", () => {
+  it("uses neutral System notice label by default", async () => {
     const node = render(
       <SystemNotice tone="neutral" body="Reassigned to ClaudeFixer." />,
     );
@@ -64,7 +64,7 @@ describe("SystemNotice", () => {
     expect(status?.getAttribute("aria-label")).toBe("System notice");
   });
 
-  it("collapses metadata details by default and toggles aria-expanded on click", () => {
+  it("collapses metadata details by default and toggles aria-expanded on click", async () => {
     const node = render(
       <SystemNotice
         tone="warning"
@@ -100,7 +100,7 @@ describe("SystemNotice", () => {
     expect(node.textContent).toContain("PAP-3440");
   });
 
-  it("renders metadata expanded when detailsDefaultOpen is true", () => {
+  it("renders metadata expanded when detailsDefaultOpen is true", async () => {
     const node = render(
       <SystemNotice
         tone="warning"
@@ -120,13 +120,13 @@ describe("SystemNotice", () => {
     expect(node.textContent).toContain("Pick a disposition");
   });
 
-  it("hides the details affordance when no metadata is provided", () => {
+  it("hides the details affordance when no metadata is provided", async () => {
     const node = render(<SystemNotice tone="warning" body="Short notice." />);
 
     expect(node.querySelector("button[aria-expanded]")).toBeNull();
   });
 
-  it("renders typed metadata rows with hrefs when present", () => {
+  it("renders typed metadata rows with hrefs when present", async () => {
     const node = render(
       <SystemNotice
         tone="danger"
@@ -171,7 +171,7 @@ describe("SystemNotice", () => {
     expect(node.textContent).toContain("succeeded");
   });
 
-  it("renders metadata link rows as plain text when href is missing", () => {
+  it("renders metadata link rows as plain text when href is missing", async () => {
     const node = render(
       <SystemNotice
         tone="neutral"

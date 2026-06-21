@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { useState } from "react";
+import {act, useState} from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type {
@@ -94,14 +94,9 @@ vi.mock("./DocumentAnnotationLayer", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  await callback();
-  await Promise.resolve();
-  await new Promise((resolve) => setTimeout(resolve, 0));
-}
 
 async function flush() {
-  await act(() => {});
+  act(() => {});
 }
 
 function setTextareaValue(textarea: HTMLTextAreaElement, value: string) {
@@ -258,7 +253,7 @@ describe("IssueDocumentAnnotations", () => {
     const queryClient = makeQueryClient();
     const doc = makeDoc();
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Harness doc={doc} />
@@ -273,7 +268,7 @@ describe("IssueDocumentAnnotations", () => {
     expect(chip!.textContent).toContain("1");
     expect(mockAnnotationsApi.list).toHaveBeenCalledTimes(1);
 
-    await act(async () => {
+    act(async () => {
       (chip as HTMLButtonElement).click();
     });
     await flush();
@@ -317,7 +312,7 @@ describe("IssueDocumentAnnotations", () => {
     const doc = makeDoc();
 
     try {
-      await act(async () => {
+      act(async () => {
         root.render(
           <QueryClientProvider client={queryClient}>
             <main id="main-content">
@@ -348,7 +343,7 @@ describe("IssueDocumentAnnotations", () => {
     const queryClient = makeQueryClient();
     const doc = makeDoc();
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Harness doc={doc} locationHash="#document-plan&thread=thread-99" />
@@ -370,7 +365,7 @@ describe("IssueDocumentAnnotations", () => {
     const queryClient = makeQueryClient();
     const doc = makeDoc();
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Harness doc={doc} draftDirty initialPanelOpen />
@@ -396,7 +391,7 @@ describe("IssueDocumentAnnotations", () => {
     const queryClient = makeQueryClient();
     const doc = makeDoc();
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Harness doc={doc} initialPanelOpen />
@@ -415,7 +410,7 @@ describe("IssueDocumentAnnotations", () => {
       (button) => button.textContent?.startsWith("Resolved"),
     );
     expect(resolvedTab).not.toBeUndefined();
-    await act(async () => resolvedTab!.click());
+    act(async () => resolvedTab!.click());
     await flush();
 
     expect(container.querySelector('[data-thread-id="resolved-1"]')).not.toBeNull();
@@ -464,7 +459,7 @@ describe("IssueDocumentAnnotations", () => {
     const agentMap = new Map([["agent-uxdesigner", { id: "agent-uxdesigner", name: "UXDesigner" }]]);
     const userProfileMap = new Map([["user-1", { label: "Dotta", image: null }]]);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <DocumentAnnotationsCountChip
@@ -497,7 +492,7 @@ describe("IssueDocumentAnnotations", () => {
     // Click the open thread to expand it.
     const threadCard = container.querySelector('[data-thread-id="open-1"]') as HTMLElement | null;
     expect(threadCard).not.toBeNull();
-    await act(async () => threadCard!.click());
+    act(async () => threadCard!.click());
     await flush();
 
     const expandedText = container.querySelector('[data-thread-id="open-1"]')?.textContent ?? "";
@@ -513,7 +508,7 @@ describe("IssueDocumentAnnotations", () => {
     const queryClient = makeQueryClient();
     const doc = makeDoc();
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Harness doc={doc} initialPanelOpen />
@@ -535,7 +530,7 @@ describe("IssueDocumentAnnotations", () => {
     const queryClient = makeQueryClient();
     const doc = makeDoc();
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Harness doc={doc} initialPanelOpen />
@@ -549,7 +544,7 @@ describe("IssueDocumentAnnotations", () => {
       '[data-testid="mock-annotation-selection-only"]',
     ) as HTMLButtonElement | null;
     expect(selectOnlyButton).not.toBeNull();
-    await act(async () => {
+    act(async () => {
       selectOnlyButton!.click();
     });
     await flush();
@@ -561,7 +556,7 @@ describe("IssueDocumentAnnotations", () => {
       '[data-testid="mock-annotation-selection"]',
     ) as HTMLButtonElement | null;
     expect(directRequestButton).not.toBeNull();
-    await act(async () => {
+    act(async () => {
       directRequestButton!.click();
     });
     await flush();
@@ -580,7 +575,7 @@ describe("IssueDocumentAnnotations", () => {
     const queryClient = makeQueryClient();
     const doc = makeDoc();
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Harness doc={doc} initialPanelOpen />
@@ -593,14 +588,14 @@ describe("IssueDocumentAnnotations", () => {
 
     const selectButton = container.querySelector('[data-testid="mock-annotation-selection"]') as HTMLButtonElement | null;
     expect(selectButton).not.toBeNull();
-    await act(async () => {
+    act(async () => {
       selectButton!.click();
     });
     await flush();
 
     const composer = container.querySelector('[data-testid="document-annotation-composer"]') as HTMLTextAreaElement | null;
     expect(composer).not.toBeNull();
-    await act(async () => {
+    act(async () => {
       setTextareaValue(composer!, "New anchored comment");
     });
     await flush();
@@ -609,7 +604,7 @@ describe("IssueDocumentAnnotations", () => {
       (button) => button.textContent === "Comment",
     );
     expect(submit).not.toBeUndefined();
-    await act(async () => {
+    act(async () => {
       submit!.click();
     });
     await flush();
@@ -634,7 +629,7 @@ describe("IssueDocumentAnnotations", () => {
     const queryClient = makeQueryClient();
     const doc = makeDoc();
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Harness doc={doc} initialPanelOpen />
@@ -646,14 +641,14 @@ describe("IssueDocumentAnnotations", () => {
 
     const openThread = container.querySelector('[data-thread-id="open-1"]') as HTMLElement | null;
     expect(openThread).not.toBeNull();
-    await act(async () => openThread!.click());
+    act(async () => openThread!.click());
     await flush();
 
     const resolveButton = Array.from(container.querySelectorAll("button")).find(
       (button) => /\bResolve\b/.test(button.textContent ?? ""),
     );
     expect(resolveButton).not.toBeUndefined();
-    await act(async () => resolveButton!.click());
+    act(async () => resolveButton!.click());
     await flush();
     expect(mockAnnotationsApi.updateStatus).toHaveBeenCalledWith("issue-1", "plan", "open-1", "resolved");
 
@@ -661,19 +656,19 @@ describe("IssueDocumentAnnotations", () => {
       (button) => button.textContent?.startsWith("Resolved"),
     );
     expect(resolvedTab).not.toBeUndefined();
-    await act(async () => resolvedTab!.click());
+    act(async () => resolvedTab!.click());
     await flush();
 
     const resolvedThread = container.querySelector('[data-thread-id="resolved-1"]') as HTMLElement | null;
     expect(resolvedThread).not.toBeNull();
-    await act(async () => resolvedThread!.click());
+    act(async () => resolvedThread!.click());
     await flush();
 
     const reopenButton = Array.from(container.querySelectorAll("button")).find(
       (button) => button.textContent?.includes("Reopen"),
     );
     expect(reopenButton).not.toBeUndefined();
-    await act(async () => reopenButton!.click());
+    act(async () => reopenButton!.click());
     await flush();
     expect(mockAnnotationsApi.updateStatus).toHaveBeenCalledWith("issue-1", "plan", "resolved-1", "open");
   });
@@ -699,7 +694,7 @@ describe("IssueDocumentAnnotations", () => {
     const doc = makeDoc();
 
     try {
-      await act(async () => {
+      act(async () => {
         root.render(
           <QueryClientProvider client={queryClient}>
             <Harness doc={doc} initialPanelOpen />

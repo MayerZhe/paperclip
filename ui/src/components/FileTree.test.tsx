@@ -29,7 +29,7 @@ describe("FileTree", () => {
     return container.querySelector(`[data-file-tree-path="${path}"]`) as HTMLDivElement | null;
   }
 
-  it("selects file rows and expands directory rows", () => {
+  it("selects file rows and expands directory rows", async () => {
     const onSelectFile = vi.fn();
     const onToggleDir = vi.fn();
     const nodes = buildFileTree({
@@ -62,7 +62,7 @@ describe("FileTree", () => {
     expect(onToggleDir).toHaveBeenCalledWith("docs");
   });
 
-  it("marks partially selected directories as indeterminate", () => {
+  it("marks partially selected directories as indeterminate", async () => {
     const nodes = buildFileTree({
       "docs/a.md": "",
       "docs/b.md": "",
@@ -88,7 +88,7 @@ describe("FileTree", () => {
     expect(row("docs")?.getAttribute("aria-checked")).toBe("mixed");
   });
 
-  it("renders file badges and host-only file extras", () => {
+  it("renders file badges and host-only file extras", async () => {
     const nodes = buildFileTree({
       "wiki/very-long-page-slug.md": "",
     });
@@ -120,7 +120,7 @@ describe("FileTree", () => {
     expect(container.querySelector("[data-testid='file-extra']")?.textContent).toBe("22 chars");
   });
 
-  it("wraps long labels by default and can opt back into truncation", () => {
+  it("wraps long labels by default and can opt back into truncation", async () => {
     const nodes = buildFileTree({
       "wiki/extremely-long-page-slug-that-wraps-on-mobile.md": "",
     });
@@ -155,7 +155,7 @@ describe("FileTree", () => {
     expect(row("wiki/extremely-long-page-slug-that-wraps-on-mobile.md")?.innerHTML).toContain("truncate");
   });
 
-  it("supports tree keyboard expansion and checkbox toggling", () => {
+  it("supports tree keyboard expansion and checkbox toggling", async () => {
     const onToggleDir = vi.fn();
     const onToggleCheck = vi.fn();
     const nodes = buildFileTree({

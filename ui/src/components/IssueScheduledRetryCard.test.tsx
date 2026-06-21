@@ -67,7 +67,7 @@ function buildRetryResponse(outcome: IssueRetryNowOutcome) {
 
 async function waitForUi(assertion: () => void) {
   await vi.waitFor(async () => {
-    await act(async () => {
+    act(async () => {
       await Promise.resolve();
     });
     assertion();
@@ -78,7 +78,7 @@ async function waitForRetryButtonText(expected: string) {
   for (let i = 0; i < 20; i += 1) {
     if ((getRetryNowButton()?.textContent ?? "").includes(expected)) return;
     // eslint-disable-next-line no-await-in-loop
-    await act(async () => {
+    act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
   }
@@ -123,12 +123,12 @@ function getRetryNowButton() {
 }
 
 describe("IssueScheduledRetryCard", () => {
-  it("renders nothing when there is no scheduled retry", () => {
+  it("renders nothing when there is no scheduled retry", async () => {
     renderWithProviders(<IssueScheduledRetryCard issueId="issue-1" scheduledRetry={null} />);
     expect(getCard()).toBeNull();
   });
 
-  it("renders nothing when status is not scheduled_retry", () => {
+  it("renders nothing when status is not scheduled_retry", async () => {
     renderWithProviders(
       <IssueScheduledRetryCard
         issueId="issue-1"
@@ -138,7 +138,7 @@ describe("IssueScheduledRetryCard", () => {
     expect(getCard()).toBeNull();
   });
 
-  it("shows attempt count, reason, absolute and relative timestamps", () => {
+  it("shows attempt count, reason, absolute and relative timestamps", async () => {
     renderWithProviders(
       <IssueScheduledRetryCard issueId="issue-1" scheduledRetry={baseRetry} />,
     );
@@ -152,7 +152,7 @@ describe("IssueScheduledRetryCard", () => {
     expect(text).toContain("run-prev");
   });
 
-  it("uses continuation copy for max-turn continuations", () => {
+  it("uses continuation copy for max-turn continuations", async () => {
     renderWithProviders(
       <IssueScheduledRetryCard
         issueId="issue-1"
@@ -165,7 +165,7 @@ describe("IssueScheduledRetryCard", () => {
     expect(text).toContain("Pulls continuation forward immediately");
   });
 
-  it("uses 'due now' label when scheduledRetryAt is at the current time", () => {
+  it("uses 'due now' label when scheduledRetryAt is at the current time", async () => {
     renderWithProviders(
       <IssueScheduledRetryCard
         issueId="issue-1"

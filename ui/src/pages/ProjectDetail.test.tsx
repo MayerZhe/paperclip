@@ -93,13 +93,6 @@ vi.mock("../components/IssuesList", () => ({
   },
 }));
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 function project(overrides: Partial<Project> = {}): Project {
   const now = new Date("2026-05-01T00:00:00Z");
@@ -181,7 +174,7 @@ describe("ProjectDetail", () => {
   });
 
   afterEach(async () => {
-    await act(() => root?.unmount());
+    act(() => root?.unmount());
     root = null;
     container.remove();
     vi.clearAllMocks();
@@ -190,7 +183,7 @@ describe("ProjectDetail", () => {
   it("shows managed plugin affordances and filters the operations tab by plugin origin", async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-    await act(async () => {
+    act(async () => {
       root = createRoot(container);
       root.render(
         <QueryClientProvider client={queryClient}>
@@ -198,7 +191,7 @@ describe("ProjectDetail", () => {
         </QueryClientProvider>,
       );
     });
-    await act(async () => {
+    act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
       await new Promise((resolve) => setTimeout(resolve, 0));
     });

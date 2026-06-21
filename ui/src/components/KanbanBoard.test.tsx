@@ -106,7 +106,7 @@ describe("KanbanBoard", () => {
     document.body.innerHTML = "";
   });
 
-  it("limits visible cards and reveals more cards per column", () => {
+  it("limits visible cards and reveals more cards per column", async () => {
     const { container } = renderBoard({
       issues: createIssues(60, "todo"),
       compactCards: true,
@@ -132,7 +132,7 @@ describe("KanbanBoard", () => {
     expect(container.textContent).not.toContain("Show 10 more");
   });
 
-  it("resets visible counts when the column page size changes", () => {
+  it("resets visible counts when the column page size changes", async () => {
     const issues = createIssues(60, "todo");
     const { container, render } = renderBoard({
       issues,
@@ -163,7 +163,7 @@ describe("KanbanBoard", () => {
     expect(container.textContent).not.toContain("Issue 11");
   });
 
-  it("renders collapsed statuses as rails without cards", () => {
+  it("renders collapsed statuses as rails without cards", async () => {
     const { container } = renderBoard({
       issues: createIssues(3, "done"),
       collapsedStatuses: ["done"],
@@ -174,7 +174,7 @@ describe("KanbanBoard", () => {
     expect(container.textContent).not.toContain("Issue 1");
   });
 
-  it("keeps core issue signals in compact cards", () => {
+  it("keeps core issue signals in compact cards", async () => {
     const { container } = renderBoard({
       issues: createIssues(1, "todo"),
       compactCards: true,
@@ -186,7 +186,7 @@ describe("KanbanBoard", () => {
     expect(container.textContent).toContain("Live");
   });
 
-  it("resolves drop targets from status rails and cards", () => {
+  it("resolves drop targets from status rails and cards", async () => {
     const issues = [
       createIssue(1, "todo"),
       createIssue(2, "blocked"),

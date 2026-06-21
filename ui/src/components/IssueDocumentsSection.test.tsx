@@ -160,7 +160,7 @@ function deferred<T>() {
 }
 
 async function flush() {
-  await act(async () => {
+  act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 }
@@ -291,7 +291,7 @@ describe("IssueDocumentsSection", () => {
       }),
     ]);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDocumentsSection issue={issue} canDeleteDocuments={false} />
@@ -305,7 +305,7 @@ describe("IssueDocumentsSection", () => {
     expect(container.textContent).not.toContain("# Handoff");
     expect(container.querySelector(`#document-${ISSUE_CONTINUATION_SUMMARY_DOCUMENT_KEY}`)).toBeNull();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
     queryClient.clear();
@@ -340,7 +340,7 @@ describe("IssueDocumentsSection", () => {
       .mockResolvedValue([lockedDocument]);
     mockIssuesApi.lockDocument.mockResolvedValue(lockedDocument);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDocumentsSection issue={issue} canDeleteDocuments={false} canManageDocumentLocks />
@@ -353,7 +353,7 @@ describe("IssueDocumentsSection", () => {
     const lockButton = container.querySelector('button[title="Lock document"]');
     expect(lockButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       lockButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flush();
@@ -361,7 +361,7 @@ describe("IssueDocumentsSection", () => {
     expect(mockIssuesApi.lockDocument).toHaveBeenCalledWith("issue-1", "plan");
     expect(container.querySelector('button[title="Unlock document"]')).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
     queryClient.clear();
@@ -389,7 +389,7 @@ describe("IssueDocumentsSection", () => {
       }),
     ]);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDocumentsSection issue={issue} canDeleteDocuments canManageDocumentLocks />
@@ -404,7 +404,7 @@ describe("IssueDocumentsSection", () => {
     expect(container.textContent).not.toContain("Delete document");
     expect(container.querySelector('button[title="Unlock document"]')).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
     queryClient.clear();
@@ -448,7 +448,7 @@ describe("IssueDocumentsSection", () => {
       ],
     );
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDocumentsSection issue={issue} canDeleteDocuments={false} />
@@ -464,7 +464,7 @@ describe("IssueDocumentsSection", () => {
     const historicalRevisionButton = revisionButtons.find((button) => button.textContent?.includes("rev 3"));
     expect(historicalRevisionButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       historicalRevisionButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -475,7 +475,7 @@ describe("IssueDocumentsSection", () => {
       .find((button) => button.textContent?.includes("Restore this revision"));
     expect(restoreButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       restoreButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -485,7 +485,7 @@ describe("IssueDocumentsSection", () => {
 
     pendingDocuments.resolve([restoredDocument]);
     await flush();
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
     queryClient.clear();
@@ -524,7 +524,7 @@ describe("IssueDocumentsSection", () => {
       ],
     );
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDocumentsSection issue={issue} canDeleteDocuments={false} />
@@ -540,7 +540,7 @@ describe("IssueDocumentsSection", () => {
     const historicalRevisionButton = revisionButtons.find((button) => button.textContent?.includes("rev 3"));
     expect(historicalRevisionButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       historicalRevisionButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -551,14 +551,14 @@ describe("IssueDocumentsSection", () => {
       .find((button) => button.textContent?.includes("rev 4"));
     expect(currentRevisionButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       currentRevisionButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
     expect(container.textContent).not.toContain("Viewing revision 3");
     expect(container.textContent).toContain("Current plan body");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
     queryClient.clear();
@@ -603,7 +603,7 @@ describe("IssueDocumentsSection", () => {
       ],
     );
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDocumentsSection issue={issue} canDeleteDocuments={false} />
@@ -619,7 +619,7 @@ describe("IssueDocumentsSection", () => {
     const historicalRevisionButton = revisionButtons.find((button) => button.textContent?.includes("rev 2"));
     expect(historicalRevisionButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       historicalRevisionButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -630,14 +630,14 @@ describe("IssueDocumentsSection", () => {
       .find((button) => button.textContent?.includes("rev 3"));
     expect(currentRevisionButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       currentRevisionButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
     expect(container.textContent).not.toContain("Viewing revision 2");
     expect(container.textContent).toContain("Current plan body");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
     queryClient.clear();
@@ -664,7 +664,7 @@ describe("IssueDocumentsSection", () => {
 
     mockIssuesApi.listDocuments.mockResolvedValue([document]);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDocumentsSection issue={issue} canDeleteDocuments={false} />
@@ -678,7 +678,7 @@ describe("IssueDocumentsSection", () => {
     expect(container.textContent).toContain("Loaded plan body");
     expect(container.textContent).not.toContain("Markdown body");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
     queryClient.clear();
@@ -700,7 +700,7 @@ describe("IssueDocumentsSection", () => {
 
     mockIssuesApi.listDocuments.mockResolvedValue([createIssueDocument()]);
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <IssueDocumentsSection
@@ -725,7 +725,7 @@ describe("IssueDocumentsSection", () => {
     expect(heading?.parentElement?.className).toContain("flex-wrap");
     expect(heading?.nextElementSibling?.className).toContain("flex-wrap");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
     queryClient.clear();

@@ -83,7 +83,7 @@ vi.mock("@/components/ui/dialog", () => ({
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -139,7 +139,7 @@ describe("NewAgentDialog", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <NewAgentDialog />
@@ -155,18 +155,18 @@ describe("NewAgentDialog", () => {
       (button) => button.textContent?.startsWith("Invite an external agent"),
     );
 
-    await act(async () => {
+    act(async () => {
       inviteButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
     expect(container.textContent).toContain("Generate a one-time onboarding prompt");
-    expect(container.textContent).not.toContain("Company Invites");
+    expect(container.textContent).not.toContain("Node Org Invites");
 
     const generateButton = Array.from(container.querySelectorAll("button")).find(
       (button) => button.textContent === "Generate onboarding prompt",
     );
 
-    await act(async () => {
+    act(async () => {
       generateButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -195,7 +195,7 @@ describe("NewAgentDialog", () => {
       (button) => button.textContent === "Back",
     );
 
-    await act(async () => {
+    act(async () => {
       backButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -203,7 +203,7 @@ describe("NewAgentDialog", () => {
     expect(container.textContent).toContain("Optional message for the agent");
     expect(container.textContent).toContain("Generate onboarding prompt");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

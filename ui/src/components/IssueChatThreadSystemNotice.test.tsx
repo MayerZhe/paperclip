@@ -104,7 +104,7 @@ const baseTimestamps = {
 };
 
 describe("IssueChatThread system notice routing", () => {
-  it("renders authorType=system comments as a SystemNotice rather than a user bubble", () => {
+  it("renders authorType=system comments as a SystemNotice rather than a user bubble", async () => {
     const comment: IssueChatComment = {
       id: "comment-system",
       companyId: "company-1",
@@ -148,7 +148,7 @@ describe("IssueChatThread system notice routing", () => {
     expect(container.querySelectorAll('[data-message-role="user"]').length).toBe(0);
   });
 
-  it("expands metadata when detailsDefaultOpen is true", () => {
+  it("expands metadata when detailsDefaultOpen is true", async () => {
     const comment: IssueChatComment = {
       id: "comment-system-open",
       companyId: "company-1",
@@ -185,7 +185,7 @@ describe("IssueChatThread system notice routing", () => {
     expect(toggle?.getAttribute("aria-expanded")).toBe("true");
   });
 
-  it("falls back to legacy user bubble + handoff callout for old text-only comments", () => {
+  it("falls back to legacy user bubble + handoff callout for old text-only comments", async () => {
     const comment: IssueChatComment = {
       id: "comment-legacy",
       companyId: "company-1",
@@ -207,7 +207,7 @@ describe("IssueChatThread system notice routing", () => {
     expect(container.textContent).toContain("Successful run missing issue disposition");
   });
 
-  it("keeps regular user comments rendering as user bubbles", () => {
+  it("keeps regular user comments rendering as user bubbles", async () => {
     const comment: IssueChatComment = {
       id: "comment-user",
       companyId: "company-1",
@@ -228,7 +228,7 @@ describe("IssueChatThread system notice routing", () => {
     expect(container.textContent).toContain("Standard user message.");
   });
 
-  it("keeps agent-authored comments rendering as assistant bubbles even with system_notice presentation absent", () => {
+  it("keeps agent-authored comments rendering as assistant bubbles even with system_notice presentation absent", async () => {
     const comment: IssueChatComment = {
       id: "comment-agent",
       companyId: "company-1",
@@ -248,7 +248,7 @@ describe("IssueChatThread system notice routing", () => {
     expect(container.querySelector('[data-message-role="assistant"]')).not.toBeNull();
   });
 
-  it("labels system notice source as the originating run agent name when runAgentId is available", () => {
+  it("labels system notice source as the originating run agent name when runAgentId is available", async () => {
     const codexAgent = {
       id: "agent-codex",
       name: "CodexCoder",
@@ -312,7 +312,7 @@ describe("IssueChatThread system notice routing", () => {
 
     const copyLink = container.querySelector('button[aria-label="Copy link to system notice"]') as HTMLButtonElement;
     const copyText = container.querySelector('button[aria-label="Copy system notice"]') as HTMLButtonElement;
-    await act(async () => {
+    act(async () => {
       copyLink.click();
       await Promise.resolve();
     });
@@ -322,7 +322,7 @@ describe("IssueChatThread system notice routing", () => {
     expect(copyText.querySelector(".lucide-check")).toBeNull();
   });
 
-  it("labels system notice source as Paperclip when no run agent can be resolved", () => {
+  it("labels system notice source as Super Node when no run agent can be resolved", async () => {
     const comment: IssueChatComment = {
       id: "comment-system-no-author",
       companyId: "company-1",
@@ -351,7 +351,7 @@ describe("IssueChatThread system notice routing", () => {
     expect(status?.textContent).not.toContain("You");
   });
 
-  it("falls back to Paperclip in the system notice header when run agent is unknown to agentMap", () => {
+  it("falls back to Super Node in the system notice header when run agent is unknown to agentMap", async () => {
     const comment: IssueChatComment = {
       id: "comment-system-unknown-agent",
       companyId: "company-1",
@@ -380,7 +380,7 @@ describe("IssueChatThread system notice routing", () => {
     expect(sourceLink?.textContent).toBe("Paperclip");
   });
 
-  it("keeps agent-authored comments as assistant bubbles even when presentation requests system_notice", () => {
+  it("keeps agent-authored comments as assistant bubbles even when presentation requests system_notice", async () => {
     const comment: IssueChatComment = {
       id: "comment-agent-system",
       companyId: "company-1",
@@ -405,7 +405,7 @@ describe("IssueChatThread system notice routing", () => {
     expect(container.querySelector('[data-message-role="assistant"]')).not.toBeNull();
   });
 
-  it("folds stale successful-run disposition warnings into the activity log disclosure style", () => {
+  it("folds stale successful-run disposition warnings into the activity log disclosure style", async () => {
     const comment: IssueChatComment = {
       id: "comment-stale-disposition-warning",
       companyId: "company-1",

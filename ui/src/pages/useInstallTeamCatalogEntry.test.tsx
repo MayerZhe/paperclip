@@ -11,6 +11,7 @@ import {
   type UseInstallTeamCatalogEntryResult,
 } from "./TeamCatalog";
 import { sampleTeam } from "./TeamCatalog.fixtures";
+import { act } from "react";
 
 const mockTeamCatalogApi = vi.hoisted(() => ({
   catalogList: vi.fn(),
@@ -25,16 +26,9 @@ vi.mock("../api/teamCatalog", () => ({ teamCatalogApi: mockTeamCatalogApi }));
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -57,7 +51,7 @@ async function renderHook(simplified: boolean) {
   document.body.appendChild(container);
   const root = createRoot(container);
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  await act(async () => {
+  act(async () => {
     root.render(
       <QueryClientProvider client={queryClient}>
         <Harness simplified={simplified} />
@@ -127,7 +121,7 @@ describe("useInstallTeamCatalogEntry", () => {
 
   it("runInstall calls the install API and resolves to the done phase", async () => {
     const cleanup = await renderHook(true);
-    await act(async () => {
+    act(async () => {
       captured!.runInstall(EMPTY_INSTALL_FORM);
     });
     await flushReact();

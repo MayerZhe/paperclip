@@ -72,7 +72,7 @@ afterEach(() => {
 });
 
 describe("IssueThreadInteractionCard", () => {
-  it("exposes pending question options as selectable radio and checkbox controls", () => {
+  it("exposes pending question options as selectable radio and checkbox controls", async () => {
     const host = renderCard({
       interaction: pendingAskUserQuestionsInteraction,
       onSubmitInteractionAnswers: vi.fn(),
@@ -119,14 +119,14 @@ describe("IssueThreadInteractionCard", () => {
     );
     expect(otherButtons.length).toBeGreaterThan(0);
 
-    await act(async () => {
+    act(async () => {
       otherButtons[0]?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
     const textarea = host.querySelector("textarea") as HTMLTextAreaElement | null;
     expect(textarea).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       const valueSetter = Object.getOwnPropertyDescriptor(
         HTMLTextAreaElement.prototype,
         "value",
@@ -138,14 +138,14 @@ describe("IssueThreadInteractionCard", () => {
     const summaryCheckbox = Array.from(host.querySelectorAll('[role="checkbox"]')).find((button) =>
       button.textContent?.includes("Inline answer pills"),
     );
-    await act(async () => {
+    act(async () => {
       summaryCheckbox?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
     const submitButton = Array.from(host.querySelectorAll("button")).find((button) =>
       button.textContent?.includes("Send answers"),
     );
-    await act(async () => {
+    act(async () => {
       submitButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -165,7 +165,7 @@ describe("IssueThreadInteractionCard", () => {
     );
   });
 
-  it("only shows question cancellation when a cancel handler is wired", () => {
+  it("only shows question cancellation when a cancel handler is wired", async () => {
     const withoutHandler = renderCard({
       interaction: pendingAskUserQuestionsInteraction,
       onSubmitInteractionAnswers: vi.fn(),
@@ -184,7 +184,7 @@ describe("IssueThreadInteractionCard", () => {
     expect(withHandler.textContent).toContain("Cancel question");
   });
 
-  it("makes child tasks explicit in suggested task trees", () => {
+  it("makes child tasks explicit in suggested task trees", async () => {
     const host = renderCard({
       interaction: pendingSuggestedTasksInteraction,
     });
@@ -192,7 +192,7 @@ describe("IssueThreadInteractionCard", () => {
     expect(host.textContent).toContain("Child task");
   });
 
-  it("shows an explicit placeholder when a rejected interaction has no reason", () => {
+  it("shows an explicit placeholder when a rejected interaction has no reason", async () => {
     const host = renderCard({
       interaction: {
         ...rejectedSuggestedTasksInteraction,
@@ -215,7 +215,7 @@ describe("IssueThreadInteractionCard", () => {
     );
     expect(declineButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       declineButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -224,7 +224,7 @@ describe("IssueThreadInteractionCard", () => {
     ).at(-1);
     expect(saveButton?.hasAttribute("disabled")).toBe(false);
 
-    await act(async () => {
+    act(async () => {
       saveButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -234,7 +234,7 @@ describe("IssueThreadInteractionCard", () => {
     expect(textarea).toBeTruthy();
     expect(textarea?.getAttribute("aria-invalid")).toBe("true");
 
-    await act(async () => {
+    act(async () => {
       const valueSetter = Object.getOwnPropertyDescriptor(
         HTMLTextAreaElement.prototype,
         "value",
@@ -246,7 +246,7 @@ describe("IssueThreadInteractionCard", () => {
       button.textContent?.includes("Request revisions"),
     ).at(-1);
     expect(enabledSaveButton?.hasAttribute("disabled")).toBe(false);
-    await act(async () => {
+    act(async () => {
       enabledSaveButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -268,7 +268,7 @@ describe("IssueThreadInteractionCard", () => {
     );
     expect(confirmButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       confirmButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -277,7 +277,7 @@ describe("IssueThreadInteractionCard", () => {
     );
   });
 
-  it("labels accept-only continuation policies in the card header", () => {
+  it("labels accept-only continuation policies in the card header", async () => {
     const host = renderCard({
       interaction: {
         ...pendingRequestConfirmationInteraction,
@@ -288,7 +288,7 @@ describe("IssueThreadInteractionCard", () => {
     expect(host.textContent).toContain("Wakes on confirm");
   });
 
-  it("renders request confirmation target links and stale-target expiry", () => {
+  it("renders request confirmation target links and stale-target expiry", async () => {
     const host = renderCard({
       interaction: staleTargetRequestConfirmationInteraction,
     });
@@ -302,7 +302,7 @@ describe("IssueThreadInteractionCard", () => {
     expect(host.textContent).not.toContain("Approve plan");
   });
 
-  it("renders a jump link for confirmations expired by comment", () => {
+  it("renders a jump link for confirmations expired by comment", async () => {
     const host = renderCard({
       interaction: commentExpiredRequestConfirmationInteraction,
     });
@@ -328,7 +328,7 @@ describe("IssueThreadInteractionCard", () => {
     );
     expect(declineButton).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       declineButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -339,7 +339,7 @@ describe("IssueThreadInteractionCard", () => {
     );
   });
 
-  it("renders explicit copy for failed request confirmations", () => {
+  it("renders explicit copy for failed request confirmations", async () => {
     const host = renderCard({
       interaction: failedRequestConfirmationInteraction,
     });
@@ -349,7 +349,7 @@ describe("IssueThreadInteractionCard", () => {
     );
   });
 
-  it("exposes pending checkbox options with select-all and clear controls", () => {
+  it("exposes pending checkbox options with select-all and clear controls", async () => {
     const host = renderCard({
       interaction: pendingRequestCheckboxConfirmationInteraction,
       onAcceptInteraction: vi.fn(),
@@ -387,7 +387,7 @@ describe("IssueThreadInteractionCard", () => {
     });
 
     const checkboxes = [...host.querySelectorAll('[role="checkbox"]')];
-    await act(async () => {
+    act(async () => {
       (checkboxes[0] as HTMLButtonElement).click();
       (checkboxes[2] as HTMLButtonElement).click();
     });
@@ -395,7 +395,7 @@ describe("IssueThreadInteractionCard", () => {
     const confirmButton = Array.from(host.querySelectorAll("button")).find((button) =>
       button.textContent?.includes("Delete selected"),
     );
-    await act(async () => {
+    act(async () => {
       confirmButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -422,7 +422,7 @@ describe("IssueThreadInteractionCard", () => {
     const confirmButton = Array.from(host.querySelectorAll("button")).find((button) =>
       button.textContent?.includes("Confirm regions"),
     );
-    await act(async () => {
+    act(async () => {
       confirmButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -430,7 +430,7 @@ describe("IssueThreadInteractionCard", () => {
     expect(host.textContent).toContain("Select at least 2 options.");
   });
 
-  it("disables remaining checkboxes once the max selection is reached", () => {
+  it("disables remaining checkboxes once the max selection is reached", async () => {
     const host = renderCard({
       interaction: boundedRequestCheckboxConfirmationInteraction,
       onAcceptInteraction: vi.fn(),
@@ -454,7 +454,7 @@ describe("IssueThreadInteractionCard", () => {
     expect(selectAllButton?.hasAttribute("disabled")).toBe(true);
   });
 
-  it("summarizes large accepted selections by count and bounds the chips", () => {
+  it("summarizes large accepted selections by count and bounds the chips", async () => {
     const host = renderCard({
       interaction: acceptedManyRequestCheckboxConfirmationInteraction,
     });
@@ -465,7 +465,7 @@ describe("IssueThreadInteractionCard", () => {
     expect(host.textContent).toContain("+34 more");
   });
 
-  it("expands the hidden accepted selections when the +N more chip is clicked", () => {
+  it("expands the hidden accepted selections when the +N more chip is clicked", async () => {
     const host = renderCard({
       interaction: acceptedManyRequestCheckboxConfirmationInteraction,
     });
@@ -507,7 +507,7 @@ describe("IssueThreadInteractionCard", () => {
     expect(document.activeElement).toBe(moreButton);
   });
 
-  it("stays compact and scrollable with around 100 options", () => {
+  it("stays compact and scrollable with around 100 options", async () => {
     const host = renderCard({
       interaction: manyOptionsRequestCheckboxConfirmationInteraction,
       onAcceptInteraction: vi.fn(),
@@ -519,7 +519,7 @@ describe("IssueThreadInteractionCard", () => {
     expect(scrollRegion?.className).toContain("overflow-y-auto");
   });
 
-  it("renders stale-target expiry for checkbox confirmations", () => {
+  it("renders stale-target expiry for checkbox confirmations", async () => {
     const host = renderCard({
       interaction: staleTargetRequestCheckboxConfirmationInteraction,
     });

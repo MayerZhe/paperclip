@@ -68,7 +68,7 @@ describe("DevRestartBanner", () => {
     expect(node.textContent).toContain("Waiting for 1 live run to finish");
     expect(button).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -83,7 +83,7 @@ describe("DevRestartBanner", () => {
     const button = [...node.querySelectorAll("button")]
       .find((entry) => entry.textContent?.includes("Restart now"));
 
-    await act(async () => {
+    act(async () => {
       button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
@@ -96,7 +96,7 @@ describe("DevRestartBanner", () => {
     const button = [...node.querySelectorAll("button")]
       .find((entry) => entry.textContent?.includes("Restart now")) as HTMLButtonElement | undefined;
 
-    await act(async () => {
+    act(async () => {
       button?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 

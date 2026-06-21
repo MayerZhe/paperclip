@@ -72,7 +72,7 @@ function render(node: ReactNode) {
 }
 
 describe("IssueSiblingNavigation", () => {
-  it("renders the locked card anatomy for previous and next siblings", () => {
+  it("renders the locked card anatomy for previous and next siblings", async () => {
     const node = render(
       <IssueSiblingNavigation
         navigation={{
@@ -110,7 +110,7 @@ describe("IssueSiblingNavigation", () => {
     expect(node.querySelector(".truncate")?.textContent).toBe("Previous sibling title");
   });
 
-  it("keeps a lone next card in the right desktop column", () => {
+  it("keeps a lone next card in the right desktop column", async () => {
     const node = render(
       <IssueSiblingNavigation
         navigation={{

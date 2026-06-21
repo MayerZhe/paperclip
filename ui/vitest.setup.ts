@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+import { flushSync } from "react-dom";
 
 const storageEntries = new Map<string, string>();
 
@@ -61,26 +62,25 @@ if (typeof window !== "undefined" && typeof window.matchMedia !== "function") {
 // NodeOrgProvider" errors when tests render components that call
 // useNodeOrg() without wrapping in NodeOrgProvider. Individual test
 // files can override this with their own vi.mock for specific values.
-vi.mock("@/context/NodeOrgContext", () => ({
-  NodeOrgProvider: ({ children }: { children: unknown }) => children,
-  useNodeOrg: () => ({
-    companies: [],
-    selectedCompanyId: null,
-    selectedCompany: null,
-    selectionSource: "bootstrap" as const,
-    loading: false,
-    error: null,
-    setSelectedCompanyId: vi.fn(),
-    reloadCompanies: vi.fn(),
-    createCompany: vi.fn(),
-  }),
-  useOptionalNodeOrg: () => null,
-  resolveBootstrapCompanySelection: vi.fn((input: {
-    companies: Array<{ id: string }>;
-    selectedCompanyId: string | null;
-  }) => input.selectedCompanyId ?? input.companies[0]?.id ?? null),
-  shouldClearStoredCompanySelection: vi.fn(() => false),
-}));
+vi.mock("@/context/NodeOrgContext", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/context/NodeOrgContext")>();
+  return {
+    ...actual,
+    NodeOrgProvider: ({ children }: { children: unknown }) => children,
+    useNodeOrg: () => ({
+      companies: [],
+      selectedCompanyId: null,
+      selectedCompany: null,
+      selectionSource: "bootstrap" as const,
+      loading: false,
+      error: null,
+      setSelectedCompanyId: vi.fn(),
+      reloadCompanies: vi.fn(),
+      createCompany: vi.fn(),
+    }),
+    useOptionalNodeOrg: () => null,
+  };
+});
 
 // Global safe default for useTheme — prevents "useTheme must be used within
 // ThemeProvider" errors when tests render components that call useTheme()
@@ -100,24 +100,26 @@ vi.mock("@/context/ThemeContext", () => ({
 // Mock the entire react module to preserve all original exports while
 // adding a compatible `act` helper.
 //
-// IMPORTANT: Many tests call act() without await and expect the rendered
-// DOM to be immediately queryable. For sync callbacks we must run the
-// callback synchronously and return void (matching React 18 semantics).
-// For async callbacks we return the promise so await-style tests still work.
+// React 19 defers createRoot.render() DOM commits to the microtask queue.
+// Wrapping the act() callback in flushSync forces the commit to happen
+// synchronously, so tests can query the DOM immediately after act().
+// Async callbacks are handled by awaiting both the callback and a
+// microtask drain.
 vi.mock("react", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react")>();
   return {
     ...actual,
     act: (callback: () => void | Promise<void>) => {
-      const result = callback();
+      let result: void | Promise<void>;
+      flushSync(() => {
+        result = callback();
+      });
       if (result instanceof Promise) {
         return result.then(async () => {
           await Promise.resolve();
           await new Promise((resolve) => setTimeout(resolve, 0));
         });
       }
-      // Sync callback: return void so the render result is immediately
-      // queryable — this matches React 18's act() behaviour.
     },
   };
 });

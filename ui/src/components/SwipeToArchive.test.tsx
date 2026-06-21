@@ -44,7 +44,7 @@ describe("SwipeToArchive", () => {
     container.remove();
   });
 
-  it("suppresses descendant clicks after a horizontal swipe and archives the row", () => {
+  it("suppresses descendant clicks after a horizontal swipe and archives the row", async () => {
     const onArchive = vi.fn();
     const onClick = vi.fn();
     const root = createRoot(container);
@@ -93,7 +93,7 @@ describe("SwipeToArchive", () => {
     });
   });
 
-  it("does not suppress a normal tap click", () => {
+  it("does not suppress a normal tap click", async () => {
     const onArchive = vi.fn();
     const onClick = vi.fn();
     const root = createRoot(container);
@@ -123,7 +123,7 @@ describe("SwipeToArchive", () => {
     });
   });
 
-  it("renders the selected inbox treatment on the swipe surface", () => {
+  it("renders the selected inbox treatment on the swipe surface", async () => {
     const root = createRoot(container);
 
     act(() => {

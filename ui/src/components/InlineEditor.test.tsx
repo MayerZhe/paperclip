@@ -77,7 +77,7 @@ describe("InlineEditor", () => {
     container.remove();
   });
 
-  it("calls onSave with empty string when nullable and the field is cleared (single-line)", () => {
+  it("calls onSave with empty string when nullable and the field is cleared (single-line)", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const root = createRoot(container);
 
@@ -111,7 +111,7 @@ describe("InlineEditor", () => {
     });
   });
 
-  it("does not call onSave when nullable is false/omitted and the field is cleared", () => {
+  it("does not call onSave when nullable is false/omitted and the field is cleared", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const root = createRoot(container);
 
@@ -170,7 +170,7 @@ describe("InlineEditor", () => {
     act(() => {
       outside.focus();
     });
-    await act(async () => {
+    act(async () => {
       await flushDoubleRequestAnimationFrame();
     });
 
@@ -184,7 +184,7 @@ describe("InlineEditor", () => {
     outside.remove();
   });
 
-  it("multiline defaults to MarkdownBody preview when value is non-empty, swaps to editor on click", () => {
+  it("multiline defaults to MarkdownBody preview when value is non-empty, swaps to editor on click", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const root = createRoot(container);
 
@@ -207,7 +207,7 @@ describe("InlineEditor", () => {
     });
   });
 
-  it("marks multiline preview textboxes as multiline", () => {
+  it("marks multiline preview textboxes as multiline", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const root = createRoot(container);
 
@@ -225,7 +225,7 @@ describe("InlineEditor", () => {
     });
   });
 
-  it("enters multiline edit mode from the keyboard preview surface", () => {
+  it("enters multiline edit mode from the keyboard preview surface", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const root = createRoot(container);
 
@@ -248,7 +248,7 @@ describe("InlineEditor", () => {
     });
   });
 
-  it("syncs a new multiline value while focused when the user has not edited locally", () => {
+  it("syncs a new multiline value while focused when the user has not edited locally", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const root = createRoot(container);
 
@@ -275,7 +275,7 @@ describe("InlineEditor", () => {
     });
   });
 
-  it("preserves focused multiline local edits when the prop value changes underneath them", () => {
+  it("preserves focused multiline local edits when the prop value changes underneath them", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const root = createRoot(container);
 
@@ -341,7 +341,7 @@ describe("queueContainedBlurCommit", () => {
   });
 
   async function flushFrames() {
-    await act(async () => {
+    act(async () => {
       vi.runAllTimers();
       await Promise.resolve();
     });

@@ -134,7 +134,7 @@ const providerConfigs = [
 ] satisfies Partial<CompanySecretProviderConfig>[];
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -197,7 +197,7 @@ async function openAwsVaultDialog() {
   const vaultTabButton = [...document.querySelectorAll("button")].find(
     (button) => button.textContent?.includes("Provider vaults"),
   ) as HTMLButtonElement | undefined;
-  await act(async () => {
+  act(async () => {
     vaultTabButton?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
     vaultTabButton?.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }));
     vaultTabButton?.click();
@@ -207,7 +207,7 @@ async function openAwsVaultDialog() {
   const addVaultButtons = [...document.querySelectorAll("button")].filter(
     (button) => button.textContent?.includes("Add vault"),
   ) as HTMLButtonElement[];
-  await act(async () => {
+  act(async () => {
     addVaultButtons[1]?.click();
   });
   await flushReact();
@@ -248,7 +248,7 @@ describe("Secrets page layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <Secrets />
@@ -265,12 +265,12 @@ describe("Secrets page layout", () => {
     expect(container.textContent).not.toContain("Provider warnings detected");
     expect(container.textContent).not.toContain("2/2 active");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
 
     const vaultRoot = createRoot(container);
-    await act(async () => {
+    act(async () => {
       vaultRoot.render(
         <ProviderVaultsTab
           providers={providers}
@@ -295,19 +295,19 @@ describe("Secrets page layout", () => {
     expect(container.textContent).not.toContain("Managed writes");
     expect(container.textContent).not.toContain("External refs");
 
-    await act(async () => {
+    act(async () => {
       vaultRoot.unmount();
     });
   });
 
-  it("warns that removing a provider vault only removes Paperclip config", async () => {
+  it("warns that removing a provider vault only removes Super Node config", async () => {
     mockSecretsApi.removeProviderConfig.mockResolvedValueOnce(providerConfigs[1]);
     const root = createRoot(container);
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <QueryClientProvider client={queryClient}>
@@ -322,7 +322,7 @@ describe("Secrets page layout", () => {
     const vaultTabButton = [...document.querySelectorAll("button")].find(
       (button) => button.textContent?.includes("Provider vaults"),
     ) as HTMLButtonElement | undefined;
-    await act(async () => {
+    act(async () => {
       vaultTabButton?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
       vaultTabButton?.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }));
       vaultTabButton?.click();
@@ -332,20 +332,20 @@ describe("Secrets page layout", () => {
     const removeButtons = [...document.querySelectorAll("button")].filter(
       (button) => button.textContent?.trim() === "Remove",
     ) as HTMLButtonElement[];
-    await act(async () => {
+    act(async () => {
       removeButtons[1]?.click();
     });
     await flushReact();
 
     expect(document.body.textContent).toContain("Remove provider vault");
-    expect(document.body.textContent).toContain("from Paperclip only");
+    expect(document.body.textContent).toContain("from Super Node only");
     expect(document.body.textContent).toContain("does not delete");
     expect(document.body.textContent).toContain("AWS Secrets Manager");
 
     const confirmButton = [...document.querySelectorAll("button")].find(
-      (button) => button.textContent?.includes("Remove from Paperclip"),
+      (button) => button.textContent?.includes("Remove from Super Node"),
     ) as HTMLButtonElement | undefined;
-    await act(async () => {
+    act(async () => {
       confirmButton?.click();
     });
     await flushReact();
@@ -353,7 +353,7 @@ describe("Secrets page layout", () => {
     expect(mockSecretsApi.removeProviderConfig).toHaveBeenCalledWith("vault-aws");
     expect(mockSecretsApi.disableProviderConfig).not.toHaveBeenCalled();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -414,7 +414,7 @@ describe("Secrets page layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <QueryClientProvider client={queryClient}>
@@ -431,7 +431,7 @@ describe("Secrets page layout", () => {
     ) as HTMLButtonElement | null;
     expect(referencesButton?.textContent).toBe("2");
 
-    await act(async () => {
+    act(async () => {
       referencesButton?.click();
     });
     await flushReact();
@@ -441,7 +441,7 @@ describe("Secrets page layout", () => {
     expect(document.body.textContent).toContain("CodexCoder");
     expect(document.body.textContent).toContain("env.OPENAI_API_KEY");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -452,7 +452,7 @@ describe("Secrets page layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <QueryClientProvider client={queryClient}>
@@ -469,7 +469,7 @@ describe("Secrets page layout", () => {
     ) as HTMLButtonElement | undefined;
     expect(newSecretButton).toBeDefined();
 
-    await act(async () => {
+    act(async () => {
       newSecretButton?.click();
     });
     await flushReact();
@@ -480,7 +480,7 @@ describe("Secrets page layout", () => {
     expect(secretValueTextarea?.className).toContain("overflow-x-hidden");
     expect(secretValueTextarea?.className).toContain("break-all");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -492,7 +492,7 @@ describe("Secrets page layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <QueryClientProvider client={queryClient}>
@@ -514,14 +514,14 @@ describe("Secrets page layout", () => {
     const regionInput = document.getElementById("provider-vault-aws-region") as HTMLInputElement | null;
     const prefixInput = document.getElementById("provider-vault-secret-name-prefix") as HTMLInputElement | null;
     expect(regionInput).not.toBeNull();
-    await act(async () => {
+    act(async () => {
       setInputValue(regionInput!, "us-east-1");
       setInputValue(prefixInput!, "paperclip");
     });
     await flushReact();
 
     expect(discoveryButton?.disabled).toBe(false);
-    await act(async () => {
+    act(async () => {
       discoveryButton?.click();
     });
     await flushReact();
@@ -545,7 +545,7 @@ describe("Secrets page layout", () => {
     const useValuesButton = [...document.querySelectorAll("button")].find(
       (button) => button.textContent?.includes("Use values"),
     ) as HTMLButtonElement | undefined;
-    await act(async () => {
+    act(async () => {
       useValuesButton?.click();
     });
     await flushReact();
@@ -558,7 +558,7 @@ describe("Secrets page layout", () => {
     expect((document.getElementById("provider-vault-environment-tag") as HTMLInputElement).value).toBe("production");
     expect(mockSecretsApi.createProviderConfig).not.toHaveBeenCalled();
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -574,7 +574,7 @@ describe("Secrets page layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <QueryClientProvider client={queryClient}>
@@ -589,7 +589,7 @@ describe("Secrets page layout", () => {
 
     const regionInput = document.getElementById("provider-vault-aws-region") as HTMLInputElement;
     const namespaceInput = document.getElementById("provider-vault-namespace") as HTMLInputElement;
-    await act(async () => {
+    act(async () => {
       setInputValue(regionInput, "us-west-2");
       setInputValue(namespaceInput, "manual-prod");
     });
@@ -598,7 +598,7 @@ describe("Secrets page layout", () => {
     const discoveryButton = document.querySelector(
       '[data-testid="aws-vault-discovery-button"]',
     ) as HTMLButtonElement | null;
-    await act(async () => {
+    act(async () => {
       discoveryButton?.click();
     });
     await flushReact();
@@ -608,7 +608,7 @@ describe("Secrets page layout", () => {
     expect(regionInput.value).toBe("us-west-2");
     expect(namespaceInput.value).toBe("manual-prod");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });
@@ -622,7 +622,7 @@ describe("Secrets page layout", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    await act(async () => {
+    act(async () => {
       root.render(
         <MemoryRouter>
           <QueryClientProvider client={queryClient}>
@@ -636,11 +636,11 @@ describe("Secrets page layout", () => {
     await openAwsVaultDialog();
 
     const regionInput = document.getElementById("provider-vault-aws-region") as HTMLInputElement;
-    await act(async () => {
+    act(async () => {
       setInputValue(regionInput, "us-east-2");
     });
     await flushReact();
-    await act(async () => {
+    act(async () => {
       (document.querySelector('[data-testid="aws-vault-discovery-button"]') as HTMLButtonElement | null)?.click();
     });
     await flushReact();
@@ -649,7 +649,7 @@ describe("Secrets page layout", () => {
     expect(document.body.textContent).toContain("No AWS vault metadata candidates found");
     expect(regionInput.value).toBe("us-east-2");
 
-    await act(async () => {
+    act(async () => {
       root.unmount();
     });
   });

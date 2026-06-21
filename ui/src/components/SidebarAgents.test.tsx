@@ -108,13 +108,6 @@ if (!globalThis.PointerEvent) {
   (globalThis as any).PointerEvent = MouseEvent;
 }
 
-async function act(callback: () => void | Promise<void>) {
-  let result: void | Promise<void> = undefined;
-  flushSync(() => {
-    result = callback();
-  });
-  await result;
-}
 
 function makeAgent(overrides: Partial<Agent>): Agent {
   return {
@@ -145,7 +138,7 @@ function makeAgent(overrides: Partial<Agent>): Agent {
 }
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
@@ -155,7 +148,7 @@ async function openAgentMenu(label = "Open actions for Alpha") {
   const trigger = document.body.querySelector(`button[aria-label="${label}"]`);
   expect(trigger).not.toBeNull();
 
-  await act(async () => {
+  act(async () => {
     trigger?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
     trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
@@ -166,7 +159,7 @@ async function openAgentsSectionMenu() {
   const trigger = document.body.querySelector('button[aria-label="Agents section actions"]');
   expect(trigger).not.toBeNull();
 
-  await act(async () => {
+  act(async () => {
     trigger?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
     trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
@@ -178,7 +171,7 @@ async function chooseSortMode(label: string) {
     .find((element) => element.textContent?.includes(label));
   expect(item).toBeTruthy();
 
-  await act(async () => {
+  act(async () => {
     item?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
   await flushReact();
@@ -247,7 +240,7 @@ describe("SidebarAgents", () => {
   afterEach(async () => {
     const currentRoot = root;
     if (currentRoot) {
-      await act(async () => {
+      act(async () => {
         currentRoot.unmount();
       });
     }
@@ -262,7 +255,7 @@ describe("SidebarAgents", () => {
     const currentRoot = createRoot(container);
     root = currentRoot;
 
-    await act(async () => {
+    act(async () => {
       currentRoot.render(
         <QueryClientProvider client={queryClient}>
           <SidebarAgents streamlined={streamlined} />
@@ -276,7 +269,7 @@ describe("SidebarAgents", () => {
     const currentRoot = createRoot(container);
     root = currentRoot;
 
-    await act(async () => {
+    act(async () => {
       currentRoot.render(
         <QueryClientProvider client={queryClient}>
           <SidebarAgents />
@@ -308,7 +301,7 @@ describe("SidebarAgents", () => {
 
     const newAgentButton = container.querySelector('button[aria-label="New agent"]');
     expect(newAgentButton).toBeTruthy();
-    await act(async () => {
+    act(async () => {
       newAgentButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     expect(mockOpenNewAgent).toHaveBeenCalledTimes(1);
@@ -386,7 +379,7 @@ describe("SidebarAgents", () => {
     await renderSidebarAgents();
     expect(agentLinkLabels(container)).toEqual(["Alpha", "Beta"]);
 
-    await act(async () => {
+    act(async () => {
       resolveMemberships({
         projectMemberships: {},
         agentMemberships: { "agent-1": "left" },
@@ -411,7 +404,7 @@ describe("SidebarAgents", () => {
       .find((element) => element.textContent?.includes("Pause agent"));
     expect(pauseItem).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       pauseItem?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -428,7 +421,7 @@ describe("SidebarAgents", () => {
       .find((element) => element.textContent?.includes("Leave agent"));
     expect(leaveItem).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       leaveItem?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -453,7 +446,7 @@ describe("SidebarAgents", () => {
       .find((element) => element.textContent?.includes("Resume agent"));
     expect(resumeItem).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       resumeItem?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -476,7 +469,7 @@ describe("SidebarAgents", () => {
       .find((element) => element.textContent?.includes("Pause agent"));
     expect(pauseItem).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       pauseItem?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();
@@ -605,7 +598,7 @@ describe("SidebarAgents", () => {
       .find((element) => element.textContent?.includes("Budget paused"));
     expect(budgetPausedItem).toBeTruthy();
 
-    await act(async () => {
+    act(async () => {
       budgetPausedItem?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushReact();

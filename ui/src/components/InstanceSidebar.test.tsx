@@ -67,14 +67,14 @@ function makePlugin(overrides: Partial<PluginRecord> & { manifestJson: PluginRec
 }
 
 async function flushReact() {
-  await act(async () => {
+  act(async () => {
     await Promise.resolve();
     await new Promise((resolve) => window.setTimeout(resolve, 0));
   });
 }
 
 async function findPluginLinks(container: HTMLElement, expectedCount: number) {
-  await act(async () => {
+  act(async () => {
     await vi.waitFor(() => {
       expect(container.querySelectorAll('a[href^="/instance/settings/plugins/"]')).toHaveLength(expectedCount);
     });
@@ -113,7 +113,7 @@ describe("InstanceSidebar", () => {
   afterEach(async () => {
     if (root) {
       const currentRoot = root;
-      await act(async () => {
+      act(async () => {
         currentRoot.unmount();
       });
     }
