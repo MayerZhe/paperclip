@@ -377,9 +377,14 @@ describe("CommentThread", () => {
       configurable: true,
     });
 
-    act(async () => {
+    act(() => {
       copyButton?.click();
     });
+
+    // Flush the microtask queue so the Promise .then() that calls
+    // setStatus("copied") can fire. With vi.useFakeTimers(), queueMicrotask
+    // is replaced and act() won't flush it automatically.
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(writeTextMock).not.toHaveBeenCalled();
     expect(execCommandMock).toHaveBeenCalledWith("copy");

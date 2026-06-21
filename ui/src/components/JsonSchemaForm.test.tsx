@@ -185,7 +185,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     expect(container.querySelector('input[type="password"]')).toBeNull();
 
     // Parent fills in a previously-saved raw value (the async load case).
-    act(async () => {
+    await act(async () => {
       root.render(
         <JsonSchemaForm
           schema={schema}
@@ -328,7 +328,7 @@ describe("JsonSchemaForm secret-ref rendering", () => {
     expect(advancedButton!.getAttribute("aria-expanded")).toBe("false");
 
     // Submit validation error on the hidden advanced field -> forced open
-    act(async () => {
+    await act(async () => {
       root.render(
         <JsonSchemaForm
           schema={schema}

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import type { ComponentProps, ReactNode } from "react";
-import { act } from "react";
+import { act as ReactAct } from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -77,6 +77,14 @@ const mockInstanceSettingsApi = vi.hoisted(() => ({
   getExperimental: vi.fn(),
 }));
 
+const mockAccessApi = vi.hoisted(() => ({
+  listUserDirectory: vi.fn(),
+}));
+
+const mockAdaptersApi = vi.hoisted(() => ({
+  list: vi.fn(),
+}));
+
 vi.mock("../context/DialogContext", () => ({
   useDialog: () => dialogState,
 }));
@@ -115,6 +123,14 @@ vi.mock("../api/assets", () => ({
 
 vi.mock("../api/instanceSettings", () => ({
   instanceSettingsApi: mockInstanceSettingsApi,
+}));
+
+vi.mock("../api/access", () => ({
+  accessApi: mockAccessApi,
+}));
+
+vi.mock("@/api/adapters", () => ({
+  adaptersApi: mockAdaptersApi,
 }));
 
 vi.mock("../hooks/useProjectOrder", () => ({
@@ -228,7 +244,7 @@ vi.mock("@/components/ui/popover", () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-function act(callback: () => void | Promise<void>): void | Promise<void> {
+function syncAct(callback: () => void | Promise<void>): void | Promise<void> {
   let result: unknown;
   flushSync(() => {
     result = callback();
@@ -238,8 +254,11 @@ function act(callback: () => void | Promise<void>): void | Promise<void> {
     : undefined;
 }
 
+// Alias for convenience — use syncAct for sync operations, ReactAct for async
+const act = syncAct;
+
 async function flush() {
-  act(async () => {
+  await ReactAct(async () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 }
@@ -329,6 +348,10 @@ describe("NewIssueDialog", () => {
     mockAuthApi.getSession.mockResolvedValue({ user: { id: "user-1" } });
     mockAssetsApi.uploadImage.mockResolvedValue({ contentPath: "/uploads/asset.png" });
     mockInstanceSettingsApi.getExperimental.mockResolvedValue({ enableIsolatedWorkspaces: false });
+    mockAccessApi.listUserDirectory.mockReset();
+    mockAccessApi.listUserDirectory.mockResolvedValue({ users: [] });
+    mockAdaptersApi.list.mockReset();
+    mockAdaptersApi.list.mockResolvedValue([]);
     localStorage.clear();
     mockIssuesApi.create.mockResolvedValue({
       id: "issue-2",
@@ -723,6 +746,9 @@ describe("NewIssueDialog", () => {
     const submitButton = Array.from(container.querySelectorAll("button"))
       .find((button) => button.textContent?.includes("Create Sub-Task"));
     expect(submitButton).not.toBeUndefined();
+    await vi.waitFor(() => {
+      expect(submitButton?.hasAttribute("disabled")).toBe(false);
+    });
 
     act(async () => {
       submitButton!.dispatchEvent(new MouseEvent("click", { bubbles: true }));

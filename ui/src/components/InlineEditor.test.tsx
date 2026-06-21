@@ -170,11 +170,13 @@ describe("InlineEditor", () => {
     act(() => {
       outside.focus();
     });
-    act(async () => {
+    await act(async () => {
       await flushDoubleRequestAnimationFrame();
     });
 
-    expect(onSave).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => {
+      expect(onSave).toHaveBeenCalledTimes(1);
+    });
     expect(onSave).toHaveBeenCalledWith("");
     expect(container.textContent).toContain("Saved");
 
@@ -267,6 +269,8 @@ describe("InlineEditor", () => {
     act(() => {
       root.render(<InlineEditor value="Loaded description" multiline onSave={onSave} />);
     });
+    // Drain microtasks so the useEffect setDraft("Loaded description") commits
+    await act(async () => {});
 
     expect(textarea?.value).toBe("Loaded description");
 

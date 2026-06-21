@@ -310,7 +310,7 @@ describe("RoutineRunVariablesDialog", () => {
       },
     });
 
-    act(async () => {
+    act(() => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <RoutineRunVariablesDialog
@@ -336,8 +336,12 @@ describe("RoutineRunVariablesDialog", () => {
           />
         </QueryClientProvider>,
       );
+    });
+    await act(async () => {
       await Promise.resolve();
       await Promise.resolve();
+    });
+    await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
@@ -394,7 +398,7 @@ describe("RoutineRunVariablesDialog", () => {
       },
     });
 
-    act(async () => {
+    act(() => {
       root.render(
         <QueryClientProvider client={queryClient}>
           <RoutineRunVariablesDialog
@@ -412,8 +416,12 @@ describe("RoutineRunVariablesDialog", () => {
           />
         </QueryClientProvider>,
       );
+    });
+    await act(async () => {
       await Promise.resolve();
       await Promise.resolve();
+    });
+    await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
 

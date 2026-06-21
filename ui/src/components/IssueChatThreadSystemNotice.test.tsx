@@ -312,7 +312,7 @@ describe("IssueChatThread system notice routing", () => {
 
     const copyLink = container.querySelector('button[aria-label="Copy link to system notice"]') as HTMLButtonElement;
     const copyText = container.querySelector('button[aria-label="Copy system notice"]') as HTMLButtonElement;
-    act(async () => {
+    await act(async () => {
       copyLink.click();
       await Promise.resolve();
     });

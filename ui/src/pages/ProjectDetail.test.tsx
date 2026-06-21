@@ -11,6 +11,13 @@ import { ProjectDetail } from "./ProjectDetail";
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
+async function flushReact() {
+  await act(async () => {
+    await Promise.resolve();
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+  });
+}
+
 const mockProjectsApi = vi.hoisted(() => ({
   get: vi.fn(),
   list: vi.fn(),
@@ -184,7 +191,7 @@ describe("ProjectDetail", () => {
   it("shows managed plugin affordances and filters the operations tab by plugin origin", async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-    act(async () => {
+    act(() => {
       root = createRoot(container);
       root.render(
         <QueryClientProvider client={queryClient}>
@@ -192,10 +199,8 @@ describe("ProjectDetail", () => {
         </QueryClientProvider>,
       );
     });
-    act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
+    await flushReact();
+    await flushReact();
 
     expect(container.textContent).toContain("Managed by Missions");
     expect(container.textContent).toContain("Plugin operations");

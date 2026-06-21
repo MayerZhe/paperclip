@@ -281,7 +281,7 @@ describe("IssueDocumentsSection", () => {
       },
     });
 
-    mockIssuesApi.listDocuments.mockResolvedValue([
+    const docs = [
       createIssueDocument({ key: "plan", body: "# Plan" }),
       createIssueDocument({
         id: "document-handoff",
@@ -289,7 +289,9 @@ describe("IssueDocumentsSection", () => {
         title: "Continuation Summary",
         body: "# Handoff",
       }),
-    ]);
+    ];
+    mockIssuesApi.listDocuments.mockResolvedValue(docs);
+    queryClient.setQueryData(queryKeys.issues.documents(issue.id), docs);
 
     act(async () => {
       root.render(
@@ -339,6 +341,7 @@ describe("IssueDocumentsSection", () => {
       .mockResolvedValueOnce([unlockedDocument])
       .mockResolvedValue([lockedDocument]);
     mockIssuesApi.lockDocument.mockResolvedValue(lockedDocument);
+    queryClient.setQueryData(queryKeys.issues.documents(issue.id), [unlockedDocument]);
 
     act(async () => {
       root.render(
@@ -356,7 +359,11 @@ describe("IssueDocumentsSection", () => {
     act(async () => {
       lockButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
-    await flush();
+    // React Query mutation chains multiple microtasks; flush() alone (one macrotask)
+    // doesn't drain them all. Drain the microtask queue before asserting.
+    await act(async () => {
+      for (let i = 0; i < 5; i++) await Promise.resolve();
+    });
 
     expect(mockIssuesApi.lockDocument).toHaveBeenCalledWith("issue-1", "plan");
     expect(container.querySelector('button[title="Unlock document"]')).toBeTruthy();
@@ -381,13 +388,15 @@ describe("IssueDocumentsSection", () => {
       },
     });
 
-    mockIssuesApi.listDocuments.mockResolvedValue([
+    const lockedDocs = [
       createIssueDocument({
         body: "Locked plan body",
         lockedAt: new Date("2026-03-31T12:06:00.000Z"),
         lockedByUserId: "user-1",
       }),
-    ]);
+    ];
+    mockIssuesApi.listDocuments.mockResolvedValue(lockedDocs);
+    queryClient.setQueryData(queryKeys.issues.documents(issue.id), lockedDocs);
 
     act(async () => {
       root.render(
@@ -440,6 +449,7 @@ describe("IssueDocumentsSection", () => {
       .mockResolvedValueOnce([blankLatestDocument])
       .mockImplementation(() => pendingDocuments.promise);
     mockIssuesApi.restoreDocumentRevision.mockResolvedValue(restoredDocument);
+    queryClient.setQueryData(queryKeys.issues.documents(issue.id), [blankLatestDocument]);
     queryClient.setQueryData(
       queryKeys.issues.documentRevisions(issue.id, "plan"),
       [
@@ -467,6 +477,9 @@ describe("IssueDocumentsSection", () => {
     act(async () => {
       historicalRevisionButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
+    await act(async () => {
+      for (let i = 0; i < 5; i++) await Promise.resolve();
+    });
 
     expect(container.textContent).toContain("Viewing revision 3");
     expect(container.textContent).toContain("Restored plan body");
@@ -477,6 +490,9 @@ describe("IssueDocumentsSection", () => {
 
     act(async () => {
       restoreButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    await act(async () => {
+      for (let i = 0; i < 5; i++) await Promise.resolve();
     });
 
     expect(mockIssuesApi.restoreDocumentRevision).toHaveBeenCalledWith("issue-1", "plan", "revision-3");
@@ -512,6 +528,7 @@ describe("IssueDocumentsSection", () => {
     });
 
     mockIssuesApi.listDocuments.mockResolvedValue([currentDocument]);
+    queryClient.setQueryData(queryKeys.issues.documents(issue.id), [currentDocument]);
     queryClient.setQueryData(
       queryKeys.issues.documentRevisions(issue.id, "plan"),
       [
@@ -585,6 +602,7 @@ describe("IssueDocumentsSection", () => {
     });
 
     mockIssuesApi.listDocuments.mockResolvedValue([staleDocument]);
+    queryClient.setQueryData(queryKeys.issues.documents(issue.id), [staleDocument]);
     queryClient.setQueryData(
       queryKeys.issues.documentRevisions(issue.id, "plan"),
       [
@@ -663,6 +681,7 @@ describe("IssueDocumentsSection", () => {
     });
 
     mockIssuesApi.listDocuments.mockResolvedValue([document]);
+    queryClient.setQueryData(queryKeys.issues.documents(issue.id), [document]);
 
     act(async () => {
       root.render(
@@ -698,7 +717,9 @@ describe("IssueDocumentsSection", () => {
       },
     });
 
-    mockIssuesApi.listDocuments.mockResolvedValue([createIssueDocument()]);
+    const testDoc = createIssueDocument();
+    mockIssuesApi.listDocuments.mockResolvedValue([testDoc]);
+    queryClient.setQueryData(queryKeys.issues.documents(issue.id), [testDoc]);
 
     act(async () => {
       root.render(
