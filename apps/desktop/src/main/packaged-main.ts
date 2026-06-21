@@ -17,11 +17,10 @@ import { createAppMenu } from "./menu.js";
 import { createUpdater, type Updater } from "./updater.js";
 import { showNotification } from "./notifications.js";
 import { SIDECAR_MESSAGES } from "../shared/sidecar-proto.js";
-import { ensureFirstRunConfig, registerOnboardingIPC, type FirstRunResult } from "./onboard.js";
+import { ensureFirstRunConfig } from "./onboard.js";
 import { loadWindowState, registerWindowStateHandlers } from "./window-state.js";
 import { setAutoLaunch } from "./login-item.js";
 import { registerContextMenuHandler } from "./context-menu.js";
-import { registerAgentBridgeIPC } from "./agent-bridge-ipc.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -128,83 +127,15 @@ function resolveDaemonEntry(): string {
   );
 }
 
-// ─── 启动模式检测 ───
-// --mode=agenthubs 或 PAPERCLIP_MODE 环境变量切换启动模式
-// POC: AgentHubs Mode 跳过 daemon，直接加载 cloud-api :4000
-function detectLaunchMode(): "agent" | "agenthubs" {
-  const arg = process.argv.find((a) => a.startsWith("--mode="));
-  if (arg) return arg.split("=")[1] as "agent" | "agenthubs";
-  const envMode = process.env.PAPERCLIP_MODE;
-  if (envMode === "agenthubs" || envMode === "agent") return envMode;
-  return "agent";
-}
-
-// ─── AgentHubs Mode POC 启动流程 ───
-// 假设 Docker Compose 已手动启动，cloud-api 在 localhost:4000 可用
-async function runAgentHubsMode(): Promise<void> {
-  await app.whenReady();
-
-  const isMac = process.platform === "darwin";
-
-  const mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    minWidth: 900,
-    minHeight: 600,
-    title: "AgentHubs",
-    show: false,
-    ...(isMac && {
-      titleBarStyle: "hiddenInset",
-      titleBarOverlay: false,
-      trafficLightPosition: { x: 12, y: 16 },
-    }),
-    webPreferences: {
-      preload: path.join(__dirname, "..", "preload", "index.js"),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true,
-    },
-  });
-
-  mainWindow.once("ready-to-show", () => {
-    mainWindow.show();
-  });
-
-  console.log("[AgentHubs Desktop] Loading http://127.0.0.1:4000 ...");
-  mainWindow.loadURL("http://127.0.0.1:4000");
-
-  // 简化的关闭流程：before-quit → app.exit(0)
-  // Docker Compose 由用户手动管理（Phase 1.2 后自动管理）
-  let shuttingDown = false;
-  app.on("before-quit", (event) => {
-    if (shuttingDown) return;
-    shuttingDown = true;
-    event.preventDefault();
-    console.log("[AgentHubs Desktop] Shutting down...");
-    app.exit(0);
-  });
-
-  app.on("activate", () => mainWindow.show());
-}
-
 // ─── 主启动流程 ───
 export async function runDesktopMain(): Promise<void> {
-  // POC: 模式检测与分支
-  const launchMode = detectLaunchMode();
-  if (launchMode === "agenthubs") {
-    return runAgentHubsMode();
-  }
-
   // ═══════════════════════════════════════
   // Phase 0: 首次启动 — 生成配置
   // ═══════════════════════════════════════
-  const firstRunResult: FirstRunResult = await ensureFirstRunConfig({
+  await ensureFirstRunConfig({
     homeDir: PAPERCLIP_HOME,
     instanceId: PAPERCLIP_INSTANCE_ID,
   });
-  console.log(
-    `[PaperClip Desktop] First run: ${firstRunResult.isFirstRun}, mode: ${firstRunResult.mode}, config: ${firstRunResult.configPath}`,
-  );
 
   // ═══════════════════════════════════════
   // Phase 1: 启动 PaperClip Server
@@ -422,9 +353,7 @@ export async function runDesktopMain(): Promise<void> {
   // ═══════════════════════════════════════
   // Phase 6: 桌面特性
   // ═══════════════════════════════════════
-  registerOnboardingIPC();       // Story 1.6: mode selection IPC
   registerContextMenuHandler(); // US3: native context menu bridge
-  registerAgentBridgeIPC();     // Story 3.3: Agent → AgentHubs data bridge
   createTray(mainWindow);
   createAppMenu(
     mainWindow,

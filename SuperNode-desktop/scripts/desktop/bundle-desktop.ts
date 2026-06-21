@@ -102,68 +102,6 @@ function copyRecursive(src: string, dest: string): void {
   }
 }
 
-
-
-// ─── AgentHubs VM bundling ──────────────────────────────────────
-
-async function bundleAgentHubsVm(): Promise<void> {
-  const vmSource = path.join(AGENTHUBS_REPO, "docker-compose.yml");
-  const vmDest = path.join(distDir, "agenthubs-local-vm");
-
-  // 1. 创建目标目录
-  fs.mkdirSync(vmDest, { recursive: true });
-
-  // 2. 复制 docker-compose.yml（生产版 — 替换硬编码绝对路径为相对路径）
-  if (!fs.existsSync(vmSource)) {
-    console.warn(`[Bundle] ⚠️ AgentHubs docker-compose.yml not found at ${vmSource} — skipping VM bundle`);
-    return;
-  }
-
-  const composeRaw = fs.readFileSync(vmSource, "utf-8");
-  const composeContent = composeRaw
-    // Replace hardcoded absolute paths with relative paths (inside .app bundle)
-    .replace(/context: \/Users\/.*/g, "context: .")
-    .replace(/dockerfile: \/Users\/.*/g, "dockerfile: ./Dockerfile");
-  fs.writeFileSync(path.join(vmDest, "docker-compose.yml"), composeContent);
-  console.log("  docker-compose.yml → agenthubs-local-vm/ (paths relativized)");
-
-  // 3. 复制 Dockerfiles
-  const dockerCloudApi = path.join(AGENTHUBS_REPO, "docker", "cloud-api", "Dockerfile");
-  const dockerPaperclip = path.join(AGENTHUBS_REPO, "docker", "paperclip", "Dockerfile");
-
-  if (fs.existsSync(dockerCloudApi)) {
-    fs.copyFileSync(dockerCloudApi, path.join(vmDest, "Dockerfile.cloud-api"));
-    console.log("  Dockerfile.cloud-api → agenthubs-local-vm/");
-  } else {
-    console.warn("  ⚠️ cloud-api Dockerfile not found");
-  }
-
-  if (fs.existsSync(dockerPaperclip)) {
-    fs.copyFileSync(dockerPaperclip, path.join(vmDest, "Dockerfile.paperclip"));
-    console.log("  Dockerfile.paperclip → agenthubs-local-vm/");
-  } else {
-    console.warn("  ⚠️ paperclip Dockerfile not found");
-  }
-
-  // 4. docker save 导出 Docker 镜像（如果本地已构建）
-  try {
-    execSync(
-      `docker save agenthubs-cloud-api agenthubs-paperclip -o "${path.join(vmDest, "images.tar")}"`,
-      { stdio: "pipe", timeout: 120_000 },
-    );
-    const imgSize = (fs.statSync(path.join(vmDest, "images.tar")).size / (1024 * 1024)).toFixed(1);
-    console.log(`  images.tar → agenthubs-local-vm/ (${imgSize} MB)`);
-  } catch {
-    console.warn("  ⚠️ Docker images not found locally — images.tar not created");
-    console.warn("     VM will build images on first launch via `docker compose build`");
-  }
-
-  // 5. 写入 VERSION 文件
-  fs.writeFileSync(path.join(vmDest, "VERSION"), version);
-  console.log(`  VERSION → agenthubs-local-vm/ (${version})`);
-
-  console.log(`[Bundle] VM image bundled to ${vmDest}`);
-}
 // ─── 清理 ────────────────────────────────────────────────────────
 const distDir = path.join(SUPER_DESKTOP, "dist");
 const serverSymlink = path.join(SUPER_DESKTOP, "paperclip-server");
@@ -784,13 +722,6 @@ if (!allPass) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-	// ═══════════════════════════════════════════════════════════════════
-	// 12.5 Bundle AgentHubs VM image (docker-compose + Dockerfiles + images)
-	//      Must run BEFORE the sync so apps/desktop/ gets the VM files.
-	// ═══════════════════════════════════════════════════════════════════
-	const AGENTHUBS_REPO = path.join(ROOT, "..", "agenthubs");
-	await bundleAgentHubsVm();
-
 // 13. Sync to apps/desktop/ — electron-builder runs from there
 //    Without this step, the daemon bundle (paperclip-server with
 //    node_modules) never reaches the packaged app.
@@ -835,17 +766,6 @@ fs.copyFileSync(
   path.join(appsDesktopDist, "package.json"),
 );
 
-		// Sync AgentHubs VM image (extraResources — electron-builder picks up from apps/desktop/)
-		const superAgenthubsDir = path.join(distDir, "agenthubs-local-vm");
-		if (fs.existsSync(superAgenthubsDir)) {
-		  const appsAgenthubsDir = path.join(APPS_DESKTOP, "agenthubs-local-vm");
-		  if (fs.existsSync(appsAgenthubsDir)) {
-		    fs.rmSync(appsAgenthubsDir, { recursive: true, force: true });
-		  }
-		  fs.cpSync(superAgenthubsDir, appsAgenthubsDir, { recursive: true, force: true });
-		  console.log("  agenthubs-local-vm/ → apps/desktop/agenthubs-local-vm/ (extraResource)");
-		}
-
 	// Sync browser/ assets (jsdom default-stylesheet.css RC-14 fix)
 	// In the .app, __dirname = Resources/paperclip-server/dist/
 	// jsdom does path.resolve(__dirname, "../../browser/") → Resources/browser/
@@ -862,8 +782,7 @@ fs.copyFileSync(
 
 	console.log("[Bundle] ✅ Synced to apps/desktop/");
 
-
-	// ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // 14. 摘要
 // ═══════════════════════════════════════════════════════════════════
 const totalSize = (() => {

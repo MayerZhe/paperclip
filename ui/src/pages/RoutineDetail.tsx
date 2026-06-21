@@ -30,12 +30,12 @@ import { LiveRunWidget } from "../components/LiveRunWidget";
 import { agentsApi } from "../api/agents";
 import { projectsApi } from "../api/projects";
 import { accessApi } from "../api/access";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { useToastActions } from "../context/ToastContext";
 import { queryKeys } from "../lib/queryKeys";
 import { buildRoutineTriggerPatch } from "../lib/routine-trigger-patch";
-import { buildMarkdownMentionOptions } from "../lib/company-members";
+import { buildMarkdownMentionOptions } from "../lib/node-org-members";
 import { timeAgo } from "../lib/timeAgo";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { EmptyState } from "../components/EmptyState";
@@ -189,7 +189,7 @@ function TriggerEditor({
   }, [trigger]);
 
   return (
-    <div className="rounded-lg border border-border p-4 space-y-4">
+    <div className="rounded-none border border-border p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm font-medium">
           {trigger.kind === "schedule" ? <Clock3 className="h-3.5 w-3.5" /> : trigger.kind === "webhook" ? <Webhook className="h-3.5 w-3.5" /> : <Zap className="h-3.5 w-3.5" />}
@@ -285,7 +285,7 @@ function TriggerEditor({
 
 export function RoutineDetail() {
   const { routineId } = useParams<{ routineId: string }>();
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -386,7 +386,7 @@ export function RoutineDetail() {
   });
   const createSecret = useMutation({
     mutationFn: (input: { name: string; value: string }) => {
-      if (!selectedCompanyId) throw new Error("Select a company to create secrets");
+      if (!selectedCompanyId) throw new Error("Select a node org to create secrets");
       return secretsApi.create(selectedCompanyId, input);
     },
     onSuccess: () => {
@@ -521,7 +521,7 @@ export function RoutineDetail() {
       }
       pushToast({
         title: "Failed to save routine",
-        body: error instanceof Error ? error.message : "Paperclip could not save the routine.",
+        body: error instanceof Error ? error.message : "Super Node could not save the routine.",
         tone: "error",
       });
     },
@@ -555,7 +555,7 @@ export function RoutineDetail() {
     onError: (error) => {
       pushToast({
         title: "Routine run failed",
-        body: error instanceof Error ? error.message : "Paperclip could not start the routine run.",
+        body: error instanceof Error ? error.message : "Super Node could not start the routine run.",
         tone: "error",
       });
     },
@@ -577,7 +577,7 @@ export function RoutineDetail() {
     onError: (error) => {
       pushToast({
         title: "Failed to update routine",
-        body: error instanceof Error ? error.message : "Paperclip could not update the routine.",
+        body: error instanceof Error ? error.message : "Super Node could not update the routine.",
         tone: "error",
       });
     },
@@ -626,7 +626,7 @@ export function RoutineDetail() {
     onError: (error) => {
       pushToast({
         title: "Failed to add trigger",
-        body: error instanceof Error ? error.message : "Paperclip could not create the trigger.",
+        body: error instanceof Error ? error.message : "Super Node could not create the trigger.",
         tone: "error",
       });
     },
@@ -649,7 +649,7 @@ export function RoutineDetail() {
     onError: (error) => {
       pushToast({
         title: "Failed to update trigger",
-        body: error instanceof Error ? error.message : "Paperclip could not update the trigger.",
+        body: error instanceof Error ? error.message : "Super Node could not update the trigger.",
         tone: "error",
       });
     },
@@ -671,7 +671,7 @@ export function RoutineDetail() {
     onError: (error) => {
       pushToast({
         title: "Failed to delete trigger",
-        body: error instanceof Error ? error.message : "Paperclip could not delete the trigger.",
+        body: error instanceof Error ? error.message : "Super Node could not delete the trigger.",
         tone: "error",
       });
     },
@@ -695,7 +695,7 @@ export function RoutineDetail() {
     onError: (error) => {
       pushToast({
         title: "Failed to rotate webhook secret",
-        body: error instanceof Error ? error.message : "Paperclip could not rotate the webhook secret.",
+        body: error instanceof Error ? error.message : "Super Node could not rotate the webhook secret.",
         tone: "error",
       });
     },
@@ -743,7 +743,7 @@ export function RoutineDetail() {
   const currentProject = editDraft.projectId ? projectById.get(editDraft.projectId) ?? null : null;
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={Repeat} message="Select a company to view routines." />;
+    return <EmptyState icon={Repeat} message="Select a Node Org to view routines." />;
   }
 
   if (isLoading) {
@@ -775,13 +775,13 @@ export function RoutineDetail() {
       : "text-muted-foreground";
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6">
       {/* Header: editable title + actions */}
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1 space-y-2">
           <textarea
             ref={titleInputRef}
-            className="w-full resize-none overflow-hidden bg-transparent text-xl font-bold outline-none placeholder:text-muted-foreground/50"
+            className="w-full resize-none overflow-hidden bg-transparent text-xs font-bold outline-none placeholder:text-muted-foreground/50"
             placeholder="Routine title"
             rows={1}
             value={editDraft.title}
@@ -848,10 +848,10 @@ export function RoutineDetail() {
 
       {/* Secret message banner */}
       {secretMessage && (
-        <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-4 space-y-3 text-sm">
+        <div className="rounded-none border border-primary/30 bg-primary/5 p-4 space-y-3 text-sm">
           <div>
             <p className="font-medium">{secretMessage.title}</p>
-            <p className="text-xs text-muted-foreground">Save this now. Paperclip will not show the secret value again.</p>
+            <p className="text-xs text-muted-foreground">Save this now. Super Node will not show the secret value again.</p>
           </div>
           <div className="space-y-3">
             {secretMessage.entries.map((entry, index) => (
@@ -883,7 +883,7 @@ export function RoutineDetail() {
 
       {/* Save conflict banner */}
       {saveConflict && (
-        <div className="rounded-md border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
+        <div className="rounded-none border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-1">
               <p className="font-medium text-amber-200">Out of date</p>
@@ -912,7 +912,7 @@ export function RoutineDetail() {
       )}
 
       {!routine.assigneeAgentId ? (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-900 dark:text-amber-200">
+        <div className="rounded-none border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-900 dark:text-amber-200">
           Default agent required. This routine can stay as a draft and still run manually, but automation stays paused until you assign a default agent.
         </div>
       ) : null}
@@ -986,7 +986,7 @@ export function RoutineDetail() {
                 <>
                   <span
                     className="h-3.5 w-3.5 shrink-0 rounded-sm"
-                    style={{ backgroundColor: currentProject.color ?? "#64748b" }}
+                    style={{ backgroundColor: currentProject.color ?? "#888888" }}
                   />
                   <span className="truncate">{option.label}</span>
                 </>
@@ -1001,7 +1001,7 @@ export function RoutineDetail() {
                 <>
                   <span
                     className="h-3.5 w-3.5 shrink-0 rounded-sm"
-                    style={{ backgroundColor: project?.color ?? "#64748b" }}
+                    style={{ backgroundColor: project?.color ?? "#888888" }}
                   />
                   <span className="truncate">{option.label}</span>
                 </>
@@ -1100,7 +1100,7 @@ export function RoutineDetail() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3">
-        <TabsList variant="line" className="w-full justify-start gap-1">
+        <TabsList variant="line" className="w-full justify-start">
           <TabsTrigger value="triggers" className="gap-1.5">
             <Clock3 className="h-3.5 w-3.5" />
             Triggers
@@ -1108,7 +1108,7 @@ export function RoutineDetail() {
           <TabsTrigger value="runs" className="gap-1.5">
             <Play className="h-3.5 w-3.5" />
             Runs
-            {hasLiveRun && <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />}
+            {hasLiveRun && <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />}
           </TabsTrigger>
 <TabsTrigger value="activity" className="gap-1.5">
             <ActivityIcon className="h-3.5 w-3.5" />
@@ -1126,7 +1126,7 @@ export function RoutineDetail() {
 
         <TabsContent value="triggers" className="space-y-4">
           {/* Add trigger form */}
-          <div className="rounded-lg border border-border p-4 space-y-3">
+          <div className="rounded-none border border-border p-4 space-y-3">
             <p className="text-sm font-medium">Add trigger</p>
             <div className="grid gap-3 md:grid-cols-2">
               <div className="space-y-1.5">
@@ -1210,7 +1210,7 @@ export function RoutineDetail() {
           {(routineRuns ?? []).length === 0 ? (
             <p className="text-xs text-muted-foreground">No runs yet.</p>
           ) : (
-            <div className="border border-border rounded-lg divide-y divide-border">
+            <div className="border border-border rounded-none divide-y divide-border">
               {(routineRuns ?? []).map((run) => (
                 <div key={run.id} className="flex items-center justify-between px-3 py-2 text-sm">
                   <div className="flex items-center gap-2 min-w-0">
@@ -1238,7 +1238,7 @@ export function RoutineDetail() {
           {(activity ?? []).length === 0 ? (
             <p className="text-xs text-muted-foreground">No activity yet.</p>
           ) : (
-            <div className="border border-border rounded-lg divide-y divide-border">
+            <div className="border border-border rounded-none divide-y divide-border">
               {(activity ?? []).map((event) => (
                 <div key={event.id} className="flex items-center justify-between px-3 py-2 text-xs gap-4">
                   <div className="flex items-center gap-2 min-w-0">
@@ -1356,3 +1356,4 @@ export function RoutineDetail() {
     </div>
   );
 }
+

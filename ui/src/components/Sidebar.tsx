@@ -22,7 +22,7 @@ import { SidebarNavItem } from "./SidebarNavItem";
 import { SidebarAgents } from "./SidebarAgents";
 import { SidebarProjects } from "./SidebarProjects";
 import { useDialogActions } from "../context/DialogContext";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { heartbeatsApi } from "../api/heartbeats";
 import { instanceSettingsApi } from "../api/instanceSettings";
 import { queryKeys } from "../lib/queryKeys";
@@ -30,11 +30,11 @@ import { useInboxBadge } from "../hooks/useInboxBadge";
 import { Button } from "@/components/ui/button";
 import { PluginSlotOutlet } from "@/plugins/slots";
 import { PluginLauncherOutlet } from "@/plugins/launchers";
-import { SidebarCompanyMenu } from "./SidebarCompanyMenu";
+import { SidebarNodeOrgMenu } from "./SidebarNodeOrgMenu";
 
 export function Sidebar() {
   const { openNewIssue } = useDialogActions();
-  const { selectedCompanyId, selectedCompany } = useCompany();
+  const { selectedCompanyId, selectedCompany } = useNodeOrg();
   const inboxBadge = useInboxBadge(selectedCompanyId);
   const { data: experimentalSettings } = useQuery({
     queryKey: queryKeys.instance.experimentalSettings,
@@ -60,10 +60,10 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-full h-full min-h-0 border-r border-border bg-background flex flex-col">
+    <aside className="w-full h-full min-h-0 border-r border-[var(--sidebar-border-subtle)] bg-[var(--sidebar-bg)] backdrop-blur-xl backdrop-saturate-[180%] flex flex-col">
       {/* Top bar: Company name (bold) + Search — aligned with top sections (no visible border) */}
       <div className="flex items-center gap-1 px-3 h-12 shrink-0">
-        <SidebarCompanyMenu />
+        <SidebarNodeOrgMenu />
         <Button
           asChild
           variant="ghost"
@@ -131,7 +131,7 @@ export function Sidebar() {
 
         <SidebarAgents streamlined={streamlined} />
 
-        <SidebarSection label="Company">
+        <SidebarSection label="Node Org">
           <SidebarNavItem to="/org" label="Org" icon={Network} />
           <SidebarNavItem to="/skills" label="Skills" icon={Boxes} />
           <SidebarNavItem to="/costs" label="Costs" icon={DollarSign} />
@@ -143,7 +143,7 @@ export function Sidebar() {
           slotTypes={["sidebarPanel"]}
           context={pluginContext}
           className="flex flex-col gap-3"
-          itemClassName="rounded-lg border border-border p-3"
+          itemClassName="rounded-none border border-border p-3"
           missingBehavior="placeholder"
         />
       </nav>

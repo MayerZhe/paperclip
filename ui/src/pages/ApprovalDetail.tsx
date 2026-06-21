@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from "@/lib/router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { approvalsApi } from "../api/approvals";
 import { agentsApi } from "../api/agents";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
 import { StatusBadge } from "../components/StatusBadge";
@@ -18,7 +18,7 @@ import { MarkdownBody } from "../components/MarkdownBody";
 
 export function ApprovalDetail() {
   const { approvalId } = useParams<{ approvalId: string }>();
-  const { selectedCompanyId, setSelectedCompanyId } = useCompany();
+  const { selectedCompanyId, setSelectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -171,9 +171,9 @@ export function ApprovalDetail() {
           };
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       {showApprovedBanner && (
-        <div className="border border-green-300 dark:border-green-700/40 bg-green-50 dark:bg-green-900/20 rounded-lg px-4 py-3 animate-in fade-in zoom-in-95 duration-300">
+        <div className="border border-green-300 dark:border-green-700/40 bg-green-50 dark:bg-green-900/20 rounded-none px-4 py-3 animate-in fade-in zoom-in-95 duration-300">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-2">
               <div className="relative mt-0.5">
@@ -198,7 +198,7 @@ export function ApprovalDetail() {
           </div>
         </div>
       )}
-      <div className="border border-border rounded-lg p-4 space-y-3">
+      <div className="border border-border rounded-none p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TypeIcon className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -229,7 +229,7 @@ export function ApprovalDetail() {
             See full request
           </button>
           {showRawPayload && (
-            <pre className="text-xs bg-muted/40 rounded-md p-3 overflow-x-auto">
+            <pre className="text-xs bg-muted/40 rounded-none p-3 overflow-x-auto">
               {JSON.stringify(payload, null, 2)}
             </pre>
           )}
@@ -323,11 +323,11 @@ export function ApprovalDetail() {
         </div>
       </div>
 
-      <div className="border border-border rounded-lg p-4 space-y-3">
+      <div className="border border-border rounded-none p-4 space-y-3">
         <h3 className="text-sm font-medium">Comments ({comments?.length ?? 0})</h3>
         <div className="space-y-2">
           {(comments ?? []).map((comment: ApprovalComment) => (
-            <div key={comment.id} className="border border-border/60 rounded-md p-3">
+            <div key={comment.id} className="border border-border/60 rounded-none p-3">
               <div className="flex items-center justify-between mb-1">
                 {comment.authorAgentId ? (
                   <Link to={`/agents/${comment.authorAgentId}`} className="hover:underline">

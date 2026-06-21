@@ -145,8 +145,11 @@ function buildCatalogPackageRootCandidates() {
   const configuredRoot = process.env.PAPERCLIP_TEAMS_CATALOG_DIR?.trim();
   const candidates = [
     ...(configuredRoot ? [path.resolve(configuredRoot)] : []),
+    // Bundle: bundledServer/teams-catalog/ (set by PAPERCLIP_TEAMS_CATALOG_DIR in packaged-main.ts)
+    // But also try candidate from serviceDir as fallback
+    path.resolve(serviceDir, "..", "teams-catalog"),                  // bundle: bundledServer/teams-catalog/
     path.resolve(process.cwd(), "packages/teams-catalog"),
-    path.resolve(serviceDir, "../../..", "packages/teams-catalog"),
+    path.resolve(serviceDir, "../../..", "packages/teams-catalog"),   // monorepo: packages/teams-catalog
   ];
   return Array.from(new Set(candidates));
 }

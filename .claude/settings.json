@@ -1,0 +1,106 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "model": "claude-opus-4-8",
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(yarn:*)",
+      "Bash(pnpm:*)",
+      "Bash(bun:*)",
+      "Bash(node:*)",
+      "Bash(tsc:*)",
+      "Bash(tsx:*)",
+      "Bash(vite:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(echo:*)",
+      "Bash(chmod:*)",
+      "Bash(curl:*)",
+      "Bash(which:*)",
+      "Bash(date:*)",
+      "Bash(pkill:*)",
+      "Bash(kill:*)",
+      "Bash(electron:*)",
+      "Bash(playwright:*)",
+      "Bash(python3:*)",
+      "Bash(uv:*)",
+      "Bash(docker:*)",
+      "mcp__officecli__*",
+      "mcp__Claude_in_Chrome__*",
+      "mcp__Claude_Preview__*",
+      "mcp__ccd_directory__*",
+      "mcp__ccd_session__*",
+      "mcp__ccd_session_mgmt__*",
+      "mcp__scheduled-tasks__*"
+    ],
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~:*)",
+      "Bash(rm -rf .:*)",
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(echo * > /etc:*)",
+      "Bash(> /etc:*)"
+    ],
+    "defaultMode": "default"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/quality-gate.sh",
+            "statusMessage": "PaperClip Desktop — 7-agent framework initialized (orchestrator, architect, frontend-dev, backend-dev, reviewer, tester, requirements-analyst)",
+            "async": true
+          }
+        ]
+      }
+    ]
+  },
+  "worktree": {
+    "baseRef": "fresh"
+  },
+  "mcpServers": {
+    "officecli": {
+      "command": "npx",
+      "args": ["-y", "@paperclipai/mcp-server-officecli"]
+    },
+    "Claude in Chrome": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-claude-in-chrome"]
+    },
+    "Claude Preview": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-claude-preview"]
+    },
+    "ccd_directory": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-ccd-directory"]
+    },
+    "ccd_session": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-ccd-session"]
+    },
+    "ccd_session_mgmt": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-ccd-session-mgmt"]
+    },
+    "scheduled-tasks": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-scheduled-tasks"]
+    }
+  }
+}

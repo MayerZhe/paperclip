@@ -8,10 +8,10 @@ import { projectsApi } from "../api/projects";
 import { issuesApi } from "../api/issues";
 import { heartbeatsApi } from "../api/heartbeats";
 import { accessApi } from "../api/access";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { useToastActions } from "../context/ToastContext";
-import { buildMarkdownMentionOptions } from "../lib/company-members";
+import { buildMarkdownMentionOptions } from "../lib/node-org-members";
 import { queryKeys } from "../lib/queryKeys";
 import { groupBy } from "../lib/groupBy";
 import { createIssueDetailLocationState } from "../lib/issueDetailBreadcrumb";
@@ -200,7 +200,7 @@ function buildRoutinesTabHref(tab: RoutinesTab) {
 }
 
 export function Routines() {
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { setBreadcrumbs } = useBreadcrumbs();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -236,8 +236,8 @@ export function Routines() {
     variables: [],
   });
   const routineViewStateKey = selectedCompanyId
-    ? `paperclip:routines-view:${selectedCompanyId}`
-    : "paperclip:routines-view";
+    ? `super-node:routines-view:${selectedCompanyId}`
+    : "super-node:routines-view";
   const [routineViewState, setRoutineViewState] = useState<RoutineViewState>(() => getRoutineViewState(routineViewStateKey));
 
   useEffect(() => {
@@ -344,7 +344,7 @@ export function Routines() {
     onError: (mutationError) => {
       pushToast({
         title: "Failed to update routine",
-        body: mutationError instanceof Error ? mutationError.message : "Paperclip could not update the routine.",
+        body: mutationError instanceof Error ? mutationError.message : "Super Node could not update the routine.",
         tone: "error",
       });
     },
@@ -379,7 +379,7 @@ export function Routines() {
     onError: (mutationError) => {
       pushToast({
         title: "Routine run failed",
-        body: mutationError instanceof Error ? mutationError.message : "Paperclip could not start the routine run.",
+        body: mutationError instanceof Error ? mutationError.message : "Super Node could not start the routine run.",
         tone: "error",
       });
     },
@@ -483,7 +483,7 @@ export function Routines() {
   }
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={Repeat} message="Select a company to view routines." />;
+    return <EmptyState icon={Repeat} message="Select a Node Org to view routines." />;
   }
 
   if (isLoading) {
@@ -605,7 +605,7 @@ export function Routines() {
             agents={agents}
             projects={projects}
             liveIssueIds={liveIssueIds}
-            viewStateKey="paperclip:routine-recent-runs-view"
+            viewStateKey="super-node:routine-recent-runs-view"
             issueLinkState={recentRunsIssueLinkState}
             onUpdateIssue={(id, data) => updateIssue.mutate({ id, data })}
           />
@@ -648,7 +648,7 @@ export function Routines() {
             <div className="px-5 pt-5 pb-3">
               <textarea
                 ref={titleInputRef}
-                className="w-full resize-none overflow-hidden bg-transparent text-xl font-semibold outline-none placeholder:text-muted-foreground/50"
+                className="w-full resize-none overflow-hidden bg-transparent text-xs font-semibold outline-none placeholder:text-muted-foreground/50"
                 placeholder="Routine title"
                 rows={1}
                 value={draft.title}
@@ -748,7 +748,7 @@ export function Routines() {
                         <>
                           <span
                             className="h-3.5 w-3.5 shrink-0 rounded-sm"
-                            style={{ backgroundColor: currentProject.color ?? "#64748b" }}
+                            style={{ backgroundColor: currentProject.color ?? "#888888" }}
                           />
                           <span className="truncate">{option.label}</span>
                         </>
@@ -763,7 +763,7 @@ export function Routines() {
                         <>
                           <span
                             className="h-3.5 w-3.5 shrink-0 rounded-sm"
-                            style={{ backgroundColor: project?.color ?? "#64748b" }}
+                            style={{ backgroundColor: project?.color ?? "#888888" }}
                           />
                           <span className="truncate">{option.label}</span>
                         </>
@@ -844,7 +844,7 @@ export function Routines() {
 
           <div className="shrink-0 flex flex-col gap-3 border-t border-border/60 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm text-muted-foreground">
-              After creation, Paperclip takes you straight to trigger setup. Draft routines stay paused until you add a default agent.
+              After creation, Super Node takes you straight to trigger setup. Draft routines stay paused until you add a default agent.
             </div>
             <div className="flex flex-col gap-2 sm:items-end">
               <Button
@@ -885,7 +885,7 @@ export function Routines() {
               />
             </div>
           ) : (
-            <div className="rounded-lg border border-border">
+            <div className="rounded-none border border-border">
               {routineGroups.map((group) => (
                 <Collapsible
                   key={group.key}
@@ -956,3 +956,4 @@ export function Routines() {
     </div>
   );
 }
+

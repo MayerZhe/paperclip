@@ -570,7 +570,7 @@ export function MarkdownBody({
   resolveImageSrc,
   onImageClick,
 }: MarkdownBodyProps) {
-  const { resolved } = useTheme();
+  const { theme } = useTheme();
   // Read company prefixes non-throwingly: MarkdownBody renders in surfaces that
   // may lack a NodeOrgProvider. A null context (or no companies yet) leaves
   // knownPrefixes undefined, which keeps issue auto-linking permissive.
@@ -624,7 +624,7 @@ export function MarkdownBody({
     pre: ({ node: _node, children: preChildren, ...preProps }) => {
       const mermaidSource = extractMermaidSource(preChildren);
       if (mermaidSource) {
-        return <MermaidDiagramBlock source={mermaidSource} darkMode={resolved === "dark"} />;
+        return <MermaidDiagramBlock source={mermaidSource} darkMode={theme === "dark"} />;
       }
       return <CodeBlock preProps={preProps}>{preChildren}</CodeBlock>;
     },
@@ -727,7 +727,7 @@ export function MarkdownBody({
     <div
       className={cn(
         "paperclip-markdown prose min-w-0 max-w-full break-words overflow-hidden !text-xs",
-        resolved === "dark" && "prose-invert",
+        theme === "dark" && "prose-invert",
         className,
       )}
       style={mergeWrapStyle(style)}

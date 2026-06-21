@@ -12,14 +12,14 @@ import { accessApi, type CurrentBoardAccess } from "../api/access";
 import { agentsApi } from "../api/agents";
 import { authApi } from "../api/auth";
 import { projectsApi } from "../api/projects";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useDialogActions } from "../context/DialogContext";
 import { usePanel } from "../context/PanelContext";
 import { useSidebar } from "../context/SidebarContext";
 import { useToastActions } from "../context/ToastContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { assigneeValueFromSelection, suggestedCommentAssigneeValue } from "../lib/assignees";
-import { buildCompanyUserInlineOptions, buildCompanyUserLabelMap, buildCompanyUserProfileMap, buildMarkdownMentionOptions, isAgentTaskTarget } from "../lib/company-members";
+import { buildCompanyUserInlineOptions, buildCompanyUserLabelMap, buildCompanyUserProfileMap, buildMarkdownMentionOptions, isAgentTaskTarget } from "../lib/node-org-members";
 import { extractIssueTimelineEvents } from "../lib/issue-timeline-events";
 import { queryKeys } from "../lib/queryKeys";
 import { keepPreviousDataForSameQueryTail } from "../lib/query-placeholder-data";
@@ -134,7 +134,7 @@ import {
   MoreHorizontal,
   MoreVertical,
   PauseCircle,
-  Paperclip,
+  Paperclip as PaperclipIcon,
   PlayCircle,
   Plus,
   Repeat,
@@ -399,11 +399,11 @@ function IssueSectionSkeleton({
   rows?: number;
 }) {
   return (
-    <div className="space-y-3 rounded-lg border border-border p-3">
+    <div className="space-y-3 border border-border p-3">
       <Skeleton className={cn("h-4", titleWidth)} />
       <div className="space-y-2">
         {Array.from({ length: rows }).map((_, index) => (
-          <Skeleton key={index} className="h-12 w-full rounded-md" />
+          <Skeleton key={index} className="h-12 w-full" />
         ))}
       </div>
     </div>
@@ -412,7 +412,7 @@ function IssueSectionSkeleton({
 
 function IssueChatSkeleton() {
   return (
-    <div className="space-y-3 rounded-lg border border-border p-3">
+    <div className="space-y-3 border border-border p-3">
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Skeleton className="h-8 w-8 rounded-full" />
@@ -421,7 +421,7 @@ function IssueChatSkeleton() {
             <Skeleton className="h-3 w-16" />
           </div>
         </div>
-        <Skeleton className="h-20 w-full rounded-xl" />
+        <Skeleton className="h-20 w-full" />
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-end gap-2">
@@ -431,11 +431,11 @@ function IssueChatSkeleton() {
           </div>
           <Skeleton className="h-8 w-8 rounded-full" />
         </div>
-        <Skeleton className="ml-auto h-16 w-[85%] rounded-xl" />
+        <Skeleton className="ml-auto h-16 w-[85%]" />
       </div>
       <div className="space-y-2 border-t border-border pt-3">
         <Skeleton className="h-3 w-28" />
-        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-24 w-full" />
       </div>
     </div>
   );
@@ -449,7 +449,7 @@ function IssueDetailLoadingState({
   const identifier = headerSeed?.identifier ?? headerSeed?.id.slice(0, 8) ?? null;
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="space-y-6">
       <div className="space-y-3">
         <Skeleton className="h-3 w-40" />
 
@@ -493,7 +493,7 @@ function IssueDetailLoadingState({
 
         {headerSeed ? (
           <>
-            <h2 className="text-xl font-bold leading-tight">{headerSeed.title}</h2>
+            <h2 className="text-xs font-bold leading-tight">{headerSeed.title}</h2>
             <div className="space-y-2">
               <Skeleton className="h-4 w-full max-w-xl" />
               <Skeleton className="h-4 w-[72%]" />
@@ -507,7 +507,7 @@ function IssueDetailLoadingState({
         )}
       </div>
 
-      <Skeleton className="h-28 w-full rounded-lg border border-border" />
+      <Skeleton className="h-28 w-full border border-border" />
 
       <div className="space-y-3">
         <div className="flex items-center gap-2">
@@ -1115,12 +1115,12 @@ function IssueDetailActivityTab({
   return (
     <>
       {shouldShowCostSummary && (
-        <div className="mb-3 px-3 py-2 rounded-lg border border-border">
+        <div className="mb-3 px-3 py-2 border border-border">
           <div className="text-sm font-medium text-muted-foreground mb-1">Cost Summary</div>
           {!issueCostSummary.hasCost && !issueCostSummary.hasTokens && !hasIssueTreeCost ? (
             <div className="text-xs text-muted-foreground">No cost data yet.</div>
           ) : (
-            <div className="space-y-1 text-xs text-muted-foreground tabular-nums">
+            <div className="space-y-1 text-xs text-muted-foreground tabular-nums font-mono">
               <div className="flex flex-wrap gap-3">
                 <span className="font-medium text-foreground">This task</span>
                 {issueCostSummary.hasCost ? (
@@ -1190,7 +1190,7 @@ function IssueDetailActivityTab({
               evt.action === SUCCESSFUL_RUN_HANDOFF_REQUIRED_ACTION
               || evt.action === SUCCESSFUL_RUN_HANDOFF_ESCALATED_ACTION;
             return (
-              <div className={cn("space-y-1.5 rounded-lg border px-3 py-2 text-xs", tone.className)}>
+              <div className={cn("space-y-1.5 border px-3 py-2 text-xs", tone.className)}>
                 <div className="flex items-center gap-1.5">
                   {isHandoffWarning ? (
                     <AlertTriangle className={cn("h-3.5 w-3.5 shrink-0", tone.iconClassName)} />
@@ -1238,7 +1238,7 @@ function IssueDetailActivityTab({
 
 export function IssueDetail() {
   const { issueId } = useParams<{ issueId: string }>();
-  const { selectedCompanyId } = useCompany();
+  const { selectedCompanyId } = useNodeOrg();
   const { openNewIssue } = useDialogActions();
   const { openPanel, closePanel, panelVisible, setPanelVisible } = usePanel();
   const { setBreadcrumbs, setMobileToolbar } = useBreadcrumbs();
@@ -2611,7 +2611,7 @@ export function IssueDetail() {
 
   const uploadAttachment = useMutation({
     mutationFn: async (file: File) => {
-      if (!selectedCompanyId) throw new Error("No company selected");
+      if (!selectedCompanyId) throw new Error("No node org selected");
       return issuesApi.uploadAttachment(selectedCompanyId, issueId!, file);
     },
     onSuccess: () => {
@@ -2882,7 +2882,7 @@ export function IssueDetail() {
   }, [location.hash]);
 
   // Scroll + briefly highlight work-product / direct-attachment anchors so the
-  // company Artifacts page (PAP-10359) can deep-link to a specific artifact in
+  // node org Artifacts page (PAP-10359) can deep-link to a specific artifact in
   // its issue context. Retries while the section data loads in.
   useEffect(() => {
     const match = location.hash.match(/^#(work-product|attachment)-(.+)$/);
@@ -3315,11 +3315,10 @@ export function IssueDetail() {
         onClick={() => fileInputRef.current?.click()}
         disabled={uploadAttachment.isPending || importMarkdownDocument.isPending}
         className={cn(
-          "shadow-none",
           attachmentDragActive && "border-primary bg-primary/5",
         )}
       >
-        <Paperclip className="h-3.5 w-3.5 mr-1.5" />
+        <PaperclipIcon className="h-3.5 w-3.5 mr-1.5" />
         {uploadAttachment.isPending || importMarkdownDocument.isPending ? "Uploading..." : (
           <>
             <span className="hidden sm:inline">Upload attachment</span>
@@ -3331,7 +3330,7 @@ export function IssueDetail() {
   );
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="space-y-6">
       {/* Parent chain breadcrumb */}
       {ancestors.length > 0 && (
         <nav className="flex items-center gap-1 text-xs text-muted-foreground flex-wrap">
@@ -3360,13 +3359,13 @@ export function IssueDetail() {
       )}
 
       {issue.hiddenAt && (
-        <div className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="flex items-center gap-2 border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           <EyeOff className="h-4 w-4 shrink-0" />
           This task is hidden
         </div>
       )}
       {activePauseHold && (
-        <div className="rounded-md border border-amber-500/35 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200">
+        <div className="border border-amber-500/35 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200">
           {activePauseHold.isRoot ? (
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -3727,14 +3726,14 @@ export function IssueDetail() {
           value={issue.title}
           onSave={(title) => updateIssue.mutateAsync({ title })}
           as="h2"
-          className="text-xl font-bold"
+          className="text-xs font-bold"
         />
 
         <InlineEditor
           value={issue.description ?? ""}
           onSave={(description) => updateIssue.mutateAsync({ description })}
           as="p"
-          className="text-[15px] leading-7 text-foreground"
+          className="text-xs leading-7 text-foreground"
           placeholder="Add a description..."
           multiline
           foldable
@@ -3786,7 +3785,7 @@ export function IssueDetail() {
           entityType: "issue",
         }}
         className="space-y-3"
-        itemClassName="rounded-lg border border-border p-3"
+        itemClassName="border border-border p-3"
         missingBehavior="placeholder"
       />
 
@@ -3804,7 +3803,7 @@ export function IssueDetail() {
             mutedIssueIds={mutedChildIssueIds}
             issueBadgeById={childPauseBadgeById}
             projectId={issue.projectId ?? undefined}
-            viewStateKey={`paperclip:issue-detail:${issue.id}:subissues-view`}
+            viewStateKey={`super-node:issue-detail:${issue.id}:subissues-view`}
             issueLinkState={resolvedIssueDetailState ?? location.state}
             searchFilters={{ descendantOf: issue.id, includeBlockedBy: true }}
             searchWithinLoadedIssues
@@ -3818,7 +3817,7 @@ export function IssueDetail() {
         </div>
       ) : (
         <div className="flex flex-wrap items-center justify-end gap-2 min-w-0">
-          <Button variant="outline" size="sm" onClick={openNewSubIssue} className="shrink-0 shadow-none">
+          <Button variant="outline" size="sm" onClick={openNewSubIssue} className="shrink-0">
             <Plus className="mr-1.5 h-3.5 w-3.5" />
             New Sub-task
           </Button>
@@ -3909,7 +3908,7 @@ export function IssueDetail() {
       <Separator />
 
       <Tabs value={detailTab} onValueChange={setDetailTab} className="space-y-3">
-        <TabsList variant="line" className="w-full justify-start gap-1">
+        <TabsList variant="line" className="w-full justify-start">
           <TabsTrigger value="chat" className="gap-1.5">
             <MessageSquare className="h-3.5 w-3.5" />
             Chat
@@ -3969,7 +3968,7 @@ export function IssueDetail() {
               currentUserId={currentUserId}
               userLabelMap={userLabelMap}
               userProfileMap={userProfileMap}
-              draftKey={`paperclip:issue-comment-draft:${issue.id}`}
+              draftKey={`super-node:issue-comment-draft:${issue.id}`}
               reassignOptions={commentReassignOptions}
               currentAssigneeValue={actualAssigneeValue}
               suggestedAssigneeValue={suggestedAssigneeValue}
@@ -4061,7 +4060,7 @@ export function IssueDetail() {
           </DialogHeader>
           <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-6 py-4">
             {treeControlMode === "cancel" ? (
-              <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
+              <div className="border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
                 Cancelling a subtree is destructive. Non-terminal tasks will be marked cancelled, and running or queued work will be interrupted where possible.
               </div>
             ) : null}
@@ -4113,7 +4112,7 @@ export function IssueDetail() {
             ) : null}
 
             {treeControlMode === "cancel" ? (
-              <label className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-2 text-sm">
+              <label className="flex items-start gap-2 border border-destructive/30 bg-destructive/5 p-2 text-sm">
                 <input
                   type="checkbox"
                   className="mt-0.5"

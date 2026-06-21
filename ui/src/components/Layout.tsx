@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Outlet, useLocation, useNavigate, useNavigationType, useParams } from "@/lib/router";
 import { Sidebar } from "./Sidebar";
 import { InstanceSidebar } from "./InstanceSidebar";
-import { CompanySettingsSidebar } from "./CompanySettingsSidebar";
-import { CompanySettingsNav } from "./access/CompanySettingsNav";
+import { NodeOrgSettingsSidebar } from "./NodeOrgSettingsSidebar";
+import { NodeOrgSettingsNav } from "./access/NodeOrgSettingsNav";
 import { BreadcrumbBar } from "./BreadcrumbBar";
 import { PropertiesPanel } from "./PropertiesPanel";
 import { CommandPalette } from "./CommandPalette";
@@ -23,13 +23,13 @@ import { SidebarAccountMenu } from "./SidebarAccountMenu";
 import { useDialogActions } from "../context/DialogContext";
 import { GeneralSettingsProvider } from "../context/GeneralSettingsContext";
 import { usePanel } from "../context/PanelContext";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useSidebar } from "../context/SidebarContext";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
-import { useCompanyPageMemory } from "../hooks/useCompanyPageMemory";
+import { useNodeOrgPageMemory } from "../hooks/useNodeOrgPageMemory";
 import { healthApi } from "../api/health";
 import { instanceSettingsApi } from "../api/instanceSettings";
-import { shouldSyncCompanySelectionFromRoute } from "../lib/company-selection";
+import { shouldSyncCompanySelectionFromRoute } from "../lib/node-org-selection";
 import {
   DEFAULT_INSTANCE_SETTINGS_PATH,
   normalizeRememberedInstanceSettingsPath,
@@ -74,7 +74,7 @@ export function Layout() {
     selectedCompanyId,
     selectionSource,
     setSelectedCompanyId,
-  } = useCompany();
+  } = useNodeOrg();
   const {
     companyPrefix,
     pluginRoutePath: matchedPluginRoutePath,
@@ -91,6 +91,7 @@ export function Layout() {
   const [mobileNavVisible, setMobileNavVisible] = useState(true);
   const [instanceSettingsTarget, setInstanceSettingsTarget] = useState<string>(() => readRememberedInstanceSettingsPath());
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [isMacPlatform, setIsMacPlatform] = useState(false);
   const matchedCompany = useMemo(() => {
     if (!companyPrefix) return null;
     const requestedPrefix = companyPrefix.toUpperCase();
@@ -205,7 +206,7 @@ export function Layout() {
     }));
   }, []);
 
-  useCompanyPageMemory();
+  useNodeOrgPageMemory();
 
   useKeyboardShortcuts({
     enabled: keyboardShortcutsEnabled,
@@ -348,17 +349,61 @@ export function Layout() {
     resetNavigationScroll(mainContentRef.current);
   }, [location.pathname, navigationType]);
 
+  // Detect macOS platform for native chrome styling (T018)
+  useEffect(() => {
+    const platform = window.paperclip?.platform;
+    if (platform === "darwin") {
+      setIsMacPlatform(true);
+      document.documentElement.classList.add("macos");
+    }
+  }, []);
+
+  // Native context menu handler (US3 T029) — replaces browser default right-click menu
+  useEffect(() => {
+    const isMac = window.paperclip?.platform === "darwin";
+    if (!isMac || !window.paperclip?.showContextMenu) return;
+
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      const isInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+      window.paperclip!.showContextMenu!(
+        isInput
+          ? [
+              { label: "Cut", action: "cut" },
+              { label: "Copy", action: "copy" },
+              { label: "Paste", action: "paste" },
+              { label: "Select All", action: "selectAll" },
+            ]
+          : [
+              { label: "New Task", action: "newTask" },
+              { label: "New Project", action: "newProject" },
+            ],
+      );
+    };
+
+    document.addEventListener("contextmenu", handleContextMenu);
+    return () => document.removeEventListener("contextmenu", handleContextMenu);
+  }, []);
+
   return (
     <GeneralSettingsProvider value={{ keyboardShortcutsEnabled }}>
       <div
       className={cn(
         "bg-background text-foreground pt-[env(safe-area-inset-top)]",
         isMobile ? "min-h-dvh" : "flex h-dvh flex-col overflow-hidden",
+        isMacPlatform && "pt-[env(titlebar-area-height,52px)]",
       )}
       >
+      {/* macOS titlebar drag region — allows window dragging when titleBarStyle is hiddenInset (T016) */}
+      {isMacPlatform && !isMobile && (
+        <div
+          className="fixed top-0 left-0 right-0 z-50 h-[env(titlebar-area-height,52px)]"
+          style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
+        />
+      )}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[200] focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[200] focus:rounded-none focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         Skip to Main Content
       </a>
@@ -377,7 +422,7 @@ export function Layout() {
         {isMobile ? (
           <div
             className={cn(
-              "fixed inset-y-0 left-0 z-50 flex flex-col overflow-hidden pt-[env(safe-area-inset-top)] transition-transform duration-100 ease-out",
+              "fixed inset-y-0 left-0 z-50 flex flex-col overflow-hidden pt-[env(safe-area-inset-top)] motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.34,1.56,0.64,1)]",
               sidebarOpen ? "translate-x-0" : "-translate-x-full"
             )}
           >
@@ -386,7 +431,7 @@ export function Layout() {
                 {isInstanceSettingsRoute ? (
                   <InstanceSidebar />
                 ) : isCompanySettingsRoute ? (
-                  <CompanySettingsSidebar />
+                  <NodeOrgSettingsSidebar />
                 ) : (
                   companySidebar
                 )}
@@ -405,7 +450,7 @@ export function Layout() {
                 {isInstanceSettingsRoute ? (
                   <InstanceSidebar />
                 ) : isCompanySettingsRoute ? (
-                  <CompanySettingsSidebar />
+                  <NodeOrgSettingsSidebar />
                 ) : (
                   companySidebar
                 )}
@@ -429,7 +474,7 @@ export function Layout() {
             <BreadcrumbBar />
             {isMobile && isCompanySettingsRoute ? (
               <div className="border-b border-border px-4 pb-3">
-                <CompanySettingsNav />
+                <NodeOrgSettingsNav />
               </div>
             ) : null}
           </div>
@@ -449,7 +494,9 @@ export function Layout() {
                   requestedPrefix={companyPrefix ?? selectedCompany?.issuePrefix}
                 />
               ) : (
-                <Outlet />
+                <div key={location.pathname} className="page-transition-enter">
+                  <Outlet />
+                </div>
               )}
             </main>
             <PropertiesPanel />

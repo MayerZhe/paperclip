@@ -11,7 +11,7 @@ import { agentsApi } from "../api/agents";
 import { heartbeatsApi } from "../api/heartbeats";
 import { assetsApi } from "../api/assets";
 import { usePanel } from "../context/PanelContext";
-import { useCompany } from "../context/CompanyContext";
+import { useNodeOrg } from "../context/NodeOrgContext";
 import { useToastActions } from "../context/ToastContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
@@ -84,7 +84,7 @@ function OverviewContent({
         onSave={(description) => onUpdate({ description })}
         nullable
         as="p"
-        className="text-sm text-muted-foreground"
+        className="text-xs text-muted-foreground"
         placeholder="Add a description..."
         multiline
         imageUploadHandler={imageUploadHandler}
@@ -146,7 +146,7 @@ function ProjectTilePicker({
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="shrink-0 rounded-lg cursor-pointer hover:ring-2 hover:ring-foreground/20 transition-[box-shadow]"
+          className="shrink-0 rounded-none cursor-pointer hover:ring-2 hover:ring-foreground/20 transition-[box-shadow]"
           aria-label="Change project icon and color"
         >
           <ProjectTile color={color} icon={icon} size="md" />
@@ -192,7 +192,7 @@ function ProjectTilePicker({
               onClick={() => onSelectColor(null)}
               className={`h-6 w-6 cursor-pointer transition-[transform,box-shadow] duration-150 hover:scale-110 ${
                 color === null
-                  ? "ring-2 ring-foreground ring-offset-1 ring-offset-background rounded-md"
+                  ? "ring-2 ring-foreground ring-offset-1 ring-offset-background rounded-none"
                   : ""
               }`}
               aria-label="Reset to neutral gray"
@@ -205,7 +205,7 @@ function ProjectTilePicker({
                 key={swatch}
                 type="button"
                 onClick={() => onSelectColor(swatch)}
-                className={`h-6 w-6 rounded-md cursor-pointer transition-[transform,box-shadow] duration-150 hover:scale-110 ${
+                className={`h-6 w-6 rounded-none cursor-pointer transition-[transform,box-shadow] duration-150 hover:scale-110 ${
                   swatch === color
                     ? "ring-2 ring-foreground ring-offset-1 ring-offset-background"
                     : "hover:ring-2 hover:ring-foreground/30"
@@ -270,7 +270,7 @@ function ProjectIssuesList({ projectId, companyId }: { projectId: string; compan
       projects={projects}
       liveIssueIds={liveIssueIds}
       projectId={projectId}
-      viewStateKey="paperclip:project-issues-view"
+      viewStateKey="super-node:project-issues-view"
       onUpdateIssue={(id, data) => updateIssue.mutate({ id, data })}
     />
   );
@@ -331,7 +331,7 @@ function ProjectPluginOperationsList({
       projects={projects}
       liveIssueIds={liveIssueIds}
       projectId={projectId}
-      viewStateKey={`paperclip:project-plugin-operations-view:${pluginKey}`}
+      viewStateKey={`super-node:project-plugin-operations-view:${pluginKey}`}
       onUpdateIssue={(id, data) => updateIssue.mutate({ id, data })}
     />
   );
@@ -345,7 +345,7 @@ export function ProjectDetail() {
     projectId: string;
     filter?: string;
   }>();
-  const { companies, selectedCompanyId, setSelectedCompanyId } = useCompany();
+  const { companies, selectedCompanyId, setSelectedCompanyId } = useNodeOrg();
   const { closePanel } = usePanel();
   const { setBreadcrumbs } = useBreadcrumbs();
   const { pushToast } = useToastActions();
@@ -486,7 +486,7 @@ export function ProjectDetail() {
 
   const uploadImage = useMutation({
     mutationFn: async (file: File) => {
-      if (!resolvedCompanyId) throw new Error("No company selected");
+      if (!resolvedCompanyId) throw new Error("No node org selected");
       return assetsApi.uploadImage(resolvedCompanyId, file, `projects/${projectLookupRef || "draft"}`);
     },
   });
@@ -661,7 +661,7 @@ export function ProjectDetail() {
   if (routeProjectRef && activeTab === null) {
     let cachedTab: string | null = null;
     if (project?.id) {
-      try { cachedTab = localStorage.getItem(`paperclip:project-tab:${project.id}`); } catch {}
+      try { cachedTab = localStorage.getItem(`super-node:project-tab:${project.id}`); } catch {}
     }
     if (cachedTab === "overview") {
       return <Navigate to={`/projects/${canonicalProjectRef}/overview`} replace />;
@@ -700,7 +700,7 @@ export function ProjectDetail() {
   const handleTabChange = (tab: ProjectTab) => {
     // Cache the active tab per project
     if (project?.id) {
-      try { localStorage.setItem(`paperclip:project-tab:${project.id}`, tab); } catch {}
+      try { localStorage.setItem(`super-node:project-tab:${project.id}`, tab); } catch {}
     }
     if (isProjectPluginTab(tab)) {
       navigate(`/projects/${canonicalProjectRef}?tab=${encodeURIComponent(tab)}`);
@@ -771,7 +771,7 @@ export function ProjectDetail() {
             value={project.name}
             onSave={(name) => updateProject.mutate({ name })}
             as="h2"
-            className="text-xl font-bold"
+            className="text-xs font-bold"
           />
           {project.pauseReason === "budget" ? (
             <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-red-200">
@@ -781,7 +781,7 @@ export function ProjectDetail() {
           ) : null}
           {project.managedByPlugin ? (
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-[11px] font-medium text-muted-foreground">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: project.color ?? "#6366f1" }} />
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: project.color ?? "#a855f7" }} />
               Managed by {project.managedByPlugin.pluginDisplayName}
             </div>
           ) : null}

@@ -142,7 +142,7 @@ export function ResizableSidebarPane({
     <div
       className={cn(
         "relative overflow-hidden",
-        !isResizing && "transition-[width] duration-100 ease-out",
+        !isResizing && "motion-safe:transition-[width] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.34,1.56,0.64,1)]",
         className,
       )}
       style={paneStyle}

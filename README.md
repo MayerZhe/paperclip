@@ -212,8 +212,6 @@ Paperclip operates at the *company management* layer — above agent frameworks 
 
 > **The key difference:** Agent frameworks tell you *how to build* an agent. Workflow tools tell you *what step comes next*. Paperclip tells you *who does what, on what budget, reporting to whom* — the management layer that neither frameworks nor workflow tools address.
 
-See the full **[Competitive Comparison](https://paperclip.ing/docs/start/competitive-comparison)** for detailed breakdowns vs. LangGraph, CrewAI, AutoGen, Conductor, and enterprise platforms.
-
 <br/>
 
 ## What Paperclip is not
