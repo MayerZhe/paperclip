@@ -32,6 +32,7 @@ import {
   stopBothModes,
 } from "./mode-manager.js";
 import { createSidebarManager, type SidebarManager } from "./sidebar-manager.js";
+import { detectContainerRuntime } from "./container-runtime.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -293,9 +294,11 @@ export async function runDesktopMain(): Promise<void> {
     }
   };
 
+  const containerRuntime = detectContainerRuntime();
+
   const modeResult = await startBothModes({
     paperclipHome: PAPERCLIP_HOME,
-    containerRuntime: "docker",
+    containerRuntime: containerRuntime.primary ?? "docker",
     agentConfig: { daemonEntry, serverPort },
     agenthubsConfig: { token },
     startAgentDaemon: async (_entry: string, _port: number) => {
