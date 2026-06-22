@@ -1,0 +1,58 @@
+/* AgentHubs theme — dark mode CSS custom properties.
+   Imported by index.css so .dark tokens are available to all components. */
+
+/* ── Dark mode: AgentHubs Cloud palette ───────────────────────────────────
+   Overrides shadcn/ui .dark variables with AgentHubs Cloud branding while
+   keeping the variable *names* intact.  Components using bg-background,
+   text-foreground, etc. automatically pick up the AgentHubs palette — no
+   className changes required.
+
+   All --ah-* tokens are already defined in tokens.css (:root).  This file
+   only enhances the .dark experience with AgentHubs Cloud colours.
+   ──────────────────────────────────────────────────────────────────────── */
+
+.dark {
+  /* Page background — AgentHubs Cloud deep black */
+  --background: #050505;
+
+  /* Cards — one step above the page */
+  --card:            #111111;
+  --card-foreground: #f5f5f7;
+
+  /* Popovers — match card elevation */
+  --popover:            #111111;
+  --popover-foreground: #f5f5f7;
+
+  /* Primary accent — AgentHubs purple */
+  --primary:            oklch(0.65 0.2 265);
+  --primary-foreground: #ffffff;
+
+  /* Secondary surfaces — subtle lift on near-black */
+  --secondary:            #1a1a1a;
+  --secondary-foreground: #b0b0b0;
+
+  /* Muted / low-emphasis */
+  --muted:            #1a1a1a;
+  --muted-foreground: #98989d;
+
+  /* Accent — hover / highlight */
+  --accent:            #1a1a1a;
+  --accent-foreground: #f5f5f7;
+
+  /* Borders — near-background for a seamless look */
+  --border: #222222;
+  --input:  #1a1a1a;
+
+  /* Focus ring — accent purple */
+  --ring: oklch(0.65 0.2 265);
+
+  /* Sidebar — slightly lighter than the page */
+  --sidebar:                    #0a0a0a;
+  --sidebar-foreground:         #f5f5f7;
+  --sidebar-primary:            oklch(0.65 0.2 265);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent:             #1a1a1a;
+  --sidebar-accent-foreground:  #f5f5f7;
+  --sidebar-border:             #222222;
+  --sidebar-ring:               oklch(0.65 0.2 265);
+}
