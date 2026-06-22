@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PaperClip Sidebar</title>
+  <link rel="stylesheet" href="shell.css" />
+  <script src="shell.js" defer></script>
+</head>
+<body>
+  <aside id="sidebar">
+    <!-- macOS traffic light titlebar spacer -->
+    <div class="titlebar"></div>
+
+    <!-- Tab navigation -->
+    <nav id="tab-nav">
+      <button class="tab active" data-mode="agenthubs">AgentHubs</button>
+      <button class="tab" data-mode="agent">Agent</button>
+    </nav>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Organization info panel -->
+    <section id="org-panel">
+      <div id="org-name">AgentHubs</div>
+      <div id="org-role">Owner</div>
+      <div id="org-balance">Loading...</div>
+    </section>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Status panel -->
+    <section id="status-panel">
+      <div class="status-item" id="daemon-status">
+        <span class="status-dot loading"></span>
+        <span class="status-label">Agent Daemon</span>
+      </div>
+      <div class="status-item" id="agenthubs-status">
+        <span class="status-dot loading"></span>
+        <span class="status-label">AgentHubs</span>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="sidebar-footer">
+      <div id="user-email">...</div>
+      <button id="btn-logout">Sign Out</button>
+    </footer>
+  </aside>
+</body>
+</html>

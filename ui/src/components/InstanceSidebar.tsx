@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Clock3, Cpu, FlaskConical, Puzzle, Settings, Shield, SlidersHorizontal, UserRoundPen } from "lucide-react";
+import { Clock3, Cpu, FlaskConical, Puzzle, Settings, Shield, SlidersHorizontal, Terminal, UserRoundPen } from "lucide-react";
 import type { PluginRecord } from "@paperclipai/shared";
 import { NavLink } from "@/lib/router";
 import { pluginsApi } from "@/api/plugins";
@@ -65,6 +65,7 @@ export function InstanceSidebar() {
               ))}
             </div>
           ) : null}
+          <SidebarNavItem to="/instance/settings/agent-cli" label="Agent CLI" icon={Terminal} />
           <SidebarNavItem to="/instance/settings/adapters" label="Adapters" icon={Cpu} />
         </div>
       </nav>

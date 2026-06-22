@@ -11,6 +11,8 @@ declare global {
         filters?: Array<{ name: string; extensions: string[] }>;
         properties?: Array<"openFile" | "openDirectory" | "multiSelections">;
       }) => Promise<{ canceled: boolean; filePaths: string[] }>;
+      getCliScan?: () => Promise<Array<{ label: string; command: string; adapterType: string; found: boolean; version?: string; installHint?: string }>>;
+      installCli?: (adapterType: string) => Promise<{ success: boolean; output: string }>;
     };
   }
 }

@@ -86,6 +86,13 @@ const CLI_WHITELIST: Array<{
     installHint: "npm install -g @anthropic/pi",
   },
   {
+    adapterType: "antigravity_local",
+    command: "antigravity",
+    label: "Antigravity CLI",
+    versionFlag: "--version",
+    installHint: "npm install -g antigravity",
+  },
+  {
     adapterType: "openclaw_gateway",
     command: "openclaw",
     label: "OpenClaw Gateway",

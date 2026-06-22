@@ -36,4 +36,32 @@ contextBridge.exposeInMainWorld("paperclip", {
   showOpenDialog: (options: OpenDialogOptions): Promise<OpenDialogResult> => {
     return ipcRenderer.invoke("paperclip:open-dialog", options);
   },
+
+  // Story 3.3: Agent → AgentHubs data bridge
+  exportAgent: (data: {
+    name: string;
+    description: string;
+    adapterType: string;
+    adapterConfig: Record<string, string | number | boolean>;
+    skills: string[];
+    exportedAt: string;
+  }): Promise<{ success: boolean; filePath: string }> => {
+    return ipcRenderer.invoke("file-bridge:export-agent", data);
+  },
+
+  // CLI scan — returns results from main process scanCliAvailability()
+  getCliScan: () => ipcRenderer.invoke("paperclip:get-cli-scan"),
+
+  // Install a CLI tool — main process execs the install command
+  installCli: (adapterType: string) => ipcRenderer.invoke("paperclip:install-cli", { adapterType }),
+
+  // Sidebar mode switch — user clicked tab (AgentHubs data bridge)
+  sidebar: {
+    switchMode: (mode: string) => ipcRenderer.send("shell:switch-mode", { mode }),
+    signOut: () => ipcRenderer.send("shell:sign-out"),
+    onOrgInfo: (cb: Function) => ipcRenderer.on("sidebar:org-info", (_event, info) => cb(info)),
+    onStatus: (cb: Function) => ipcRenderer.on("sidebar:status", (_event, status) => cb(status)),
+    getToken: () => ipcRenderer.invoke("shell:get-token"),
+    refreshBalance: (orgId: string) => ipcRenderer.invoke("shell:refresh-balance", { orgId }),
+  },
 });

@@ -1,6 +1,7 @@
 // apps/desktop/src/main/tray.ts
 // v3 Sprint 2: 周期性轮询 GET /api/desktop/status，实时更新托盘状态文本和图标
 // 图标使用 NativeImage 程序化绘制圆形指示器：绿=运行，黄=关闭中，红=不可达
+// v3.1 Story 1.5: AgentHubs mode 支持 — tooltip 显示当前模式、上下文菜单模式切换、AgentHubs 下跳过心跳
 
 import { Tray, Menu, nativeImage, BrowserWindow, type NativeImage } from "electron";
 import path from "node:path";
@@ -14,9 +15,14 @@ const __dirname = path.dirname(__filename);
 /** Daemon 健康状态枚举 */
 export type DaemonHealth = "running" | "shuttingDown" | "unreachable";
 
+/** 启动模式 */
+export type LaunchMode = "agent" | "agenthubs";
+
 let currentHealth: DaemonHealth = "unreachable";
+let currentMode: LaunchMode = "agent";
 let trayInstance: Tray | null = null;
 let pollingInterval: ReturnType<typeof setInterval> | null = null;
+let onSwitchMode: (() => void) | undefined = undefined;
 
 /**
  * 程序化生成 16x16 托盘图标
@@ -91,7 +97,15 @@ async function pollDaemonHealth(serverPort: number): Promise<DaemonHealth> {
 }
 
 /**
- * 更新托盘 UI（图标 + context menu 状态标签）
+ * 更新托盘 tooltip，包含当前模式
+ */
+function updateTrayTooltip(tray: Tray): void {
+  const modeLabel = currentMode === "agenthubs" ? "AgentHubs Mode" : "Agent Mode";
+  tray.setToolTip(`PaperClip · ${modeLabel}`);
+}
+
+/**
+ * 更新托盘 UI（图标 + context menu 状态标签 + 模式切换）
  * @param tray - Tray 实例
  * @param health - 新健康状态
  */
@@ -99,14 +113,20 @@ function updateTrayUI(tray: Tray, health: DaemonHealth): void {
   const icon = createIndicatorIcon(health);
   tray.setImage(icon);
 
+  updateTrayTooltip(tray);
+
   const statusLabelMap: Record<DaemonHealth, string> = {
     running: "Status: Running",
     shuttingDown: "Status: Shutting Down",
     unreachable: "Status: Unreachable",
   };
 
-  // 重建 context menu 以反映新状态
   const mainWindow = BrowserWindow.getAllWindows()[0];
+
+  // 模式切换标签：AgentHubs mode 下显示 "Switch to Agent Mode"，反之亦然
+  const switchLabel =
+    currentMode === "agenthubs" ? "Switch to Agent Mode" : "Switch to AgentHubs Mode";
+
   const contextMenu = Menu.buildFromTemplate([
     {
       label: "Show PaperClip",
@@ -123,6 +143,13 @@ function updateTrayUI(tray: Tray, health: DaemonHealth): void {
     },
     { type: "separator" },
     {
+      label: switchLabel,
+      click: () => {
+        onSwitchMode?.();
+      },
+    },
+    { type: "separator" },
+    {
       label: "Quit",
       click: () => {
         if (mainWindow) mainWindow.close();
@@ -136,10 +163,17 @@ function updateTrayUI(tray: Tray, health: DaemonHealth): void {
 /**
  * 启动托盘心跳轮询（每 15 秒）
  * 在 packaged-main.ts Phase 6 调用
+ * AgentHubs Mode 下跳过轮询（没有 daemon 可轮询）
  * @param serverPort - Daemon HTTP 端口
  * @returns 停止轮询的清理函数
  */
 export function startTrayHeartbeat(serverPort: number): () => void {
+  // AgentHubs mode — 没有 daemon，不轮询
+  if (currentMode === "agenthubs") {
+    console.log("[PaperClip Desktop] Tray heartbeat skipped (AgentHubs mode)");
+    return () => {};
+  }
+
   // 立即执行首次轮询
   pollDaemonHealth(serverPort)
     .then((health) => {
@@ -176,9 +210,19 @@ export function startTrayHeartbeat(serverPort: number): () => void {
 /**
  * 创建系统托盘
  * @param mainWindow - 主 BrowserWindow
+ * @param onSwitchModeArg - 可选的模式切换回调（点击 "Switch to AgentHubs/Agent Mode" 时调用）
+ * @param mode - 当前启动模式，默认 "agent"
  * @returns Tray 实例
  */
-export function createTray(mainWindow: BrowserWindow): Tray {
+export function createTray(
+  mainWindow: BrowserWindow,
+  onSwitchModeArg?: () => void,
+  mode: LaunchMode = "agent",
+): Tray {
+  // 保存引用供后续使用
+  onSwitchMode = onSwitchModeArg;
+  currentMode = mode;
+
   // 尝试加载真实图标文件，失败则使用空白占位
   const iconPathCandidates = [
     path.join(__dirname, "..", "..", "resources", "tray", "tray-icon.png"),
@@ -203,8 +247,14 @@ export function createTray(mainWindow: BrowserWindow): Tray {
   }
 
   const tray = new Tray(trayIcon);
-  tray.setToolTip("PaperClip");
   trayInstance = tray;
+
+  const modeLabel = mode === "agenthubs" ? "AgentHubs Mode" : "Agent Mode";
+  tray.setToolTip(`PaperClip · ${modeLabel}`);
+
+  // 模式切换标签：AgentHubs mode 下显示 "Switch to Agent Mode"，反之亦然
+  const switchLabel =
+    mode === "agenthubs" ? "Switch to Agent Mode" : "Switch to AgentHubs Mode";
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -217,6 +267,13 @@ export function createTray(mainWindow: BrowserWindow): Tray {
     {
       label: "Status: Unreachable",
       enabled: false,
+    },
+    { type: "separator" },
+    {
+      label: switchLabel,
+      click: () => {
+        onSwitchModeArg?.();
+      },
     },
     { type: "separator" },
     {
@@ -234,6 +291,19 @@ export function createTray(mainWindow: BrowserWindow): Tray {
   });
 
   return tray;
+}
+
+/**
+ * 更新托盘模式（供模式管理器调用）
+ * 刷新 tooltip、context menu 模式切换标签，并在 AgentHubs 模式下停止心跳
+ * @param mode - 新模式
+ */
+export function updateTrayMode(mode: LaunchMode): void {
+  currentMode = mode;
+  if (trayInstance) {
+    updateTrayTooltip(trayInstance);
+    updateTrayUI(trayInstance, currentHealth);
+  }
 }
 
 /**

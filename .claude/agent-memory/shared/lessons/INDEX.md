@@ -22,3 +22,5 @@ desktop, build, bundle, electron-builder, esbuild, path-resolution, daemon, life
 
 macos, native-chrome, electron, titlebar, hiddenInset, vibrancy, CSS, system-font, overlay-scrollbars, context-menu, preload, contextBridge, motion, animations, reduce-motion → story-001-macos-native-chrome-2026-06-12.md — Four-layer macOS native transformation: window chrome (hiddenInset+vibrancy), visual foundation (system font+rounded corners+overlay scrollbars+frosted glass), native context menu (preload bridge+Menu.buildFromTemplate), motion polish (CSS animations+spring sidebar+button feedback)
 
+desktop, login, sidebar, auth-bridge, WebContentsView, mode-manager, parallel-startup, IPC, preload, contextBridge, CLI-scan, antigravity, React-component, worktree-isolation, sandbox → story-desktop-login-sidebar-cli-2026-06-22.md — Desktop login system + sidebar shell with WebContentsView, dual-mode parallel startup, Agent CLI setup page, worktree sandbox copy pattern
+

@@ -50,6 +50,7 @@ import { ProfileSettings } from "./pages/ProfileSettings";
 import { PluginManager } from "./pages/PluginManager";
 import { PluginSettings } from "./pages/PluginSettings";
 import { AdapterManager } from "./pages/AdapterManager";
+import { InstanceAgentCli } from "./pages/InstanceAgentCli";
 import { PluginPage } from "./pages/PluginPage";
 import { OrgChart } from "./pages/OrgChart";
 import { NewAgent } from "./pages/NewAgent";
@@ -303,6 +304,7 @@ export function App() {
             <Route path="plugins" element={<PluginManager />} />
             <Route path="plugins/:pluginId" element={<PluginSettings />} />
             <Route path="adapters" element={<AdapterManager />} />
+            <Route path="agent-cli" element={<InstanceAgentCli />} />
           </Route>
           <Route path="companies" element={<UnprefixedBoardRedirect />} />
           <Route path="issues" element={<UnprefixedBoardRedirect />} />

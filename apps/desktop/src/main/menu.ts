@@ -1,9 +1,21 @@
 // apps/desktop/src/main/menu.ts
 // v3 Sprint 2: 增强诊断报告（daemon 状态、CLI 扫描结果、内存、env）+ Launch at Login toggle
+// v3.1 Story 1.5: Mode 子菜单 + 全局快捷键 Cmd+Shift+M 模式切换
 
 import { Menu, dialog, type BrowserWindow } from "electron";
 import fs from "node:fs";
 import { setAutoLaunch, getAutoLaunchState } from "./login-item.js";
+
+/** 启动模式类型 */
+export type MenuMode = "agent" | "agenthubs";
+
+/** 菜单创建选项 */
+export interface MenuOptions {
+  /** 当前启动模式 */
+  mode?: MenuMode;
+  /** 模式切换回调 */
+  onSwitchMode?: () => void;
+}
 
 /** 菜单创建所需的外部数据 */
 export interface MenuDataProvider {
@@ -21,6 +33,9 @@ let dataProvider: MenuDataProvider = {
   cliScanSummary: [],
   serverPort: 3100,
 };
+
+/** 当前菜单选项 */
+let menuOpts: MenuOptions = {};
 
 /**
  * 设置菜单数据（在 daemon 状态变化或 CLI 扫描完成时更新）
@@ -99,18 +114,24 @@ async function handleExportDiagnostics(serverPort: number): Promise<void> {
 }
 
 /**
- * 创建应用菜单（含诊断增强 + Launch at Login toggle）
+ * 创建应用菜单（含诊断增强 + Launch at Login toggle + Mode 子菜单）
  * @param mainWindow - 主 BrowserWindow
  * @param serverPort - Daemon HTTP 端口
  * @param cliScanSummary - CLI 扫描结果摘要（可选）
+ * @param opts - 可选参数 { mode, onSwitchMode }
  */
 export function createAppMenu(
   mainWindow: BrowserWindow,
   serverPort?: number,
   cliScanSummary?: string[],
+  opts?: MenuOptions,
 ): void {
   const port = serverPort ?? 3100;
   const isMac = process.platform === "darwin";
+
+  // 保存菜单选项引用
+  menuOpts = opts ?? {};
+  const currentMode = menuOpts.mode ?? "agent";
 
   // 更新菜单数据
   updateMenuData({
@@ -199,6 +220,40 @@ export function createAppMenu(
           : [{ role: "close" as const }]),
       ],
     },
+    // ── Mode 子菜单（Story 1.5） ──
+    {
+      label: "Mode",
+      submenu: [
+        {
+          label: "Agent Mode",
+          type: "radio",
+          checked: currentMode === "agent",
+          click: () => {
+            if (menuOpts.mode !== "agent") {
+              menuOpts.onSwitchMode?.();
+            }
+          },
+        },
+        {
+          label: "AgentHubs Mode",
+          type: "radio",
+          checked: currentMode === "agenthubs",
+          click: () => {
+            if (menuOpts.mode !== "agenthubs") {
+              menuOpts.onSwitchMode?.();
+            }
+          },
+        },
+        { type: "separator" },
+        {
+          label: "Switch Mode",
+          accelerator: "CmdOrCtrl+Shift+M",
+          click: () => {
+            menuOpts.onSwitchMode?.();
+          },
+        },
+      ],
+    },
     {
       role: "help",
       submenu: [
@@ -221,4 +276,21 @@ export function createAppMenu(
 
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
+}
+
+/**
+ * 更新菜单模式（供模式管理器调用）
+ * 重建应用菜单以更新 Mode 子菜单的 checked 状态
+ * 注意：会重新设置整个应用菜单，保留所有现有参数
+ * @param mode - 新模式
+ * @param mainWindow - 主 BrowserWindow（用于保留现有菜单参数）
+ */
+export function updateMenuMode(mode: MenuMode, mainWindow: BrowserWindow): void {
+  menuOpts = { ...menuOpts, mode };
+  createAppMenu(
+    mainWindow,
+    dataProvider.serverPort,
+    dataProvider.cliScanSummary,
+    menuOpts,
+  );
 }
