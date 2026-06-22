@@ -66,3 +66,4 @@ SuperNode-desktop/electron-builder.yml
 SuperNode-desktop/package.json
 SuperNode-desktop/paperclip-server
 SuperNode-desktop/resources/
+*.tgz
