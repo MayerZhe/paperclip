@@ -140,6 +140,15 @@ export async function startBothModes(config: StartBothModesConfig): Promise<Mode
   const startAgentHubs = async (): Promise<ModeStartupResult["agenthubs"]> => {
     config.onStatusChange("agenthubs", "starting");
     try {
+      // 检查 VM bundle 是否就绪 — 如果没有下载 VM image，降级 AgentHubs
+      const { isVmBundleReady } = await import("./vm-bundle.js");
+      if (!isVmBundleReady()) {
+        const msg = "VM image not downloaded";
+        console.warn(`[PaperClip Desktop] AgentHubs: ${msg}`);
+        config.onStatusChange("agenthubs", "error", msg);
+        return { success: false, error: msg };
+      }
+
       const { startAgentHubsMode } = await import("./agenthubs-mode.js");
       const result = await startAgentHubsMode({
         paperclipHome: config.paperclipHome,

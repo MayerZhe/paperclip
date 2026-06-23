@@ -54,4 +54,25 @@ contextBridge.exposeInMainWorld("sidebar", {
    */
   refreshBalance: (orgId: string) =>
     ipcRenderer.invoke("shell:refresh-balance", { orgId }),
+
+  /**
+   * Send: trigger VM image download.
+   * Main process downloads rootfs.img and agent.img via manifest.
+   */
+  downloadVm: () => ipcRenderer.send("shell:download-vm"),
+
+  /**
+   * Receive: VM download progress updates from main process.
+   * percent: 0-100, downloadedMB: bytes received, totalMB: total size, stage: current phase
+   */
+  onVmDownloadProgress: (
+    callback: (progress: {
+      percent: number;
+      downloadedMB: number;
+      totalMB: number;
+      stage: string;
+    }) => void
+  ) => {
+    ipcRenderer.on("sidebar:vm-download-progress", (_event, progress) => callback(progress));
+  },
 });

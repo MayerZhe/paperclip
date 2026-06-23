@@ -40,6 +40,9 @@ function init() {
       }
     });
   }
+
+  // Download VM button
+  initDownloadButton();
 }
 
 function setActiveTab(mode) {
@@ -82,6 +85,52 @@ function updateStatus(mode, status) {
   var labelEl = el.querySelector(".status-label");
   if (labelEl) {
     labelEl.textContent = label;
+  }
+
+  // Show download button when AgentHubs is offline (VM not ready)
+  if (mode === "agenthubs") {
+    var downloadArea = document.getElementById("vm-download-area");
+    if (downloadArea) {
+      downloadArea.style.display = status === "offline" ? "block" : "none";
+    }
+  }
+}
+
+function initDownloadButton() {
+  var btn = document.getElementById("btn-download-vm");
+  if (!btn) return;
+
+  btn.addEventListener("click", function () {
+    if (window.sidebar && window.sidebar.downloadVm) {
+      window.sidebar.downloadVm();
+      btn.disabled = true;
+      btn.textContent = "Downloading...";
+    }
+  });
+
+  // Listen for download progress updates
+  if (window.sidebar && window.sidebar.onVmDownloadProgress) {
+    window.sidebar.onVmDownloadProgress(function (progress) {
+      var progressEl = document.getElementById("vm-download-progress");
+      if (progressEl) {
+        progressEl.textContent = "Downloading... " + progress.percent + "% (" +
+          progress.downloadedMB + "MB / " + progress.totalMB + "MB)";
+      }
+
+      if (progress.stage === "complete") {
+        var btn = document.getElementById("btn-download-vm");
+        if (btn) {
+          btn.textContent = "Download complete - restart to activate";
+          btn.disabled = true;
+        }
+      } else if (progress.stage === "error") {
+        var btn = document.getElementById("btn-download-vm");
+        if (btn) {
+          btn.textContent = "Download VM (retry)";
+          btn.disabled = false;
+        }
+      }
+    });
   }
 }
 
