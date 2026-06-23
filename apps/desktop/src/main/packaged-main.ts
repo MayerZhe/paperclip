@@ -32,8 +32,6 @@ import {
   stopBothModes,
 } from "./mode-manager.js";
 import { createSidebarManager, type SidebarManager } from "./sidebar-manager.js";
-import { detectContainerRuntime } from "./container-runtime.js";
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // 读取版本号。在打包后，app.getVersion() 从 Electron 的 package.json 读取。
@@ -59,7 +57,7 @@ const DESKTOP_VERSION = (() => {
 // ─── 常量 — 全部来自实际源码验证 ───
 const PAPERCLIP_HOME = path.resolve(os.homedir(), ".paperclip");
 const PAPERCLIP_INSTANCE_ID = "default";
-const DEFAULT_SERVER_PORT = 3100;
+const DEFAULT_SERVER_PORT = 3200;
 
 // ─── 指数退避重试（借鉴 Open Design 的 REGISTER_DESKTOP_AUTH_RETRY_DELAYS_MS） ───
 const HEALTH_CHECK_RETRIES = [120, 240, 480, 960, 1500, 2000, 3000];
@@ -227,11 +225,13 @@ export async function runDesktopMain(): Promise<void> {
 
   process.env.PAPERCLIP_DESKTOP_VERSION = DESKTOP_VERSION;
 
-  // ── Phase 1: 检查已有会话 ────────────────────────────────────────────
-
-  let loginResult: LoginResult | null = await checkExistingSession();
+  // ── Phase 1: 等待 Electron app 就绪，然后检查已有会话 ─────────────────
+  // ⚠️ checkExistingSession() 在内部创建 BrowserWindow，必须在 app.whenReady() 之后调用，
+  // 否则 Electron 抛出 "Session can only be received when app is ready"。
 
   await app.whenReady();
+
+  let loginResult: LoginResult | null = await checkExistingSession();
 
   // If no existing session, open login window
   if (!loginResult) {
@@ -277,7 +277,7 @@ export async function runDesktopMain(): Promise<void> {
 
   // ── Phase 3: 并行启动两种模式 ────────────────────────────────────────
 
-  const serverPort = findAvailablePort();
+  const requestedPort = findAvailablePort();
   const daemonEntry = resolveDaemonEntry();
 
   // sidebarMgr declared here but not yet created — mode-manager's onStatusChange
@@ -294,12 +294,15 @@ export async function runDesktopMain(): Promise<void> {
     }
   };
 
-  const containerRuntime = detectContainerRuntime();
-
-  const modeResult = await startBothModes({
+  // ── Phase 3: 并行启动两种模式（fire-and-continue — 不阻塞 Sidebar 创建）──
+  //
+  // 原先 await startBothModes() 在 Docker daemon 不可用时可能阻塞 140-180s，
+  // 导致 creatSidebarManager() 永远不执行。改为先启动、先创建 sidebar、
+  // 后 await 结果的策略。onStatusChange 回调通过 pendingStatusUpdates 缓冲，
+  // 在 sidebar 创建后 flush，确保 status dots 正确渲染。
+  const modeResultPromise = startBothModes({
     paperclipHome: PAPERCLIP_HOME,
-    containerRuntime: containerRuntime.primary ?? "docker",
-    agentConfig: { daemonEntry, serverPort },
+    agentConfig: { daemonEntry, serverPort: requestedPort },
     agenthubsConfig: { token },
     startAgentDaemon: async (_entry: string, _port: number) => {
       const result = await startAgentDaemon();
@@ -315,6 +318,7 @@ export async function runDesktopMain(): Promise<void> {
   });
 
   // ── Phase 4: 创建 Sidebar Shell（BrowserWindow + WebContentsView） ───
+  // 立即创建，不等待 modeResult — 用户立即可见 sidebar UI
 
   sidebarMgr = createSidebarManager({
     shellHtmlPath: path.join(__dirname, "..", "..", "src", "renderer", "shell.html"),
@@ -372,8 +376,14 @@ export async function runDesktopMain(): Promise<void> {
 
   // ── Phase 7: 启动 Tray + App Menu ─────────────────────────────────────
 
+  // Await mode startup results now (agent daemon port needed for heartbeat + menu)
+  // AgentHubs may still be starting/failing, but we proceed with what we have
+  const modeResult = await modeResultPromise;
+
   // Start tray heartbeat (daemon health polling)
-  const stopHeartbeat = startTrayHeartbeat(serverPort);
+  const stopHeartbeat = modeResult.agent.success
+    ? startTrayHeartbeat(modeResult.agent.port)
+    : (() => {});
 
   // Scan CLI availability
   const cliResults: CliScanResult[] = await scanCliAvailability();
@@ -398,7 +408,7 @@ export async function runDesktopMain(): Promise<void> {
   };
   createAppMenu(
     mainWindow,
-    serverPort,
+    modeResult.agent.port,
     cliResults.filter((r) => r.found).map((r) => r.label),
     menuOpts,
   );

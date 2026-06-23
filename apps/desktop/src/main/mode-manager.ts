@@ -36,8 +36,6 @@ export type ModeStatus = "starting" | "running" | "error";
 export interface StartBothModesConfig {
   /** PaperClip home 目录 (~/.paperclip) */
   paperclipHome: string;
-  /** 容器运行时（如 "docker", "orbstack", "podman"） */
-  containerRuntime: string;
   /** Agent 模式 daemon 配置 */
   agentConfig: {
     daemonEntry: string;
@@ -145,7 +143,6 @@ export async function startBothModes(config: StartBothModesConfig): Promise<Mode
       const { startAgentHubsMode } = await import("./agenthubs-mode.js");
       const result = await startAgentHubsMode({
         paperclipHome: config.paperclipHome,
-        containerRuntime: config.containerRuntime,
         onProgress: (msg: string) => {
           console.log(`[PaperClip Desktop] AgentHubs: ${msg}`);
         },
@@ -222,7 +219,6 @@ export async function stopBothModes(
     try {
       const { stopAgentHubsMode } = await import("./agenthubs-mode.js");
       await stopAgentHubsMode({
-        containerRuntime: "docker", // agenthubs-mode will auto-detect
         timeout: 60,
       });
       console.log("[PaperClip Desktop] AgentHubs mode stopped");
