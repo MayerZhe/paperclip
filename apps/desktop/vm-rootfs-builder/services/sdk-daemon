@@ -1,0 +1,37 @@
+#!/sbin/openrc-run
+# sdk-daemon — PaperClip VM guest agent (vsock RPC server)
+# Starts after network is available, manages child services.
+
+description="PaperClip VM guest agent (vsock RPC server)"
+
+depend() {
+    need net
+    after bootmisc
+}
+
+start() {
+    ebegin "Starting sdk-daemon"
+    start-stop-daemon --start --background \
+        --make-pidfile --pidfile /var/run/sdk-daemon.pid \
+        --exec /usr/local/bin/sdk-daemon
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping sdk-daemon"
+    start-stop-daemon --stop --pidfile /var/run/sdk-daemon.pid \
+        --signal TERM
+    eend $?
+}
+
+status() {
+    if [ -f /var/run/sdk-daemon.pid ]; then
+        pid=$(cat /var/run/sdk-daemon.pid)
+        if kill -0 "$pid" 2>/dev/null; then
+            echo "sdk-daemon is running (pid $pid)"
+            return 0
+        fi
+    fi
+    echo "sdk-daemon is not running"
+    return 3
+}

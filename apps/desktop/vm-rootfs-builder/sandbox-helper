@@ -1,0 +1,191 @@
+#!/bin/sh
+# sandbox-helper — manages sandbox directories and permissions
+#
+# This script is placed in agent.img and invoked from the host-side VM manager
+# to set up, tear down, and verify sandbox environments inside the VM.
+#
+# Usage:
+#   sandbox-helper setup <name>     Create a sandbox directory
+#   sandbox-helper teardown <name>  Remove a sandbox directory
+#   sandbox-helper list             List all active sandboxes
+#   sandbox-helper clean            Remove all sandboxes
+#   sandbox-helper verify <name>    Check sandbox permissions
+
+set -e
+
+PROGNAME=$(basename "$0")
+SANDBOX_ROOT="/sandbox"
+SANDBOX_MODE="${SANDBOX_MODE:-0750}"
+
+usage() {
+    echo "Usage: $PROGNAME <command> [args...]"
+    echo ""
+    echo "Commands:"
+    echo "  setup <name>      Create a sandbox directory"
+    echo "  teardown <name>   Remove a sandbox directory"
+    echo "  list              List all active sandboxes"
+    echo "  clean             Remove all sandboxes"
+    echo "  verify <name>     Check sandbox directory permissions"
+    exit 1
+}
+
+if [ $# -lt 1 ]; then
+    usage
+fi
+
+COMMAND="$1"
+shift
+
+# Ensure the sandbox root exists
+mkdir -p "$SANDBOX_ROOT"
+chmod 755 "$SANDBOX_ROOT"
+
+sandbox_path() {
+    echo "${SANDBOX_ROOT}/${1}"
+}
+
+case "$COMMAND" in
+    setup)
+        if [ $# -lt 1 ]; then
+            echo "ERROR: setup requires a sandbox name"
+            echo "Usage: $PROGNAME setup <name>"
+            exit 1
+        fi
+        NAME="$1"
+        SANDBOX_DIR=$(sandbox_path "$NAME")
+
+        if [ -d "$SANDBOX_DIR" ]; then
+            echo "Sandbox '$NAME' already exists at $SANDBOX_DIR"
+            exit 0
+        fi
+
+        mkdir -p "$SANDBOX_DIR"
+        chmod "$SANDBOX_MODE" "$SANDBOX_DIR"
+
+        # Create subdirectories
+        mkdir -p "$SANDBOX_DIR/tmp"
+        mkdir -p "$SANDBOX_DIR/data"
+        mkdir -p "$SANDBOX_DIR/logs"
+
+        # Set restrictive permissions
+        chmod 700 "$SANDBOX_DIR/tmp"
+        chmod 700 "$SANDBOX_DIR/data"
+        chmod 700 "$SANDBOX_DIR/logs"
+
+        echo "Sandbox '$NAME' created at $SANDBOX_DIR"
+        ;;
+
+    teardown)
+        if [ $# -lt 1 ]; then
+            echo "ERROR: teardown requires a sandbox name"
+            echo "Usage: $PROGNAME teardown <name>"
+            exit 1
+        fi
+        NAME="$1"
+        SANDBOX_DIR=$(sandbox_path "$NAME")
+
+        if [ ! -d "$SANDBOX_DIR" ]; then
+            echo "Sandbox '$NAME' does not exist"
+            exit 0
+        fi
+
+        rm -rf "$SANDBOX_DIR"
+        echo "Sandbox '$NAME' removed"
+        ;;
+
+    list)
+        echo "Active sandboxes:"
+        if [ -d "$SANDBOX_ROOT" ] && [ "$(ls -A "$SANDBOX_ROOT" 2>/dev/null)" ]; then
+            for d in "$SANDBOX_ROOT"/*; do
+                if [ -d "$d" ]; then
+                    NAME=$(basename "$d")
+                    SIZE=$(du -sh "$d" 2>/dev/null | awk '{print $1}')
+                    echo "  $NAME ($SIZE)"
+                fi
+            done
+        else
+            echo "  (none)"
+        fi
+        ;;
+
+    clean)
+        echo "Removing all sandboxes..."
+        if [ -d "$SANDBOX_ROOT" ]; then
+            for d in "$SANDBOX_ROOT"/*; do
+                if [ -d "$d" ]; then
+                    NAME=$(basename "$d")
+                    rm -rf "$d"
+                    echo "  Removed: $NAME"
+                fi
+            done
+        fi
+        echo "All sandboxes cleaned"
+        ;;
+
+    verify)
+        if [ $# -lt 1 ]; then
+            echo "ERROR: verify requires a sandbox name"
+            echo "Usage: $PROGNAME verify <name>"
+            exit 1
+        fi
+        NAME="$1"
+        SANDBOX_DIR=$(sandbox_path "$NAME")
+        EXIT_CODE=0
+
+        echo "Verifying sandbox '$NAME'..."
+        echo ""
+
+        if [ ! -d "$SANDBOX_DIR" ]; then
+            echo "[FAIL] Sandbox directory does not exist: $SANDBOX_DIR"
+            exit 1
+        fi
+
+        # Check directory permissions
+        DIR_PERMS=$(stat -c '%a' "$SANDBOX_DIR" 2>/dev/null || stat -f '%Mp%Lp' "$SANDBOX_DIR" 2>/dev/null | tail -c 4)
+        echo "  Directory       : $SANDBOX_DIR (perms: $DIR_PERMS)"
+        if [ "$DIR_PERMS" = "750" ] || [ "$DIR_PERMS" = "700" ]; then
+            echo "  [PASS] Permissions are restrictive"
+        else
+            echo "  [WARN] Permissions ($DIR_PERMS) may be too open"
+        fi
+
+        # Check subdirectories
+        for sub in tmp data logs; do
+            if [ -d "$SANDBOX_DIR/$sub" ]; then
+                SUB_PERMS=$(stat -c '%a' "$SANDBOX_DIR/$sub" 2>/dev/null || stat -f '%Mp%Lp' "$SANDBOX_DIR/$sub" 2>/dev/null | tail -c 4)
+                echo "  $sub/            : exists (perms: $SUB_PERMS)"
+                if [ "$SUB_PERMS" = "700" ]; then
+                    echo "  [PASS] $sub permissions correct"
+                else
+                    echo "  [WARN] $sub permissions ($SUB_PERMS) should be 700"
+                    EXIT_CODE=1
+                fi
+            else
+                echo "  [FAIL] Missing subdirectory: $sub"
+                EXIT_CODE=1
+            fi
+        done
+
+        # Check writability
+        if touch "$SANDBOX_DIR/.write_test" 2>/dev/null; then
+            rm -f "$SANDBOX_DIR/.write_test"
+            echo "  [PASS] Directory is writable"
+        else
+            echo "  [FAIL] Directory is not writable"
+            EXIT_CODE=1
+        fi
+
+        echo ""
+        if [ "$EXIT_CODE" -eq 0 ]; then
+            echo "Verification: PASSED"
+        else
+            echo "Verification: FAILED"
+        fi
+        exit $EXIT_CODE
+        ;;
+
+    *)
+        echo "Unknown command: $COMMAND"
+        usage
+        ;;
+esac

@@ -1,0 +1,39 @@
+#!/sbin/openrc-run
+# minio — MinIO object storage server
+# Starts after sdk-daemon, provides S3-compatible API.
+
+description="MinIO object storage server"
+
+depend() {
+    need net
+    after sdk-daemon
+}
+
+start() {
+    ebegin "Starting minio"
+    start-stop-daemon --start --background \
+        --make-pidfile --pidfile /var/run/minio.pid \
+        --env MINIO_ROOT_USER=minioadmin \
+        --env MINIO_ROOT_PASSWORD=minioadmin \
+        --exec /usr/local/bin/minio -- server /data/minio --address :9000
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping minio"
+    start-stop-daemon --stop --pidfile /var/run/minio.pid \
+        --signal TERM
+    eend $?
+}
+
+status() {
+    if [ -f /var/run/minio.pid ]; then
+        pid=$(cat /var/run/minio.pid)
+        if kill -0 "$pid" 2>/dev/null; then
+            echo "minio is running (pid $pid)"
+            return 0
+        fi
+    fi
+    echo "minio is not running"
+    return 3
+}

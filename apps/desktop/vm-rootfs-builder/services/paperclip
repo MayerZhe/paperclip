@@ -1,0 +1,40 @@
+#!/sbin/openrc-run
+# paperclip — PaperClip server (Node.js)
+# Starts after cloud-api is running.
+
+description="PaperClip server"
+
+depend() {
+    need net
+    after cloud-api
+}
+
+start() {
+    ebegin "Starting paperclip"
+    start-stop-daemon --start --background \
+        --make-pidfile --pidfile /var/run/paperclip.pid \
+        --chdir /opt/paperclip \
+        --env SERVE_UI=false \
+        --env NODE_ENV=production \
+        --exec /usr/bin/node -- dist/index.js
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping paperclip"
+    start-stop-daemon --stop --pidfile /var/run/paperclip.pid \
+        --signal TERM
+    eend $?
+}
+
+status() {
+    if [ -f /var/run/paperclip.pid ]; then
+        pid=$(cat /var/run/paperclip.pid)
+        if kill -0 "$pid" 2>/dev/null; then
+            echo "paperclip is running (pid $pid)"
+            return 0
+        fi
+    fi
+    echo "paperclip is not running"
+    return 3
+}

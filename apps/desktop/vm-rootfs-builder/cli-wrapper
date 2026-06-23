@@ -1,0 +1,149 @@
+#!/bin/sh
+# cli-wrapper — bridges host CLI commands to VM services
+#
+# This script is placed in agent.img and invoked from the host-side VM manage
+# to execute commands inside the VM guest against local services.
+#
+# Usage (from host, via vsock proxy or ssh):
+#   cli-wrapper <service> <command> [args...]
+#
+# Services:
+#   paperclip   PaperClip Agent CLI (wraps paperclip/server)
+#   cloud-api   AgentHubs cloud API (wraps agenthubs/cloud-api)
+#   minio       MinIO client (mc alias commands)
+#   sdk-daemon  SDK daemon management (status, restart, reload)
+#   health      Health check (polls all services)
+
+set -e
+
+PROGNAME=$(basename "$0")
+
+usage() {
+    echo "Usage: $PROGNAME <service> <command> [args...]"
+    echo ""
+    echo "Services:"
+    echo "  paperclip    PaperClip Agent CLI"
+    echo "  cloud-api    AgentHubs cloud API"
+    echo "  minio        MinIO client commands"
+    echo "  sdk-daemon   SDK daemon management"
+    echo "  health       Health check all services"
+    echo ""
+    echo "Examples:"
+    echo "  $PROGNAME paperclip status"
+    echo "  $PROGNAME cloud-api ping"
+    echo "  $PROGNAME minio bucket list"
+    echo "  $PROGNAME health"
+    exit 1
+}
+
+if [ $# -lt 1 ]; then
+    usage
+fi
+
+SERVICE="$1"
+shift
+
+case "$SERVICE" in
+    paperclip)
+        # Delegate to the PaperClip server's CLI
+        # In the VM, paperclip runs on port 3200
+        curl -s "http://127.0.0.1:3200/api/health" >/dev/null 2>&1 || {
+            echo "paperclip is not responding"
+            exit 1
+        }
+        curl -s "http://127.0.0.1:3200/$*"
+        ;;
+
+    cloud-api)
+        # Delegate to the cloud-api server on port 4000
+        curl -s "http://127.0.0.1:4000/health" >/dev/null 2>&1 || {
+            echo "cloud-api is not responding"
+            exit 1
+        }
+        curl -s "http://127.0.0.1:4000/$*"
+        ;;
+
+    minio)
+        # MinIO client command passthrough
+        # MinIO runs on port 9000
+        mc --config-dir /tmp/mc "$@"
+        ;;
+
+    sdk-daemon)
+        # SDK daemon management
+        case "${1:-}" in
+            status)
+                if [ -f /var/run/sdk-daemon.pid ] && kill -0 "$(cat /var/run/sdk-daemon.pid)" 2>/dev/null; then
+                    echo "sdk-daemon: running (pid $(cat /var/run/sdk-daemon.pid))"
+                else
+                    echo "sdk-daemon: not running"
+                    exit 1
+                fi
+                ;;
+            restart)
+                rc-service sdk-daemon restart
+                ;;
+            reload)
+                # Send SIGHUP to reload config
+                if [ -f /var/run/sdk-daemon.pid ]; then
+                    kill -HUP "$(cat /var/run/sdk-daemon.pid)"
+                    echo "sdk-daemon: reload signal sent"
+                else
+                    echo "sdk-daemon: not running"
+                    exit 1
+                fi
+                ;;
+            *)
+                echo "Unknown sdk-daemon command: ${1:-}"
+                echo "Available: status, restart, reload"
+                exit 1
+                ;;
+        esac
+        ;;
+
+    health)
+        # Health check all services
+        EXIT_CODE=0
+        echo "=== VM Health Check ==="
+        echo ""
+
+        # Check sdk-daemon
+        if [ -f /var/run/sdk-daemon.pid ] && kill -0 "$(cat /var/run/sdk-daemon.pid)" 2>/dev/null; then
+            echo "[PASS] sdk-daemon : running (pid $(cat /var/run/sdk-daemon.pid))"
+        else
+            echo "[FAIL] sdk-daemon : not running"
+            EXIT_CODE=1
+        fi
+
+        # Check cloud-api
+        if curl -s --max-time 2 "http://127.0.0.1:4000/health" >/dev/null 2>&1; then
+            echo "[PASS] cloud-api  : responding"
+        else
+            echo "[FAIL] cloud-api  : not responding"
+            EXIT_CODE=1
+        fi
+
+        # Check paperclip
+        if curl -s --max-time 2 "http://127.0.0.1:3200/api/health" >/dev/null 2>&1; then
+            echo "[PASS] paperclip  : responding"
+        else
+            echo "[FAIL] paperclip  : not responding"
+            EXIT_CODE=1
+        fi
+
+        # Check minio
+        if curl -s --max-time 2 "http://127.0.0.1:9000/minio/health/live" >/dev/null 2>&1; then
+            echo "[PASS] minio      : responding"
+        else
+            echo "[FAIL] minio      : not responding"
+            EXIT_CODE=1
+        fi
+
+        exit $EXIT_CODE
+        ;;
+
+    *)
+        echo "Unknown service: $SERVICE"
+        usage
+        ;;
+esac

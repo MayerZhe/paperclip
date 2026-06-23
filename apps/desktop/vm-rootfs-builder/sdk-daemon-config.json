@@ -1,0 +1,32 @@
+{
+  "vsock_port": 1024,
+  "services": [
+    {
+      "name": "cloud-api",
+      "command": "node /opt/cloud-api/dist/index.js",
+      "port": 4000,
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "name": "paperclip",
+      "command": "node /opt/paperclip/dist/index.js",
+      "port": 3200,
+      "env": {
+        "SERVE_UI": "false",
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "name": "minio",
+      "command": "minio server /data/minio --address :9000",
+      "port": 9000,
+      "env": {
+        "MINIO_ROOT_USER": "minioadmin",
+        "MINIO_ROOT_PASSWORD": "minioadmin"
+      }
+    }
+  ],
+  "startup_timeout_seconds": 30
+}

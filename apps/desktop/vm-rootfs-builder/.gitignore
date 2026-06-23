@@ -1,0 +1,8 @@
+# Build artifacts
+build/
+output/*.img
+output/*.img.zst
+output/*.tar
+
+# Keep the directory structure
+!output/.gitkeep

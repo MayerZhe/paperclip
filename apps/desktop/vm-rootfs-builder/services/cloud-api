@@ -1,0 +1,38 @@
+#!/sbin/openrc-run
+# cloud-api — AgentHubs cloud API (Node.js)
+# Starts after sdk-daemon is running.
+
+description="AgentHubs cloud API"
+
+depend() {
+    need net
+    after sdk-daemon
+}
+
+start() {
+    ebegin "Starting cloud-api"
+    start-stop-daemon --start --background \
+        --make-pidfile --pidfile /var/run/cloud-api.pid \
+        --chdir /opt/cloud-api \
+        --exec /usr/bin/node -- dist/index.js
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping cloud-api"
+    start-stop-daemon --stop --pidfile /var/run/cloud-api.pid \
+        --signal TERM
+    eend $?
+}
+
+status() {
+    if [ -f /var/run/cloud-api.pid ]; then
+        pid=$(cat /var/run/cloud-api.pid)
+        if kill -0 "$pid" 2>/dev/null; then
+            echo "cloud-api is running (pid $pid)"
+            return 0
+        fi
+    fi
+    echo "cloud-api is not running"
+    return 3
+}
