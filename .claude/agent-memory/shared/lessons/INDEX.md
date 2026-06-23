@@ -24,3 +24,5 @@ macos, native-chrome, electron, titlebar, hiddenInset, vibrancy, CSS, system-fon
 
 desktop, login, sidebar, auth-bridge, WebContentsView, mode-manager, parallel-startup, IPC, preload, contextBridge, CLI-scan, antigravity, React-component, worktree-isolation, sandbox → story-desktop-login-sidebar-cli-2026-06-22.md — Desktop login system + sidebar shell with WebContentsView, dual-mode parallel startup, Agent CLI setup page, worktree sandbox copy pattern
 
+go, golang, vsock, guest-agent, sdk-daemon, cross-compile, arm64, wire-format, rpc, vm, aarch64, docker, alpine, rootfs, ext4, exfat, minio, openrc, zstd, qemu → story-phase3A-guest-agent-rootfs-2026-06-23.md — Go guest agent with vsock RPC (5 methods), Alpine rootfs Docker build scripts, QEMU verification harness, sandbox Go build workarounds
+
