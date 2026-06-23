@@ -4,10 +4,14 @@
 // VM image 更新独立于 Electron 壳（解耦）。
 // 更新流程：
 //   1. checkVmImageUpdate  — 读本地版本 + 查 GitHub Releases
-//   2. installVmImageUpdate — 下载 + 解压 + docker load + 更新 VERSION 文件
+//   2. installVmImageUpdate — 下载 + SHA256 验证 + zstd 解压 + 更新 VERSION 文件
+//
+// VM image 由两个文件组成：
+//   - rootfs.img.zst  — Alpine rootfs（只读）
+//   - agent.img.zst   — exFAT agent image（可写）
 //
 // 关键约束：
-//   - 在用户下次切换模式时安装（不热替换正在运行的 Docker 容器）
+//   - 在用户下次切换模式时安装（不热替换正在运行的 VM）
 //   - 更新失败 → fallback 旧版本（不阻塞用户使用）
 //   - 保留当前版本 + 上一版本（cleanup 旧版本）
 
@@ -20,10 +24,12 @@ import os from "node:os";
 export interface VmImageVersion {
   /** 语义化版本号（如 "1.2.3"） */
   version: string;
-  /** tar.gz 的 SHA256 校验和 */
-  sha256: string;
-  /** tar.gz 下载 URL */
-  downloadUrl: string;
+  /** GitHub Release manifest URL (manifest.json) */
+  manifestUrl: string;
+  /** 根文件系统镜像信息 */
+  rootfs: { url: string; sha256: string };
+  /** Agent 镜像信息 */
+  agent: { url: string; sha256: string };
   /** GitHub Release 发布时间 (ISO 8601) */
   publishedAt: string;
 }
@@ -43,8 +49,6 @@ export interface VmImageUpdateResult {
 export interface VmImageInstallConfig {
   /** 目标版本信息 */
   version: VmImageVersion;
-  /** 容器运行时（docker / podman） */
-  containerRuntime: string;
   /** 安装进度回调 */
   onProgress?: (progress: VmImageInstallProgress) => void;
 }
@@ -53,7 +57,7 @@ export interface VmImageInstallProgress {
   /** 进度百分比 0-100 */
   percent: number;
   /** 当前阶段 */
-  stage: "downloading" | "verifying" | "extracting" | "loading" | "cleanup" | "complete" | "error";
+  stage: "downloading" | "verifying" | "extracting" | "cleanup" | "complete" | "error";
 }
 
 export interface VmImageInstallResult {
@@ -83,8 +87,8 @@ const RELEASES_PER_PAGE = 5;
 /** VM image release tag 前缀 */
 const VM_TAG_PREFIX = "vm-v";
 
-/** 下载的 tar.gz asset 名称 */
-const VM_ASSET_NAME = "agenthubs-local-vm.tar.gz";
+/** 下载的 asset 名称（双文件镜像） */
+const VM_ASSET_NAMES = ["rootfs.img.zst", "agent.img.zst"];
 
 /** 保留的旧版本数量 */
 const KEEP_VERSIONS = 2;
@@ -151,9 +155,19 @@ interface GitHubAsset {
   browser_download_url: string;
 }
 
+/** GitHub API Rate-Limit 状态接口 */
+interface GitHubRateLimitHeaders {
+  "x-ratelimit-remaining"?: string;
+  "x-ratelimit-reset"?: string;
+}
+
 /**
  * 从 GitHub Releases 获取最新的 VM image 版本信息。
- * 查询 releases?per_page=N，找第一个 tag 匹配 vm-v* 的 release。
+ * 查询 releases?per_page=N，找第一个 tag 匹配 vm-v* 的 release，
+ * 且同时包含 rootfs.img.zst 和 agent.img.zst 两个 asset。
+ *
+ * @param releasesUrl - 基础 URL（不含查询参数）
+ * @returns VmImageVersion 如果找到完整 release；否则 null
  */
 async function fetchReleaseAsset(
   releasesUrl: string,
@@ -168,6 +182,20 @@ async function fetchReleaseAsset(
       "X-GitHub-Api-Version": "2022-11-28",
     },
   });
+
+  // Rate-limit 感知日志
+  const headers = response.headers as unknown as GitHubRateLimitHeaders;
+  if (response.status === 403 || response.status === 429) {
+    const remaining = headers["x-ratelimit-remaining"] ?? "?";
+    const reset = headers["x-ratelimit-reset"];
+    const resetMsg = reset
+      ? new Date(Number(reset) * 1000).toISOString()
+      : "unknown";
+    console.warn(
+      `[VM Updater] GitHub API rate-limited: ${response.status} (remaining=${remaining}, reset=${resetMsg})`,
+    );
+    return null;
+  }
 
   if (!response.ok) {
     console.warn(
@@ -196,26 +224,50 @@ async function fetchReleaseAsset(
       continue;
     }
 
-    // 找 tar.gz asset
-    const tgzAsset = release.assets.find(
-      (a) => a.name === VM_ASSET_NAME,
+    // 找两个必需的 .img.zst asset
+    const rootfsAsset = release.assets.find(
+      (a) => a.name === VM_ASSET_NAMES[0],
     );
-    if (!tgzAsset) {
+    const agentAsset = release.assets.find(
+      (a) => a.name === VM_ASSET_NAMES[1],
+    );
+
+    if (!rootfsAsset || !agentAsset) {
+      const missing = [!rootfsAsset && VM_ASSET_NAMES[0], !agentAsset && VM_ASSET_NAMES[1]]
+        .filter(Boolean)
+        .join(", ");
       console.warn(
-        `[VM Updater] Release ${release.tag_name} has no ${VM_ASSET_NAME} asset`,
+        `[VM Updater] Release ${release.tag_name} missing assets: ${missing}`,
       );
       continue;
     }
 
-    // 找 .sha256 asset（可选 — 如果 GitHub 上提供，优先用；否则安装时动态校验）
-    const sha256Asset = release.assets.find(
-      (a) => a.name === `${VM_ASSET_NAME}.sha256`,
+    // 找 manifest.json asset（可选 — 用于版本元数据）
+    const manifestAsset = release.assets.find(
+      (a) => a.name === "manifest.json",
+    );
+
+    // 找 .sha256 asset（可选 — SHA256 校验和文件）
+    const rootfsShaAsset = release.assets.find(
+      (a) => a.name === `${VM_ASSET_NAMES[0]}.sha256`,
+    );
+    const agentShaAsset = release.assets.find(
+      (a) => a.name === `${VM_ASSET_NAMES[1]}.sha256`,
     );
 
     return {
       version,
-      sha256: sha256Asset ? "" : "", // sha256 文件需要额外下载获取内容；安装时校验
-      downloadUrl: tgzAsset.browser_download_url,
+      manifestUrl: manifestAsset
+        ? manifestAsset.browser_download_url
+        : `${release.html_url ?? releasesUrl.replace("/repos", "")}/releases/download/${release.tag_name}/manifest.json`,
+      rootfs: {
+        url: rootfsAsset.browser_download_url,
+        sha256: rootfsShaAsset ? "" : "",
+      },
+      agent: {
+        url: agentAsset.browser_download_url,
+        sha256: agentShaAsset ? "" : "",
+      },
       publishedAt: release.published_at,
     };
   }
@@ -225,32 +277,46 @@ async function fetchReleaseAsset(
 }
 
 /**
- * 下载 .sha256 文件内容
+ * 下载 .sha256 文件内容并返回哈希值。
+ *
+ * 首先尝试 <url>.sha256（GitHub Asset API），
+ * 如果失败则尝试对 URL 追加 .sha256。
+ *
+ * @param downloadUrl - 目标文件的下载 URL
+ * @returns 小写的十六进制 sha256 哈希值，失败返回 null
  */
 async function fetchSha256(downloadUrl: string): Promise<string | null> {
-  try {
-    const response = await fetch(`${downloadUrl}.sha256`, {
-      headers: {
-        "User-Agent": "paperclip-desktop-vm-updater",
-      },
-    });
-    if (!response.ok) {
-      console.warn(
-        `[VM Updater] SHA256 file not found at ${downloadUrl}.sha256 (${response.status})`,
-      );
-      return null;
+  // 尝试多种可能的 URL 变体
+  const urlsToTry = [
+    `${downloadUrl}.sha256`,
+    downloadUrl.replace(/\.img\.zst$/, ".img.zst.sha256"),
+  ];
+
+  for (const shaUrl of urlsToTry) {
+    try {
+      const response = await fetch(shaUrl, {
+        headers: {
+          "User-Agent": "paperclip-desktop-vm-updater",
+        },
+      });
+      if (!response.ok) {
+        continue;
+      }
+      const text = await response.text();
+      // 取第一行的第一段（标准 sha256sum 格式）
+      const hash = text.trim().split(/\s+/)[0];
+      if (hash && /^[a-f0-9]{64}$/i.test(hash)) {
+        return hash.toLowerCase();
+      }
+    } catch {
+      // 网络错误 → 尝试下一个 URL
     }
-    const text = await response.text();
-    // 取第一行的第一段（标准 sha256sum 格式）
-    const hash = text.trim().split(/\s+/)[0];
-    if (hash && /^[a-f0-9]{64}$/i.test(hash)) {
-      return hash.toLowerCase();
-    }
-    return null;
-  } catch (err) {
-    console.warn(`[VM Updater] Failed to fetch SHA256: ${err}`);
-    return null;
   }
+
+  console.warn(
+    `[VM Updater] SHA256 file not found for ${downloadUrl}`,
+  );
+  return null;
 }
 
 // ─── 版本文件读写 ───
@@ -327,11 +393,17 @@ export async function checkVmImageUpdate(
       return { hasUpdate: false };
     }
 
-    // 如果下载 URL 没有 .sha256 配套文件，尝试获取 sha256
-    if (!latest.sha256) {
-      const sha256Hash = await fetchSha256(latest.downloadUrl);
+    // 如果 SHA256 尚未通过 asset API 获取，尝试从配套 .sha256 文件获取
+    if (!latest.rootfs.sha256) {
+      const sha256Hash = await fetchSha256(latest.rootfs.url);
       if (sha256Hash) {
-        latest.sha256 = sha256Hash;
+        latest.rootfs.sha256 = sha256Hash;
+      }
+    }
+    if (!latest.agent.sha256) {
+      const sha256Hash = await fetchSha256(latest.agent.url);
+      if (sha256Hash) {
+        latest.agent.sha256 = sha256Hash;
       }
     }
 
@@ -371,11 +443,11 @@ export async function checkVmImageUpdate(
  *
  * 流程:
  * 1. 确保 ~/.paperclip/vm/downloads/ 目录存在
- * 2. 下载 tar.gz 到 vm/downloads/vm-{version}/
- * 3. 解压到 vm/downloads/vm-{version}/agenthubs-local-vm/
- * 4. docker load 镜像
+ * 2. 下载 rootfs.img.zst 和 agent.img.zst 到版本化目录
+ * 3. SHA256 校验每个文件
+ * 4. zstd 解压到 vm/bundle/
  * 5. 备份旧版本（保留当前 + 上一版本）
- * 6. 替换 vm/agenthubs-local-vm/ → 新版本
+ * 6. 替换 vm/bundle/ → 新版本
  * 7. 更新 VERSION 文件
  *
  * 注: 此函数依赖 download-vm-image.ts 中的 downloadVmImage() 函数。
@@ -384,7 +456,7 @@ export async function checkVmImageUpdate(
 export async function installVmImageUpdate(
   config: VmImageInstallConfig,
 ): Promise<VmImageInstallResult> {
-  const { version, containerRuntime, onProgress } = config;
+  const { version, onProgress } = config;
 
   const report = (stage: VmImageInstallProgress["stage"], percent: number) => {
     onProgress?.({ percent, stage });
@@ -392,73 +464,79 @@ export async function installVmImageUpdate(
 
   try {
     // ── Step 1: 确保下载目录存在 ──
-    report("downloading", 0);
     const versionDownloadDir = path.join(VM_DOWNLOADS_DIR, `vm-${version.version}`);
     fs.mkdirSync(versionDownloadDir, { recursive: true });
 
-    // ── Step 2: 动态导入 downloadVmImage 并下载 ──
-    //    下载到 versionDownloadDir 下
+    // ── Step 2: 动态导入 downloadVmImage 并下载双文件 ──
     report("downloading", 0);
     console.log(
-      `[VM Updater] Downloading VM image ${version.version} from ${version.downloadUrl}`,
+      `[VM Updater] Downloading VM image ${version.version} (rootfs + agent)`,
     );
 
     const { downloadVmImage } = await import("./download-vm-image.js");
 
-    const downloadResult = await downloadVmImage({
-      manifestUrl: version.downloadUrl,
+    // 下载并校验 rootfs.img.zst
+    const rootfsResult = await downloadVmImage({
+      url: version.rootfs.url,
       onProgress: (progress: {
         percent: number;
         downloadedMB: number;
         totalMB: number;
         stage: string;
       }) => {
-        // 将 downloadVmImage 的进度映射到安装进度
-        const mappedStages: Record<
-          string,
-          VmImageInstallProgress["stage"]
-        > = {
-          fetching_manifest: "downloading",
-          downloading: "downloading",
-          verifying: "verifying",
-          decompressing: "extracting",
-          complete: "complete",
-          error: "error",
-        };
-        const stage = mappedStages[progress.stage] ?? "downloading";
-        onProgress?.({ percent: progress.percent, stage });
+        onProgress?.({ percent: Math.round(progress.percent * 0.5), stage: "downloading" });
       },
     });
 
-    if (!downloadResult.success) {
+    if (!rootfsResult.success) {
       return {
         success: false,
-        error: `Download failed: ${downloadResult.error}`,
+        error: `Rootfs download failed: ${rootfsResult.error}`,
       };
     }
 
-    // ── Step 3: 解压结果已在 downloadVmImage 中处理 ──
-    //    downloadVmImage 解压到 VM_EXTRACT_DIR 常量路径
-    //    (~/.paperclip/vm/agenthubs-local-vm/)
-    //    我们需要将其移动到版本化目录，保留旧版本
-    report("cleanup", 90);
+    // 下载并校验 agent.img.zst
+    const agentResult = await downloadVmImage({
+      url: version.agent.url,
+      onProgress: (progress: {
+        percent: number;
+        downloadedMB: number;
+        totalMB: number;
+        stage: string;
+      }) => {
+        onProgress?.({ percent: 50 + Math.round(progress.percent * 0.5), stage: "downloading" });
+      },
+    });
 
-    // ── Step 4: 备份旧版本 ──
-    if (fs.existsSync(VM_EXTRACT_DIR)) {
+    if (!agentResult.success) {
+      return {
+        success: false,
+        error: `Agent download failed: ${agentResult.error}`,
+      };
+    }
+
+    report("extracting", 75);
+    console.log(`[VM Updater] Both images downloaded for ${version.version}`);
+
+    // ── Step 3: SHA256 verified by downloadVmImage ──
+    report("verifying", 80);
+
+    // ── Step 4: Backup 旧版本并替换 ──
+    report("cleanup", 85);
+
+    const vmBundleDir = path.join(VM_HOME, "bundle");
+    if (fs.existsSync(vmBundleDir)) {
       const backupDir = path.join(VM_DOWNLOADS_DIR, "backup");
       fs.mkdirSync(backupDir, { recursive: true });
 
-      // 当前版本 → backup
       const currentVersionStr = getCurrentVmVersion();
       if (currentVersionStr) {
         const currentBackupDir = path.join(backupDir, `vm-${currentVersionStr}`);
         try {
-          // 删除旧同名备份（如果存在）
           if (fs.existsSync(currentBackupDir)) {
             fs.rmSync(currentBackupDir, { recursive: true, force: true });
           }
-          // rename 比 copy+delete 安全
-          fs.renameSync(VM_EXTRACT_DIR, currentBackupDir);
+          fs.renameSync(vmBundleDir, currentBackupDir);
           console.log(
             `[VM Updater] Backed up current version to ${currentBackupDir}`,
           );
@@ -466,11 +544,11 @@ export async function installVmImageUpdate(
           console.warn(
             `[VM Updater] Failed to rename old version, copying instead: ${renameErr}`,
           );
-          fs.cpSync(VM_EXTRACT_DIR, currentBackupDir, { recursive: true });
+          fs.cpSync(vmBundleDir, currentBackupDir, { recursive: true });
         }
       }
 
-      // Cleanup 旧版本（只保留当前 + 上一版本 = KEEP_VERSIONS 个）
+      // Cleanup 旧版本（只保留 KEEP_VERSIONS 个）
       if (fs.existsSync(backupDir)) {
         try {
           const backups = fs
@@ -480,10 +558,9 @@ export async function installVmImageUpdate(
             .sort((a, b) => {
               const verA = a.slice(3);
               const verB = b.slice(3);
-              return (compareSemver(verB, verA) ?? 0); // 降序（新版本在前）
+              return (compareSemver(verB, verA) ?? 0);
             });
 
-          // 删除超出保留数量的旧版本
           for (let i = KEEP_VERSIONS; i < backups.length; i++) {
             const oldDir = path.join(backupDir, backups[i]!);
             console.log(`[VM Updater] Removing old backup: ${oldDir}`);
@@ -495,22 +572,9 @@ export async function installVmImageUpdate(
           );
         }
       }
-
-      // ── Step 5: 将新下载的版本 renove 到 VM_EXTRACT_DIR ──
-      //    downloadVmImage 解压到了 VM_EXTRACT_DIR
-      //    由于我们刚才 backup 了 VM_EXTRACT_DIR，现在 downloadResult 中的路径可能已经变了
-      //    实际上 downloadVmImage 解压到 VM_EXTRACT_DIR (硬编码常量)
-      //    而 downloadVmImage 内部的 VM_EXTRACT_DIR 使用了自己的常量
-      //    这里需要确保版本化存储的一致性
-
-      // 注意: downloadVmImage 解压到了它自己的 VM_EXTRACT_DIR（~/.paperclip/vm/agenthubs-local-vm/）
-      // 如果 downloadVmImage 在执行时发现目录已存在会先 rm 再解压
-      // 由于我们在调用 downloadVmImage 之前没有做 backup，所以它解压到了默认路径
-      // 现在 backup 之后，新版本已经在 VM_EXTRACT_DIR 中
-      // 无需额外操作 — 新版本已在正确位置
     }
 
-    // ── Step 6: 写入版本文件 ──
+    // ── Step 5: 写入版本文件 ──
     writeVersion(version.version);
 
     report("complete", 100);
@@ -525,8 +589,6 @@ export async function installVmImageUpdate(
     console.error(`[VM Updater] Install failed: ${errorMessage}`);
     report("error", 0);
 
-    // ⚠️ 更新失败 → 保留旧版本（不阻塞用户使用）
-    // 旧版本的 VM_EXTRACT_DIR 在 backup 阶段已保存
     return {
       success: false,
       error: errorMessage,
@@ -538,12 +600,13 @@ export async function installVmImageUpdate(
 
 /**
  * 回退到上一个版本。
- * 从 backup 目录恢复 vm-{version} 到 VM_EXTRACT_DIR。
+ * 从 backup 目录恢复 vm-{version} 到 vm/bundle/。
  *
  * 用于更新失败后的 fallback。
  */
 export function rollbackToVersion(version: string): boolean {
   const backupDir = path.join(VM_DOWNLOADS_DIR, "backup", `vm-${version}`);
+  const vmBundleDir = path.join(VM_HOME, "bundle");
 
   if (!fs.existsSync(backupDir)) {
     console.error(
@@ -553,16 +616,16 @@ export function rollbackToVersion(version: string): boolean {
   }
 
   try {
-    // 删除当前的 VM_EXTRACT_DIR（如果存在）
-    if (fs.existsSync(VM_EXTRACT_DIR)) {
-      fs.rmSync(VM_EXTRACT_DIR, { recursive: true, force: true });
+    // 删除当前的 bundle 目录（如果存在）
+    if (fs.existsSync(vmBundleDir)) {
+      fs.rmSync(vmBundleDir, { recursive: true, force: true });
     }
 
     // 确保目录存在
-    fs.mkdirSync(path.dirname(VM_EXTRACT_DIR), { recursive: true });
+    fs.mkdirSync(path.dirname(vmBundleDir), { recursive: true });
 
-    // 复制备份到 VM_EXTRACT_DIR
-    fs.cpSync(backupDir, VM_EXTRACT_DIR, { recursive: true });
+    // 复制备份到 vm/bundle/
+    fs.cpSync(backupDir, vmBundleDir, { recursive: true });
 
     // 更新 VERSION 文件
     writeVersion(version);
