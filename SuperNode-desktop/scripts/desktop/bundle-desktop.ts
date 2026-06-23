@@ -102,6 +102,68 @@ function copyRecursive(src: string, dest: string): void {
   }
 }
 
+// ─── VM Bundle (AgentHubs) ─────────────────────────────────────────
+// Copies VM images, guest agent binary, and VM runtime binary into the
+// dist/ directory for inclusion in the Electron app bundle.
+
+function copyVmBundle(outputDir: string): void {
+  console.log("[Bundle] Copying VM bundle (AgentHubs)...");
+
+  // 1. Copy VM images → outputDir/agenthubs-vm/
+  const vmImagesDir = path.join(outputDir, "agenthubs-vm");
+  fs.mkdirSync(vmImagesDir, { recursive: true });
+
+  const vmImagesSource = path.join(APPS_DESKTOP, "vm-rootfs-builder", "output");
+  const vmImages: Array<{ file: string; label: string }> = [
+    { file: "rootfs.img.zst", label: "rootfs.img.zst" },
+    { file: "agent.img.zst", label: "agent.img.zst" },
+  ];
+  for (const { file, label } of vmImages) {
+    const src = path.join(vmImagesSource, file);
+    const dest = path.join(vmImagesDir, file);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, dest);
+      const sizeMb = (fs.statSync(dest).size / (1024 * 1024)).toFixed(1);
+      console.log(`  ${label} → agenthubs-vm/ (${sizeMb} MB)`);
+    } else {
+      console.warn(`[Bundle] ⚠️ ${label} not found at ${src} — skipping (build VM images first)`);
+    }
+  }
+
+  // 2. Copy VM runtime binaries → outputDir/vm-runtime/
+  const vmRuntimeDir = path.join(outputDir, "vm-runtime");
+  fs.mkdirSync(vmRuntimeDir, { recursive: true });
+
+  // 2a. supernode-vm Swift binary
+  const supernodeVmSource = path.join(
+    APPS_DESKTOP, "vm-runtime", "swift", ".build", "apple", "Products", "Release", "supernode-vm",
+  );
+  const supernodeVmDest = path.join(vmRuntimeDir, "supernode-vm");
+  if (fs.existsSync(supernodeVmSource)) {
+    fs.copyFileSync(supernodeVmSource, supernodeVmDest);
+    // Preserve executable permission
+    try { fs.chmodSync(supernodeVmDest, 0o755); } catch { /* best-effort */ }
+    const sizeMb = (fs.statSync(supernodeVmDest).size / (1024 * 1024)).toFixed(1);
+    console.log(`  supernode-vm → vm-runtime/ (${sizeMb} MB)`);
+  } else {
+    console.warn(`[Bundle] ⚠️ supernode-vm not found at ${supernodeVmSource} — skipping (build Swift project first)`);
+  }
+
+  // 2b. sdk-daemon (VM guest agent — Go binary)
+  const sdkDaemonSource = path.join(APPS_DESKTOP, "vm-guest-agent", "bin", "sdk-daemon");
+  const sdkDaemonDest = path.join(vmRuntimeDir, "sdk-daemon");
+  if (fs.existsSync(sdkDaemonSource)) {
+    fs.copyFileSync(sdkDaemonSource, sdkDaemonDest);
+    try { fs.chmodSync(sdkDaemonDest, 0o755); } catch { /* best-effort */ }
+    const sizeMb = (fs.statSync(sdkDaemonDest).size / (1024 * 1024)).toFixed(1);
+    console.log(`  sdk-daemon → vm-runtime/ (${sizeMb} MB)`);
+  } else {
+    console.warn(`[Bundle] ⚠️ sdk-daemon not found at ${sdkDaemonSource} — skipping`);
+  }
+
+  console.log("[Bundle] VM bundle copy complete");
+}
+
 // ─── 清理 ────────────────────────────────────────────────────────
 const distDir = path.join(SUPER_DESKTOP, "dist");
 const serverSymlink = path.join(SUPER_DESKTOP, "paperclip-server");
@@ -610,6 +672,11 @@ fs.copyFileSync(
 );
 
 // ═══════════════════════════════════════════════════════════════════
+// 10b. VM Bundle (AgentHubs) — rootfs + agent images + VM runtime
+// ═══════════════════════════════════════════════════════════════════
+copyVmBundle(distDir);
+
+// ═══════════════════════════════════════════════════════════════════
 // 11. 复制资源 & 配置 electron-builder 工作目录
 // ═══════════════════════════════════════════════════════════════════
 copyRecursive(path.join(APPS_DESKTOP, "resources"), path.join(SUPER_DESKTOP, "resources"));
@@ -677,6 +744,10 @@ const checks: Array<{ p: string; label: string; critical: boolean }> = [
   { p: pgBinary ?? "/nonexistent", label: "embedded-postgres (binary)", critical: true },
   { p: path.join(bundledServer, "node_modules", "sharp"), label: "sharp (package)", critical: true },
   { p: path.join(bundledServer, "ui-dist", "index.html"), label: "UI index.html", critical: true },
+  { p: path.join(distDir, "vm-runtime", "sdk-daemon"), label: "sdk-daemon (VM guest agent)", critical: false },
+  { p: path.join(distDir, "vm-runtime", "supernode-vm"), label: "supernode-vm (Swift runtime)", critical: false },
+  { p: path.join(distDir, "agenthubs-vm", "rootfs.img.zst"), label: "rootfs.img.zst", critical: false },
+  { p: path.join(distDir, "agenthubs-vm", "agent.img.zst"), label: "agent.img.zst", critical: false },
 ];
 
 let allPass = true;
@@ -721,7 +792,6 @@ if (!allPass) {
   process.exit(1);
 }
 
-// ═══════════════════════════════════════════════════════════════════
 // 13. Sync to apps/desktop/ — electron-builder runs from there
 //    Without this step, the daemon bundle (paperclip-server with
 //    node_modules) never reaches the packaged app.
@@ -766,6 +836,19 @@ fs.copyFileSync(
   path.join(appsDesktopDist, "package.json"),
 );
 
+	// Sync VM bundle directories to apps/desktop/ (extraResources)
+	for (const vmSubDir of ["agenthubs-vm", "vm-runtime"]) {
+	  const superVmDir = path.join(distDir, vmSubDir);
+	  if (fs.existsSync(superVmDir)) {
+	    const appsVmDir = path.join(APPS_DESKTOP, vmSubDir);
+	    if (fs.existsSync(appsVmDir)) {
+	      fs.rmSync(appsVmDir, { recursive: true, force: true });
+	    }
+	    fs.cpSync(superVmDir, appsVmDir, { recursive: true, force: true });
+	    console.log(`  ${vmSubDir}/ → apps/desktop/${vmSubDir}/ (extraResource)`);
+	  }
+	}
+
 	// Sync browser/ assets (jsdom default-stylesheet.css RC-14 fix)
 	// In the .app, __dirname = Resources/paperclip-server/dist/
 	// jsdom does path.resolve(__dirname, "../../browser/") → Resources/browser/
@@ -782,7 +865,8 @@ fs.copyFileSync(
 
 	console.log("[Bundle] ✅ Synced to apps/desktop/");
 
-// ═══════════════════════════════════════════════════════════════════
+
+	// ═══════════════════════════════════════════════════════════════════
 // 14. 摘要
 // ═══════════════════════════════════════════════════════════════════
 const totalSize = (() => {
