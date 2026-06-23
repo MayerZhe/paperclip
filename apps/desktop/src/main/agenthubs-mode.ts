@@ -1,17 +1,23 @@
 // apps/desktop/src/main/agenthubs-mode.ts
-// Story 1.2: VM 生命周期管理 (Docker Compose)
+// S-3C1: Rewrite from Docker Compose to VM Platform
 //
-// 管理 AgentHubs Mode 的 Docker Compose 生命周期：
-//   - docker compose up -d 启动所有容器
-//   - 指数退避等待健康检查就绪
-//   - docker compose down 停止并清理容器
-//   - 状态追踪与错误上报
+// Manages the AgentHubs Mode lifecycle using the VM platform abstraction layer:
+//   - isVmBundleReady() to verify the VM bundle is ready
+//   - createSessionDisk() to create a per-session writable overlay
+//   - VmGuestRpc to communicate with the Swift CLI for VM lifecycle
+//   - waitForHealth() to wait for HTTP services to be ready
+//
+// Replaces the old docker compose lifecycle completely.
+// No docker/compose/container references remain.
 
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { execSync } from "node:child_process";
 
+import { isVmBundleReady, getRootfsPath, getAgentImgPath, getVmBundleDir } from "./vm-bundle.js";
+import { createSessionDisk } from "./vm-disk.js";
+import { VmGuestRpc } from "./vm-guest-rpc.js";
+import { waitForHealth } from "./health-check.js";
 import { isVmImageDownloaded } from "./download-vm-image.js";
 import { ensureSharedDir } from "./file-bridge.js";
 
@@ -20,28 +26,24 @@ import { ensureSharedDir } from "./file-bridge.js";
 export interface HealthCheckResults {
   cloudApi: boolean;
   paperclip: boolean;
-  postgres: boolean;
-  redis: boolean;
+  minio: boolean;
 }
 
 export interface AgentHubsModeState {
   status: "stopped" | "starting" | "running" | "stopping" | "error";
   error?: string;
-  composePath: string;
+  composePath: string; // REPURPOSED: now points to VM bundle dir (keep field name for compatibility)
   healthCheckResults: HealthCheckResults;
 }
 
 export interface StartAgentHubsConfig {
   paperclipHome: string;
-  composePath?: string;
-  containerRuntime: string;
   onProgress?: (status: string) => void;
 }
 
 export interface StopAgentHubsConfig {
-  composePath?: string;
-  containerRuntime: string;
   timeout?: number;
+  sessionImagePath?: string; // NEW: path to session overlay disk for cleanup
 }
 
 // ─── 常量 ───
@@ -50,39 +52,23 @@ const VM_HOME = path.resolve(
   process.env.PAPERCLIP_HOME ?? path.join(os.homedir(), ".paperclip"),
   "vm",
 );
-const VM_EXTRACT_DIR = path.join(VM_HOME, "agenthubs-local-vm");
-const DEFAULT_COMPOSE_PATH = path.join(VM_EXTRACT_DIR, "docker-compose.yml");
 
-/** 健康检查指数退避间隔 (ms) — 通用用途 */
+/** 健康检查指数退避间隔 (ms) */
 const HEALTH_CHECK_RETRIES = [120, 240, 480, 960, 1500, 2000, 3000];
-
-/** Docker Compose 健康检查退避间隔 (ms) — 容器已启动时更快响应 */
-const DOCKER_HEALTH_RETRIES = [80, 160, 320, 500, 750, 1000, 1500, 2000];
 
 /** 启动指标文件路径 */
 const STARTUP_METRICS_FILE = path.join(VM_HOME, "startup-metrics.json");
 /** 启动指标最大保留条数 */
 const MAX_STARTUP_METRICS = 5;
 
-/** 必需的 Docker 镜像名称 */
-const REQUIRED_DOCKER_IMAGES = [
-  "agenthubs-postgres",
-  "agenthubs-redis",
-  "agenthubs-cloud-api",
-  "agenthubs-paperclip",
-];
-
-/** 默认 docker compose down 超时 (秒) */
-const DEFAULT_STOP_TIMEOUT = 30;
-
-/** 容器内 paperclip 端口（宿主机映射） */
+/** paperclip 端口（宿主机映射） */
 const PAPERCLIP_HOST_PORT = 3200;
 /** cloud-api 端口 */
 const CLOUD_API_PORT = 4000;
-/** Postgres 端口 */
-const POSTGRES_PORT = 5432;
-/** Redis 端口 */
-const REDIS_PORT = 6379;
+/** MinIO API 端口 */
+const MINIO_API_PORT = 9000;
+/** MinIO Console 端口 (web UI, not health-checked) */
+const MINIO_CONSOLE_PORT = 9001;
 
 // ─── 状态管理 ───
 
@@ -92,12 +78,11 @@ function setState(partial: Partial<AgentHubsModeState>): void {
   if (!currentState) {
     currentState = {
       status: "stopped",
-      composePath: DEFAULT_COMPOSE_PATH,
+      composePath: getVmBundleDir(),
       healthCheckResults: {
         cloudApi: false,
         paperclip: false,
-        postgres: false,
-        redis: false,
+        minio: false,
       },
       ...partial,
     };
@@ -112,117 +97,38 @@ export function getAgentHubsModeState(): AgentHubsModeState | null {
   return currentState;
 }
 
-// ─── 工具函数 ───
+// ─── Swift CLI 路径解析 ───
 
 /**
- * 解析 compose 文件路径
+ * Resolve the path to the Swift CLI binary (supernode-vm).
+ *
+ * Priority:
+ *   1. SUPERNODE_VM_PATH env var (explicit override)
+ *   2. ../vm-runtime/swift/.build/release/supernode-vm relative to __dirname
+ *      (production layout: dist/main/ → ../../.. reaches apps/desktop)
+ *   3. "supernode-vm" on PATH (development convenience)
  */
-function resolveComposePath(composePath?: string): string {
-  const resolved = path.resolve(composePath ?? DEFAULT_COMPOSE_PATH);
-  if (!fs.existsSync(resolved)) {
-    throw new Error(
-      `docker-compose.yml not found at ${resolved}. ` +
-        `Run download-vm-image first.`,
-    );
+function resolveSwiftCliPath(): string {
+  // 1. Explicit override
+  if (process.env.SUPERNODE_VM_PATH) {
+    return process.env.SUPERNODE_VM_PATH;
   }
-  return resolved;
-}
 
-/**
- * 指数退避等待健康检查 URL 就绪
- * 借鉴 packaged-main.ts 的 waitForServerReady 模式
- */
-async function waitForHealth(
-  url: string,
-  timeout = 30000,
-  retries: number[] = HEALTH_CHECK_RETRIES,
-): Promise<boolean> {
-  const start = Date.now();
-  for (const delay of retries) {
-    try {
-      const res = await fetch(url);
-      if (res.ok) return true;
-    } catch {
-      // 服务未就绪
-    }
-    if (Date.now() - start > timeout) return false;
-    await new Promise((r) => setTimeout(r, delay));
+  // 2. Relative to __dirname (production layout)
+  //    __dirname = apps/desktop/dist/main/
+  //    Going up 3 levels: dist/main → dist → desktop → apps
+  //    Then into: vm-runtime/swift/.build/release/supernode-vm
+  const productionPath = path.resolve(
+    __dirname,
+    "..", "..", "..",
+    "vm-runtime", "swift", ".build", "release", "supernode-vm",
+  );
+  if (fs.existsSync(productionPath)) {
+    return productionPath;
   }
-  return false;
-}
 
-/**
- * 执行 docker compose 命令，返回 stdout
- */
-function dockerCompose(
-  composePath: string,
-  args: string[],
-  timeout = 120000,
-): string {
-  const cmd = `docker compose -f "${composePath}" ${args.join(" ")}`;
-  console.log(`[AgentHubs] Running: ${cmd}`);
-  try {
-    return execSync(cmd, {
-      encoding: "utf-8",
-      timeout,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-  } catch (err: unknown) {
-    const stderr =
-      err instanceof Error && "stderr" in err
-        ? String((err as { stderr?: string }).stderr ?? err.message)
-        : String(err);
-    throw new Error(`docker compose failed: ${stderr.trim()}`);
-  }
-}
-
-/**
- * 简单的 TCP 端口连通性检查（通用，不绑定特定 HTTP 协议）
- */
-async function checkTcpPort(port: number, timeout = 2000): Promise<boolean> {
-  const net = await import("node:net");
-  return new Promise((resolve) => {
-    const socket = new net.Socket();
-    socket.setTimeout(timeout);
-    socket
-      .on("connect", () => {
-        socket.destroy();
-        resolve(true);
-      })
-      .on("error", () => {
-        socket.destroy();
-        resolve(false);
-      })
-      .on("timeout", () => {
-        socket.destroy();
-        resolve(false);
-      })
-      .connect(port, "127.0.0.1");
-  });
-}
-
-// ─── Docker 镜像预检查 ───
-
-/**
- * 检查必需的 Docker 镜像是否已存在于本地
- * @returns 缺失的镜像名称数组；如果全部存在则返回空数组
- */
-function checkDockerImages(containerRuntime: string): string[] {
-  const missing: string[] = [];
-  for (const image of REQUIRED_DOCKER_IMAGES) {
-    try {
-      const result = execSync(
-        `${containerRuntime} images -q ${image}`,
-        { encoding: "utf-8", stdio: ["ignore", "pipe", "pipe"] },
-      );
-      if (!result.trim()) {
-        missing.push(image);
-      }
-    } catch {
-      missing.push(image);
-    }
-  }
-  return missing;
+  // 3. Fallback: assume "supernode-vm" is on PATH
+  return "supernode-vm";
 }
 
 // ─── 启动指标 ───
@@ -230,9 +136,8 @@ function checkDockerImages(containerRuntime: string): string[] {
 interface StartupMetric {
   timestamp: string;
   totalMs: number;
-  composeUpMs: number;
-  cloudApiMs: number;
-  paperclipMs: number;
+  bootTimeMs: number;      // NEW: time for VM to boot + emit Ready event
+  servicesReadyMs: number;  // NEW: time for cloud-api + paperclip + minio to be ready
 }
 
 /**
@@ -267,29 +172,40 @@ function writeStartupMetrics(metric: StartupMetric): void {
   }
 }
 
+// ─── RPC 实例（生命周期内复用） ───
+
+let rpc: VmGuestRpc | null = null;
+let sessionDiskPath: string | null = null;
+
 // ─── 健康检查 ───
 
 /**
  * 检查 AgentHubs 所有服务的健康状态
+ *
+ * Probes:
+ *   - cloud-api (HTTP :4000/health)
+ *   - paperclip  (HTTP :3200/api/health)
+ *   - minio      (HTTP :9000/minio/health/live)
+ *
+ * PG and Redis are inside the VM and NOT directly accessible from host.
  */
 export async function checkAgentHubsHealth(): Promise<HealthCheckResults> {
-  const [cloudApi, paperclip, postgres, redis] = await Promise.all([
+  const [cloudApi, paperclip, minio] = await Promise.all([
     fetch(`http://127.0.0.1:${CLOUD_API_PORT}/health`)
       .then((r) => r.ok)
       .catch(() => false),
     fetch(`http://127.0.0.1:${PAPERCLIP_HOST_PORT}/api/health`)
       .then((r) => r.ok)
       .catch(() => false),
-    // PG 和 Redis 使用 TCP 端口检查（它们不支持 HTTP）
-    checkTcpPort(POSTGRES_PORT),
-    checkTcpPort(REDIS_PORT),
+    fetch(`http://127.0.0.1:${MINIO_API_PORT}/minio/health/live`)
+      .then((r) => r.ok)
+      .catch(() => false),
   ]);
 
   const results: HealthCheckResults = {
     cloudApi,
     paperclip,
-    postgres,
-    redis,
+    minio,
   };
 
   // 更新内部状态
@@ -303,99 +219,150 @@ export async function checkAgentHubsHealth(): Promise<HealthCheckResults> {
 // ─── 启动 AgentHubs Mode ───
 
 /**
- * 启动 AgentHubs Mode — docker compose up -d
+ * 启动 AgentHubs Mode — VM-based lifecycle
  *
- * 流程（优化后）：
- * 1. 检查 VM image 是否已下载
- * 2. 预检查必需 Docker 镜像是否存在
- * 3. 解析 composePath
- * 4. 确保共享目录存在
- * 5. docker compose up -d（立即返回，不等健康检查）
- * 6. 并行等待 cloud-api :4000/health + paperclip :3200/api/health 就绪
- * 7. 记录启动指标
- * 8. 返回 AgentHubsModeState
+ * 流程：
+ *  1. Check isVmBundleReady() — if not ready, throw
+ *  2. Check isVmImageDownloaded() — if not downloaded, throw
+ *  3. Create session disk: createSessionDisk()
+ *  4. Swift CLI path resolution
+ *  5. Construct VmConfig
+ *  6. Call rpc.startVM(config)
+ *  7. Wait for "Ready" event from VM
+ *  8. Set security policy (allow networking)
+ *  9. Wait for cloud-api + paperclip + minio health checks
+ *  10. Write startup metrics
+ *  11. Return AgentHubsModeState
  */
 export async function startAgentHubsMode(
   config: StartAgentHubsConfig,
 ): Promise<AgentHubsModeState> {
-  const { paperclipHome, containerRuntime, onProgress } = config;
+  const { paperclipHome, onProgress } = config;
   const t0 = Date.now();
 
-  onProgress?.("checking VM image...");
+  onProgress?.("checking VM bundle...");
 
-  // 1. 检查 VM image 是否已下载
+  // 1. Check VM image is downloaded
   if (!isVmImageDownloaded()) {
     throw new Error(
       "VM image not downloaded. Run download-vm-image first.",
     );
   }
 
-  // 2. 预检查必需 Docker 镜像
-  const missingImages = checkDockerImages(containerRuntime);
-  if (missingImages.length > 0) {
+  // 2. Check VM bundle is ready (images extracted)
+  if (!isVmBundleReady()) {
     throw new Error(
-      `Required Docker images not found: ${missingImages.join(", ")}. ` +
-        `Run download-vm-image first.`,
+      "VM bundle not ready. Run download-vm-image first.",
     );
   }
 
-  // 3. 解析 compose 文件路径
-  const composePath = resolveComposePath(config.composePath);
-  onProgress?.(`compose file: ${composePath}`);
+  // 3. Create session disk
+  onProgress?.("creating session disk...");
+  let sessionDisk: { path: string; sizeMB: number; created: boolean };
+  try {
+    sessionDisk = await createSessionDisk();
+    sessionDiskPath = sessionDisk.path;
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    setState({ status: "error", error: errorMsg });
+    throw new Error(`Failed to create session disk: ${errorMsg}`);
+  }
 
-  // 4. 确保共享目录存在
+  onProgress?.("session disk ready");
+
+  // 3b. Ensure shared directory exists (host ↔ VM file bridge)
   ensureSharedDir(paperclipHome);
   onProgress?.("shared directory ready");
 
-  // 5. 执行 docker compose up -d（立即返回）
+  // 4. Resolve Swift CLI path
+  const swiftCliPath = resolveSwiftCliPath();
+  console.log(`[AgentHubs] Swift CLI: ${swiftCliPath}`);
+
+  // 5. Construct VmConfig
+  const kernelPath = path.join(getVmBundleDir(), "vmlinuz");
+  const vmConfig = {
+    kernelPath,
+    rootfsImage: getRootfsPath(),
+    sessionImage: sessionDisk.path,
+    agentImage: getAgentImgPath(),
+    memoryMB: 2048,
+    cpuCount: 2,
+    vsockPort: 9999,
+  };
+
+  // 6-7. Start VM via RPC
   setState({
     status: "starting",
-    composePath,
+    composePath: getVmBundleDir(),
     healthCheckResults: {
       cloudApi: false,
       paperclip: false,
-      postgres: false,
-      redis: false,
+      minio: false,
     },
   });
 
-  onProgress?.("starting docker compose...");
+  onProgress?.("starting VM...");
+
+  rpc = new VmGuestRpc(swiftCliPath);
 
   try {
-    const output = dockerCompose(composePath, ["up", "-d"]);
-    console.log(`[AgentHubs] Compose output:\n${output}`);
+    await rpc.startVM(vmConfig);
   } catch (err) {
-    const errorMsg =
-      err instanceof Error ? err.message : String(err);
+    const errorMsg = err instanceof Error ? err.message : String(err);
     setState({ status: "error", error: errorMsg });
-    throw new Error(`Failed to start AgentHubs containers: ${errorMsg}`);
+    throw new Error(`Failed to start VM: ${errorMsg}`);
+  }
+
+  // 7. Wait for "Ready" event (VM booted, guest agent running)
+  onProgress?.("waiting for VM to boot...");
+  try {
+    await rpc.waitForEvent("Ready", 120000);
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    setState({ status: "error", error: errorMsg });
+    throw new Error(`VM boot timed out: ${errorMsg}`);
   }
 
   const t1 = Date.now();
-  const composeUpMs = t1 - t0;
-  console.log(`[AgentHubs] docker compose up: ${composeUpMs}ms`);
+  const bootTimeMs = t1 - t0;
+  console.log(`[AgentHubs] VM boot: ${bootTimeMs}ms`);
 
-  onProgress?.("containers started, waiting for services...");
+  // 8. Allow networking
+  onProgress?.("configuring VM security policy...");
+  try {
+    await rpc.request("SetSecurityPolicy", { allowNetwork: true });
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.warn(`[AgentHubs] SetSecurityPolicy failed (non-fatal): ${errorMsg}`);
+  }
 
-  // 6. 并行等待 cloud-api :4000/health 和 paperclip :3200/api/health 就绪
-  const [cloudApiReady, paperclipReady] = await Promise.all([
+  // 9. Wait for cloud-api + paperclip + minio health checks
+  onProgress?.("VM running, waiting for services...");
+
+  const [cloudApiReady, paperclipReady, minioReady] = await Promise.all([
     waitForHealth(
       `http://127.0.0.1:${CLOUD_API_PORT}/health`,
       60000,
-      DOCKER_HEALTH_RETRIES,
+      HEALTH_CHECK_RETRIES,
     ),
     waitForHealth(
       `http://127.0.0.1:${PAPERCLIP_HOST_PORT}/api/health`,
       60000,
-      DOCKER_HEALTH_RETRIES,
+      HEALTH_CHECK_RETRIES,
+    ),
+    waitForHealth(
+      `http://127.0.0.1:${MINIO_API_PORT}/minio/health/live`,
+      60000,
+      HEALTH_CHECK_RETRIES,
     ),
   ]);
 
   const t2 = Date.now();
-  const cloudApiMs = t2 - t0;
-  const paperclipMs = t2 - t0;
-  console.log(`[AgentHubs] cloud-api health: ${cloudApiMs}ms`);
-  console.log(`[AgentHubs] paperclip health: ${paperclipMs}ms`);
+  const servicesReadyMs = t2 - t0;
+  console.log(`[AgentHubs] cloud-api ready: ${cloudApiReady}`);
+  console.log(`[AgentHubs] paperclip ready: ${paperclipReady}`);
+  console.log(`[AgentHubs] minio ready: ${minioReady}`);
+  console.log(`[AgentHubs] Services ready: ${servicesReadyMs}ms`);
 
   if (!cloudApiReady) {
     setState({
@@ -411,23 +378,29 @@ export async function startAgentHubsMode(
     });
     throw new Error(currentState?.error);
   }
+  if (!minioReady) {
+    setState({
+      status: "error",
+      error: `minio health check timed out at http://127.0.0.1:${MINIO_API_PORT}/minio/health/live`,
+    });
+    throw new Error(currentState?.error);
+  }
 
   onProgress?.("all services ready");
 
-  // 7. 运行完整健康检查
+  // 10. Run full health check
   const health = await checkAgentHubsHealth();
 
   const t3 = Date.now();
   const totalMs = t3 - t0;
   console.log(`[AgentHubs] Total startup: ${totalMs}ms`);
 
-  // 记录启动指标（非关键路径）
+  // Record startup metrics (non-critical path)
   writeStartupMetrics({
     timestamp: new Date().toISOString(),
     totalMs,
-    composeUpMs,
-    cloudApiMs,
-    paperclipMs,
+    bootTimeMs,
+    servicesReadyMs,
   });
 
   setState({
@@ -442,73 +415,74 @@ export async function startAgentHubsMode(
 // ─── 停止 AgentHubs Mode ───
 
 /**
- * 停止 AgentHubs Mode — docker compose down
+ * 停止 AgentHubs Mode — VM-based shutdown
  *
  * 流程：
- * 1. 如果已停止，直接返回
- * 2. 尝试 POST /api/desktop/shutdown 到容器内 paperclip（graceful shutdown；忽略网络错误）
- * 3. docker compose down（默认 SIGTERM，等 30s）
- * 4. 超时 → docker compose kill（SIGKILL）
- * 5. 更新状态为 'stopped'
+ *  1. If already stopped, return
+ *  2. Try POST /api/desktop/shutdown to paperclip (graceful shutdown; ignore network errors)
+ *  3. Call rpc.stopVM() — sends Shutdown RPC then SIGTERM/SIGKILL
+ *  4. Close the RPC
+ *  5. Cleanup session disk (fs.unlinkSync)
+ *  6. Update state to 'stopped'
  */
 export async function stopAgentHubsMode(
   config: StopAgentHubsConfig,
 ): Promise<void> {
-  const {
-    containerRuntime,
-    timeout = DEFAULT_STOP_TIMEOUT,
-  } = config;
-
-  // 1. 已停止，直接返回
+  // 1. Already stopped, return
   if (currentState?.status === "stopped") {
     return;
   }
 
   setState({ status: "stopping" });
 
-  const composePath = resolveComposePath(config.composePath);
-
-  // 2. 尝试通知容器内 paperclip 优雅关闭（忽略网络错误）
+  // 2. Try to notify paperclip for graceful shutdown (ignore network errors)
   try {
-    console.log("[AgentHubs] Notifying paperclip in container to shut down...");
+    console.log("[AgentHubs] Notifying paperclip in VM to shut down...");
     await fetch(`http://127.0.0.1:${PAPERCLIP_HOST_PORT}/api/desktop/shutdown`, {
       method: "POST",
     });
-    // 给 daemon 一点时间处理
+    // Give daemon a moment to process
     await new Promise((r) => setTimeout(r, 2000));
   } catch {
-    // 容器可能已停止或未运行，忽略
-    console.log("[AgentHubs] Paperclip shutdown endpoint not reachable, proceeding with docker compose down");
+    // VM may already be stopped or unreachable, ignore
+    console.log("[AgentHubs] Paperclip shutdown endpoint not reachable, proceeding with VM stop");
   }
 
-  // 3. docker compose down（先 SIGTERM，等待 timeout 秒）
-  try {
-    dockerCompose(composePath, ["down", "--timeout", String(timeout)]);
-    console.log("[AgentHubs] docker compose down completed");
-  } catch (downErr) {
-    // 4. down 失败（超时等），强制 kill
-    console.warn(
-      `[AgentHubs] docker compose down failed (${downErr}), force killing...`,
-    );
+  // 3. Stop VM via RPC
+  if (rpc) {
     try {
-      dockerCompose(composePath, ["kill"]);
-      // 清理 kill 后留下的容器
-      dockerCompose(composePath, ["down", "--remove-orphans"]);
-    } catch (killErr) {
-      console.error(
-        `[AgentHubs] docker compose kill/down also failed: ${killErr}`,
-      );
+      await rpc.stopVM();
+      console.log("[AgentHubs] VM stopped via RPC");
+    } catch (err) {
+      console.warn(`[AgentHubs] VM stop via RPC failed: ${err}`);
     }
   }
 
-  // 5. 更新状态
+  // 4. Close RPC
+  if (rpc) {
+    rpc.close();
+    rpc = null;
+  }
+
+  // 5. Cleanup session disk
+  const diskPath = config.sessionImagePath ?? sessionDiskPath;
+  if (diskPath && fs.existsSync(diskPath)) {
+    try {
+      fs.unlinkSync(diskPath);
+      console.log(`[AgentHubs] Session disk cleaned up: ${diskPath}`);
+    } catch (err) {
+      console.warn(`[AgentHubs] Failed to cleanup session disk ${diskPath}: ${err}`);
+    }
+  }
+  sessionDiskPath = null;
+
+  // 6. Update state
   setState({
     status: "stopped",
     healthCheckResults: {
       cloudApi: false,
       paperclip: false,
-      postgres: false,
-      redis: false,
+      minio: false,
     },
   });
 }
