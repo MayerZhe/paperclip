@@ -374,6 +374,45 @@ export async function runDesktopMain(): Promise<void> {
     });
   });
 
+  // ── S-3F1: VM download + status IPC handlers (Welcome screen) ─────────
+  import("./download-vm-image.js").then(({ downloadVmImage, isVmImageDownloaded }) => {
+    // shell:vm-download — trigger VM image download
+    ipcMain.on("shell:vm-download", async () => {
+      try {
+        await downloadVmImage({
+          onProgress: (progress) => {
+            if (!mainWindow.isDestroyed()) {
+              mainWindow.webContents.send("sidebar:vm-download-progress", progress);
+            }
+          },
+        });
+      } catch (err) {
+        console.error("[PaperClip Desktop] VM download failed:", err);
+        if (!mainWindow.isDestroyed()) {
+          mainWindow.webContents.send("sidebar:vm-download-progress", {
+            percent: 0,
+            downloadedMB: 0,
+            totalMB: 0,
+            stage: "error",
+          });
+        }
+      }
+    });
+
+    // shell:vm-download-cancel — cancel VM download (noop for now)
+    ipcMain.on("shell:vm-download-cancel", () => {
+      console.log("[PaperClip Desktop] VM download cancel requested (noop)");
+    });
+
+    // shell:vm-status — check if VM bundle is ready
+    ipcMain.handle("shell:vm-status", async () => {
+      return {
+        downloaded: isVmImageDownloaded(),
+        manifest: null,
+      };
+    });
+  });
+
   // ── Phase 7: 启动 Tray + App Menu ─────────────────────────────────────
 
   // Await mode startup results now (agent daemon port needed for heartbeat + menu)

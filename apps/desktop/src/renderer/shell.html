@@ -8,6 +8,41 @@
   <script src="shell.js" defer></script>
 </head>
 <body>
+  <!-- Welcome Screen — shown on first load, hidden after mode selection -->
+  <div id="welcome-screen">
+    <div class="welcome-title">Welcome to Super Node</div>
+    <div class="welcome-cards">
+      <!-- Agent Mode Card -->
+      <div class="welcome-card" id="card-agent">
+        <div class="welcome-card-icon">🚀</div>
+        <div class="welcome-card-title">Agent Mode</div>
+        <div class="welcome-card-desc">Manage AI agents with no extra setup</div>
+        <button class="welcome-card-btn" id="btn-start-agent">Start Now</button>
+      </div>
+
+      <!-- AgentHubs Mode Card -->
+      <div class="welcome-card" id="card-agenthubs">
+        <div class="welcome-card-icon">📦</div>
+        <div class="welcome-card-title">AgentHubs Mode</div>
+        <div class="welcome-card-desc">Orders + collaboration via VM (20MB)</div>
+        <button class="welcome-card-btn" id="btn-start-agenthubs">Enter AgentHubs</button>
+        <button class="welcome-card-btn" id="btn-download-agenthubs" style="display: none;">Download VM (20MB)</button>
+        <!-- VM Download Progress (hidden unless downloading) -->
+        <div class="vm-progress-area hidden" id="vm-progress-area">
+          <div class="vm-progress-bar">
+            <div class="vm-progress-bar-fill" id="vm-progress-fill"></div>
+          </div>
+          <div class="vm-progress-stats" id="vm-progress-stats">0% — 0 MB/s — --:--</div>
+          <div class="vm-progress-actions">
+            <button class="welcome-card-btn-secondary" id="btn-vm-retry">Retry</button>
+            <button class="welcome-card-btn-secondary" id="btn-vm-skip">Skip</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar — hidden initially, shown after mode selection -->
   <aside id="sidebar">
     <!-- macOS traffic light titlebar spacer -->
     <div class="titlebar"></div>

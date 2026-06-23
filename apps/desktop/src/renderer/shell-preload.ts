@@ -59,7 +59,18 @@ contextBridge.exposeInMainWorld("sidebar", {
    * Send: trigger VM image download.
    * Main process downloads rootfs.img and agent.img via manifest.
    */
-  downloadVm: () => ipcRenderer.send("shell:download-vm"),
+  downloadVm: () => ipcRenderer.send("shell:vm-download"),
+
+  /**
+   * Send: cancel VM image download.
+   */
+  cancelVmDownload: () => ipcRenderer.send("shell:vm-download-cancel"),
+
+  /**
+   * Invoke: check if VM image bundle is downloaded and ready.
+   * Returns { downloaded: boolean, manifest: VmManifest | null }
+   */
+  checkVmStatus: () => ipcRenderer.invoke("shell:vm-status"),
 
   /**
    * Receive: VM download progress updates from main process.

@@ -217,3 +217,160 @@ html, body {
   background: #30363D;
   border-radius: 2px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Welcome Screen
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Welcome screen — full viewport, hides sidebar */
+#welcome-screen {
+  width: 100vw;
+  height: 100vh;
+  background: #0D1117;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #E6EDF3;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.welcome-cards {
+  display: flex;
+  gap: 24px;
+}
+
+.welcome-card {
+  width: 280px;
+  background: #161B22;
+  border: 1px solid #30363D;
+  border-radius: 12px;
+  padding: 32px 24px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.welcome-card:hover {
+  border-color: #1F6FEB;
+  box-shadow: 0 0 12px rgba(31, 111, 235, 0.15);
+}
+
+.welcome-card-icon {
+  font-size: 36px;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.welcome-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #E6EDF3;
+  margin-bottom: 8px;
+}
+
+.welcome-card-desc {
+  font-size: 13px;
+  color: #8B949E;
+  margin-bottom: 24px;
+  line-height: 1.4;
+}
+
+.welcome-card-btn {
+  width: 100%;
+  padding: 10px 16px;
+  background: #1F6FEB;
+  border: 1px solid #1F6FEB;
+  border-radius: 6px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 200ms ease;
+  margin-top: auto;
+}
+
+.welcome-card-btn:hover {
+  background: #388BFD;
+  border-color: #388BFD;
+}
+
+.welcome-card-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.welcome-card-btn-secondary {
+  padding: 6px 16px;
+  background: transparent;
+  border: 1px solid #30363D;
+  border-radius: 6px;
+  color: #8B949E;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.welcome-card-btn-secondary:hover {
+  color: #E6EDF3;
+  border-color: #8B949E;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   VM Download Progress (inside welcome card)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.vm-progress-area {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.vm-progress-area.hidden {
+  display: none;
+}
+
+.vm-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #21262D;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.vm-progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: #1F6FEB;
+  border-radius: 3px;
+  transition: width 300ms ease;
+}
+
+.vm-progress-stats {
+  font-size: 11px;
+  color: #8B949E;
+  text-align: center;
+  margin-bottom: 12px;
+  font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+}
+
+.vm-progress-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* Utility */
+.hidden {
+  display: none;
+}
