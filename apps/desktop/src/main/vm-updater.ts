@@ -406,8 +406,7 @@ export async function installVmImageUpdate(
     const { downloadVmImage } = await import("./download-vm-image.js");
 
     const downloadResult = await downloadVmImage({
-      url: version.downloadUrl,
-      containerRuntime,
+      manifestUrl: version.downloadUrl,
       onProgress: (progress: {
         percent: number;
         downloadedMB: number;
@@ -419,10 +418,10 @@ export async function installVmImageUpdate(
           string,
           VmImageInstallProgress["stage"]
         > = {
+          fetching_manifest: "downloading",
           downloading: "downloading",
           verifying: "verifying",
-          extracting: "extracting",
-          loading: "loading",
+          decompressing: "extracting",
           complete: "complete",
           error: "error",
         };
