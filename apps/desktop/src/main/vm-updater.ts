@@ -147,6 +147,7 @@ interface GitHubRelease {
   tag_name: string;
   name: string;
   published_at: string;
+  html_url?: string;
   assets: GitHubAsset[];
 }
 
@@ -475,43 +476,37 @@ export async function installVmImageUpdate(
 
     const { downloadVmImage } = await import("./download-vm-image.js");
 
-    // 下载并校验 rootfs.img.zst
-    const rootfsResult = await downloadVmImage({
-      url: version.rootfs.url,
+    // 使用 manifest URL 一次性下载 rootfs + agent 双文件
+    // downloadVmImage 内部会并行下载、SHA256 校验、zstd 解压
+    const downloadResult = await downloadVmImage({
+      manifestUrl: version.manifestUrl,
       onProgress: (progress: {
         percent: number;
         downloadedMB: number;
         totalMB: number;
         stage: string;
       }) => {
-        onProgress?.({ percent: Math.round(progress.percent * 0.5), stage: "downloading" });
+        // 将 downloadVmImage 的进度映射到安装进度
+        const mappedStages: Record<
+          string,
+          VmImageInstallProgress["stage"]
+        > = {
+          fetching_manifest: "downloading",
+          downloading: "downloading",
+          verifying: "verifying",
+          decompressing: "extracting",
+          complete: "complete",
+          error: "error",
+        };
+        const stage = mappedStages[progress.stage] ?? "downloading";
+        onProgress?.({ percent: progress.percent, stage });
       },
     });
 
-    if (!rootfsResult.success) {
+    if (!downloadResult.success) {
       return {
         success: false,
-        error: `Rootfs download failed: ${rootfsResult.error}`,
-      };
-    }
-
-    // 下载并校验 agent.img.zst
-    const agentResult = await downloadVmImage({
-      url: version.agent.url,
-      onProgress: (progress: {
-        percent: number;
-        downloadedMB: number;
-        totalMB: number;
-        stage: string;
-      }) => {
-        onProgress?.({ percent: 50 + Math.round(progress.percent * 0.5), stage: "downloading" });
-      },
-    });
-
-    if (!agentResult.success) {
-      return {
-        success: false,
-        error: `Agent download failed: ${agentResult.error}`,
+        error: `VM image download failed: ${downloadResult.error}`,
       };
     }
 
