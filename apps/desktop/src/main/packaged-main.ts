@@ -1,16 +1,16 @@
 // apps/desktop/src/main/packaged-main.ts
-// S-A5: Rewrite runDesktopMain() — unified startup flow with sidebar shell
+// Single BrowserWindow startup — Phase 1 (unified frontend)
 //
 // New flow:
 //   checkExistingSession → (if no session) createAuthBridge login →
-//   startBothModes → createSidebarManager → push org/status data →
-//   register IPC handlers → createTray + createAppMenu → shutdown handler
+//   startBothModes → createBrowserWindow(:3200) → register IPC handlers →
+//   createTray + createAppMenu → shutdown handler
 //
-// Architecture: Both modes start in parallel via mode-manager. The sidebar
-// shell (BrowserWindow + WebContentsView) manages visibility. No more
-// "stop one, start the other" dual-branch startup.
+// Architecture: Both modes start in parallel via mode-manager. Single
+// BrowserWindow with webviewTag:true for AgentHubs tab. Mode switching
+// handled by React SPA (Phase 3) via paperclip:mode-changed IPC.
 
-import { app, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import fs from "node:fs";
 import os from "node:os";
@@ -32,7 +32,6 @@ import {
   stopBothModes,
   type ModeStartupResult,
 } from "./mode-manager.js";
-import { createSidebarManager, type SidebarManager } from "./sidebar-manager.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // 读取版本号。在打包后，app.getVersion() 从 Electron 的 package.json 读取。
@@ -288,36 +287,13 @@ export async function runDesktopMain(): Promise<void> {
   const requestedPort = findAvailablePort();
   const daemonEntry = resolveDaemonEntry();
 
-  // sidebarMgr declared here but not yet created — mode-manager's onStatusChange
-  // fires synchronously during startBothModes, so we buffer updates until
-  // sidebarMgr is assigned in Phase 4.
-  let sidebarMgr: SidebarManager | null = null;
-  const pendingStatusUpdates: Array<{ mode: "agent" | "agenthubs"; status: "online" | "offline" | "loading" }> = [];
   let agentDaemonReady = false;
   let agentDaemonPort: number | null = null;
 
-  const applyStatusUpdate = (mode: "agent" | "agenthubs", status: "online" | "offline" | "loading") => {
-    if (sidebarMgr) {
-      sidebarMgr.updateStatus(mode, status);
-    } else {
-      pendingStatusUpdates.push({ mode, status });
-    }
-  };
-
-  /** Activate agent tab — call when daemon is confirmed ready */
-  const activateAgentMode = () => {
-    if (!sidebarMgr) return;
-    const port = agentDaemonPort ?? requestedPort;
-    sidebarMgr.updateAgentUrl(port);
-    sidebarMgr.switchToMode("agent");
-  };
-
-  // ── Phase 3: 并行启动两种模式（fire-and-continue — 不阻塞 Sidebar 创建）──
+  // ── Phase 3: 并行启动两种模式（fire-and-continue — 不阻塞窗口创建）──
   //
-  // 原先 await startBothModes() 在 Docker daemon 不可用时可能阻塞 140-180s，
-  // 导致 creatSidebarManager() 永远不执行。改为先启动、先创建 sidebar、
-  // 后 await 结果的策略。onStatusChange 回调通过 pendingStatusUpdates 缓冲，
-  // 在 sidebar 创建后 flush，确保 status dots 正确渲染。
+  // startBothModes() 内部使用 Promise.allSettled 并行启动 agent daemon
+  // 和 AgentHubs VM。不阻塞下面的 BrowserWindow 创建，确保 UI 立即可见。
   const modeResultPromise = startBothModes({
     paperclipHome: PAPERCLIP_HOME,
     agentConfig: { daemonEntry, serverPort: requestedPort },
@@ -330,55 +306,53 @@ export async function runDesktopMain(): Promise<void> {
       await stopAgentDaemon(daemon, port);
     },
     onStatusChange: (mode, status, _error) => {
-      const mapped = status === "running" ? "online" : status === "error" ? "offline" : "loading";
-      applyStatusUpdate(mode, mapped);
-      // When agent daemon becomes ready, switch to agent tab immediately.
+      // When agent daemon becomes ready, notify renderer to show agent tab.
       // Do NOT wait for AgentHubs VM — VM boot blocks for 120s in sandbox.
       if (mode === "agent" && status === "running") {
         agentDaemonReady = true;
         agentDaemonPort = requestedPort;
-        activateAgentMode();
+        if (!mainWindow.isDestroyed()) {
+          mainWindow.webContents.send("paperclip:mode-changed", { mode: "agent" });
+        }
       }
     },
   });
 
-  // ── Phase 4: 创建 Sidebar Shell（BrowserWindow + WebContentsView） ───
-  // 立即创建，不等待 modeResult — 用户立即可见 sidebar UI
+  // ── Phase 4: Create BrowserWindow ──
+  // 立即创建，不等待 modeResult — 用户立即可见 UI
 
-  sidebarMgr = createSidebarManager({
-    shellHtmlPath: path.join(__dirname, "..", "renderer", "shell.html"),
-    shellPreloadPath: path.join(__dirname, "..", "renderer", "shell-preload.js"),
-    jwtToken: token,
-    agentPort: requestedPort,
-    onSignOut: async () => {
-      // Clear session and restart login by quitting
-      app.quit();
+  const isMac = process.platform === "darwin";
+
+  const mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    minWidth: 900,
+    minHeight: 600,
+    title: "SuperNode",
+    show: false,
+    ...(isMac && {
+      titleBarStyle: "hiddenInset",
+      titleBarOverlay: false,
+      vibrancy: "under-window",
+      visualEffectState: "active",
+      backgroundColor: "#00000000",
+      trafficLightPosition: { x: 12, y: 16 },
+    }),
+    webPreferences: {
+      preload: path.join(__dirname, "..", "preload", "index.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
+      webviewTag: true,  // 允许 <webview> 标签（AgentHubs tab 用）
     },
   });
 
-  // Flush pending status updates now that sidebarMgr is assigned
-  for (const update of pendingStatusUpdates) {
-    sidebarMgr.updateStatus(update.mode, update.status);
-  }
-  pendingStatusUpdates.length = 0;
-
-  // If agent daemon became ready before sidebarMgr was created, activate now
-  if (agentDaemonReady) {
-    activateAgentMode();
-  }
-
-  const mainWindow = sidebarMgr.getWindow();
-
-  // ── Phase 5: Push 初始数据到 Sidebar ──────────────────────────────────
-
-  sidebarMgr.updateOrgInfo({
-    name: selectedOrg?.name ?? "AgentHubs",
-    role: "Owner",
-    balance: "Loading...",
-    email: user?.email ?? "",
+  mainWindow.once("ready-to-show", () => {
+    mainWindow.show();
   });
 
-  // ── Phase 6: 注册 IPC Handlers ─────────────────────────────────────────
+  mainWindow.loadURL(`http://127.0.0.1:${requestedPort}`);
+
+  // ── Phase 5: 注册 IPC Handlers ─────────────────────────────────────────
 
   registerContextMenuHandler();
 
@@ -405,22 +379,22 @@ export async function runDesktopMain(): Promise<void> {
     });
   });
 
-  // ── S-3F1: VM download + status IPC handlers (Welcome screen) ─────────
+  // ── VM download + status IPC handlers ─────────
   import("./download-vm-image.js").then(({ downloadVmImage, isVmImageDownloaded }) => {
-    // shell:vm-download — trigger VM image download
-    ipcMain.on("shell:vm-download", async () => {
+    // paperclip:vm-download — trigger VM image download
+    ipcMain.on("paperclip:vm-download", async () => {
       try {
         await downloadVmImage({
           onProgress: (progress) => {
             if (!mainWindow.isDestroyed()) {
-              mainWindow.webContents.send("sidebar:vm-download-progress", progress);
+              mainWindow.webContents.send("paperclip:vm-download-progress", progress);
             }
           },
         });
       } catch (err) {
         console.error("[SuperNode Desktop] VM download failed:", err);
         if (!mainWindow.isDestroyed()) {
-          mainWindow.webContents.send("sidebar:vm-download-progress", {
+          mainWindow.webContents.send("paperclip:vm-download-progress", {
             percent: 0,
             downloadedMB: 0,
             totalMB: 0,
@@ -430,18 +404,36 @@ export async function runDesktopMain(): Promise<void> {
       }
     });
 
-    // shell:vm-download-cancel — cancel VM download (noop for now)
-    ipcMain.on("shell:vm-download-cancel", () => {
+    // paperclip:vm-download-cancel — cancel VM download (noop for now)
+    ipcMain.on("paperclip:vm-download-cancel", () => {
       console.log("[SuperNode Desktop] VM download cancel requested (noop)");
     });
 
-    // shell:vm-status — check if VM bundle is ready
-    ipcMain.handle("shell:vm-status", async () => {
-      return {
-        downloaded: isVmImageDownloaded(),
-        manifest: null,
-      };
+    // paperclip:vm-status — check if VM bundle is ready
+    ipcMain.handle("paperclip:vm-status", async () => {
+      return isVmImageDownloaded();
     });
+  });
+
+  // ── Phase 5 IPC: mode/auth/health handlers ───────────────────────────
+
+  ipcMain.on("paperclip:mode-changed", (_event, mode: "agent" | "agenthubs") => {
+    currentMode = mode;
+  });
+
+  ipcMain.handle("paperclip:get-initial-mode", () => currentMode);
+
+  ipcMain.on("paperclip:sign-out", () => {
+    app.quit();
+  });
+
+  ipcMain.handle("paperclip:agenthubs-health", async () => {
+    try {
+      const { checkAgentHubsHealth } = await import("./agenthubs-mode.js");
+      return await checkAgentHubsHealth();
+    } catch {
+      return { cloudApi: false, paperclip: false, minio: false };
+    }
   });
 
   // ── Phase 7: 启动 Tray + App Menu + Sidecar + Updater ──────────────────
@@ -456,10 +448,14 @@ export async function runDesktopMain(): Promise<void> {
   // Create tray + menu immediately (with fallback port)
   const cliResultsPromise = scanCliAvailability();
 
+  // Mode state (in-memory, synced with renderer via IPC)
+  let currentMode: "agent" | "agenthubs" = "agent";
+
   const onSwitchMode = () => {
-    if (!sidebarMgr) return;
-    const current = sidebarMgr.getCurrentMode();
-    sidebarMgr.switchToMode(current === "agent" ? "agenthubs" : "agent");
+    currentMode = currentMode === "agent" ? "agenthubs" : "agent";
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("paperclip:mode-changed", { mode: currentMode });
+    }
   };
 
   createTray(mainWindow, onSwitchMode, "agenthubs");
@@ -503,9 +499,13 @@ export async function runDesktopMain(): Promise<void> {
     modeResult = result;
     if (result.agent.success) {
       stopHeartbeat = startTrayHeartbeat(result.agent.port);
-      // Ensure sidebar is on agent mode (may already be from onStatusChange)
+      // If agent daemon wasn't ready during startup, notify renderer now
       if (!agentDaemonReady) {
-        activateAgentMode();
+        agentDaemonReady = true;
+        agentDaemonPort = result.agent.port;
+        if (!mainWindow.isDestroyed()) {
+          mainWindow.webContents.send("paperclip:mode-changed", { mode: "agent" });
+        }
       }
     }
   }).catch((err) => {

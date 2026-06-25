@@ -151,6 +151,15 @@ export function createAuthBridge(opts: {
   let settled = false;
   let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
 
+  // Cached auth — when user lands on /select-org we cache token/user/orgs
+  // but don't settle. Settlement is deferred until the user picks an org
+  // and navigates to /console/<type>/<id>.
+  let cachedAuth: {
+    token: string;
+    user: { id: string; email: string; name: string };
+    orgs: Array<{ id: string; name: string; type: string; slug: string }>;
+  } | null = null;
+
   // ── Cleanup ────────────────────────────────────────────────────────────────
 
   const cleanup = () => {
@@ -216,50 +225,105 @@ export function createAuthBridge(opts: {
       return; // malformed URL — ignore
     }
 
-    if (isPostLoginPath(parsed.pathname)) {
-      // Wait a beat for the SPA to hydrate and write the token to localStorage.
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    if (!isPostLoginPath(parsed.pathname)) return;
 
+    // Wait a beat for the SPA to hydrate and write the token to localStorage.
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // ── Case 1: /select-org → cache auth but DON'T settle ─────────────
+    // User lands on org selection page. Cache token/user/orgs, then wait
+    // for the user to pick an org and navigate to /console/<type>/<id>.
+    if (parsed.pathname === "/select-org") {
       const token = await extractTokenFromWindow(win);
       if (!token) {
-        console.log("[auth-bridge] Post-login page detected but no token found");
+        console.log("[auth-bridge] /select-org detected but no token found");
         return;
       }
-
       try {
         const user = decodeTokenPayload(token);
         const orgs = await fetchOrgs(token);
-
-        // If we arrived at /select-org we haven't selected one yet.
-        // If we arrived at /dashboard or /console/<id> the server may have
-        // already set a selected org in localStorage — we leave that to the
-        // caller to determine.
-        let selectedOrgId: string | undefined;
-        if (parsed.pathname === "/select-org") {
-          selectedOrgId = undefined;
-        } else if (parsed.pathname.includes("/console/")) {
-          // e.g. /console/org_abc123 — extract the slug
-          const segments = parsed.pathname.split("/").filter(Boolean);
-          const slugCandidate = segments[segments.length - 1];
-          const matched = orgs.find((o) => o.slug === slugCandidate || o.id === slugCandidate);
-          selectedOrgId = matched?.id;
-        }
-
+        cachedAuth = { token, user, orgs };
         console.log(
-          `[auth-bridge] Login complete for ${user.email} with ${orgs.length} org(s)` +
-            (selectedOrgId ? `, selected ${selectedOrgId}` : ""),
+          `[auth-bridge] Cached auth for ${user.email}, waiting for org selection...`,
         );
-
-        succeed({ token, user, orgs, selectedOrgId });
-      } catch (err: unknown) {
-        // Token extraction or org fetch failed.
-        console.error("[auth-bridge] Login flow error:", err);
+        // ⚠️ Don't call succeed() — wait for /console/ navigation
+      } catch (err) {
         fail(
           err instanceof Error
             ? `Login failed: ${err.message}`
             : "Login failed: unable to complete authentication",
         );
       }
+      return;
+    }
+
+    // ── Case 2: /dashboard → skip org selection, use first org ─────────
+    if (parsed.pathname === "/dashboard" && cachedAuth) {
+      succeed({
+        token: cachedAuth.token,
+        user: cachedAuth.user,
+        orgs: cachedAuth.orgs,
+        selectedOrgId: cachedAuth.orgs[0]?.id,
+      });
+      return;
+    }
+
+    // ── Case 3: /console/<type>/<id> → user selected an org ────────────
+    if (parsed.pathname.includes("/console/") && cachedAuth) {
+      const segments = parsed.pathname.split("/").filter(Boolean);
+      const slugCandidate = segments[segments.length - 1];
+      const matched = cachedAuth.orgs.find(
+        (o) => o.slug === slugCandidate || o.id === slugCandidate,
+      );
+      const selectedOrgId = matched?.id ?? cachedAuth.orgs[0]?.id;
+      console.log(
+        `[auth-bridge] Login complete for ${cachedAuth.user.email} with ${cachedAuth.orgs.length} org(s)` +
+          (selectedOrgId ? `, selected ${selectedOrgId}` : ""),
+      );
+      succeed({
+        token: cachedAuth.token,
+        user: cachedAuth.user,
+        orgs: cachedAuth.orgs,
+        selectedOrgId,
+      });
+      return;
+    }
+
+    // ── Fallback: no cachedAuth — handle direct post-login navigation ──
+    // (e.g. user went directly to /console/ from login without /select-org)
+    const token = await extractTokenFromWindow(win);
+    if (!token) {
+      console.log("[auth-bridge] Post-login page detected but no token found");
+      return;
+    }
+
+    try {
+      const user = decodeTokenPayload(token);
+      const orgs = await fetchOrgs(token);
+
+      let selectedOrgId: string | undefined;
+      if (parsed.pathname.includes("/console/")) {
+        const segments = parsed.pathname.split("/").filter(Boolean);
+        const slugCandidate = segments[segments.length - 1];
+        const matched = orgs.find(
+          (o) => o.slug === slugCandidate || o.id === slugCandidate,
+        );
+        selectedOrgId = matched?.id;
+      }
+
+      console.log(
+        `[auth-bridge] Login complete for ${user.email} with ${orgs.length} org(s)` +
+          (selectedOrgId ? `, selected ${selectedOrgId}` : ""),
+      );
+
+      succeed({ token, user, orgs, selectedOrgId });
+    } catch (err: unknown) {
+      console.error("[auth-bridge] Login flow error:", err);
+      fail(
+        err instanceof Error
+          ? `Login failed: ${err.message}`
+          : "Login failed: unable to complete authentication",
+      );
     }
   };
 

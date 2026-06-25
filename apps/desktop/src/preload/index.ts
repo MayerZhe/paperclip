@@ -55,13 +55,43 @@ contextBridge.exposeInMainWorld("paperclip", {
   // Install a CLI tool — main process execs the install command
   installCli: (adapterType: string) => ipcRenderer.invoke("paperclip:install-cli", { adapterType }),
 
-  // Sidebar mode switch — user clicked tab (AgentHubs data bridge)
-  sidebar: {
-    switchMode: (mode: string) => ipcRenderer.send("shell:switch-mode", { mode }),
-    signOut: () => ipcRenderer.send("shell:sign-out"),
-    onOrgInfo: (cb: Function) => ipcRenderer.on("sidebar:org-info", (_event, info) => cb(info)),
-    onStatus: (cb: Function) => ipcRenderer.on("sidebar:status", (_event, status) => cb(status)),
-    getToken: () => ipcRenderer.invoke("shell:get-token"),
-    refreshBalance: (orgId: string) => ipcRenderer.invoke("shell:refresh-balance", { orgId }),
+  // ── Mode sync ──
+  /** React tab 切换 → Electron main process 更新 tray/menu */
+  switchMode: (mode: "agent" | "agenthubs") =>
+    ipcRenderer.send("paperclip:mode-changed", mode),
+
+  /** UI 初始化时获取上次保存的 mode */
+  getInitialMode: (): Promise<"agent" | "agenthubs"> =>
+    ipcRenderer.invoke("paperclip:get-initial-mode"),
+
+  // ── Auth ──
+  /** Sign out → Electron 清除 session + 重新显示登录窗口 */
+  signOut: () => ipcRenderer.send("paperclip:sign-out"),
+
+  // ── AgentHubs health ──
+  /** 轮询 AgentHubs 服务健康状态 */
+  getAgentHubsHealth: (): Promise<{
+    cloudApi: boolean;
+    paperclip: boolean;
+    minio: boolean;
+  }> => ipcRenderer.invoke("paperclip:agenthubs-health"),
+
+  // ── VM status ──
+  /** VM download progress events (main→renderer push) */
+  onVmDownloadProgress: (cb: (progress: {
+    percent: number;
+    downloadedMB: number;
+    totalMB: number;
+    stage: string;
+  }) => void) => {
+    const handler = (_event: any, progress: any) => cb(progress);
+    ipcRenderer.on("paperclip:vm-download-progress", handler);
+    return () => {
+      ipcRenderer.removeListener("paperclip:vm-download-progress", handler);
+    };
   },
+
+  /** Check if VM bundle is ready */
+  isVmReady: (): Promise<boolean> =>
+    ipcRenderer.invoke("paperclip:vm-status"),
 });
