@@ -3,7 +3,7 @@
 //
 // Manages:
 //   1. A BrowserWindow that loads shell.html (the sidebar shell)
-//   2. Two WebContentsView instances (agent mode at :3100, agenthubs mode at :4000)
+//   2. Two WebContentsView instances (agent mode at :3200, agenthubs mode at :4000)
 //   3. Layout calculation (sidebar 260px + content area filling remaining space)
 //   4. IPC for switching modes and pushing data to the shell
 

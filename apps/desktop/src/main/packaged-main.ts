@@ -80,7 +80,7 @@ async function waitForServerReady(port: number, timeout = 30000): Promise<boolea
 
 // ─── 端口检测 ───
 // Daemon uses detect-port internally and respects the PORT env var.
-// We always set PORT=3100; if the daemon can't bind to it, it will fail
+// We always set PORT=3200; if the daemon can't bind to it, it will fail
 // and report to Electron (rather than silently using a different port).
 function findAvailablePort(): number {
   return DEFAULT_SERVER_PORT;
