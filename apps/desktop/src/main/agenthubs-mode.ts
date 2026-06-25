@@ -13,6 +13,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 import { isVmBundleReady, getRootfsPath, getAgentImgPath, getVmBundleDir } from "./vm-bundle.js";
 import { createSessionDisk } from "./vm-disk.js";

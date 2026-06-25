@@ -28,9 +28,9 @@ mac:
       arch:
         - arm64
         - x64
-  # entitlements: build/entitlements.mac.plist
-  # entitlementsInherit: build/entitlements.mac.plist
-  # hardenedRuntime: true
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.inherit.plist
+  hardenedRuntime: true
   icon: resources/icon.icns
   minimumSystemVersion: "13.0"
   # 公证配置（CI 注入或本地开发时注释）
@@ -94,6 +94,10 @@ extraResources:
     to: "paperclip-server"
   - from: "browser"
     to: "browser"
+  - from: "dist/agenthubs-vm"
+    to: "agenthubs-vm"
+  - from: "dist/vm-runtime"
+    to: "vm-runtime"
 
 # 文件匹配模式
 # paperclip-server is extraResources (copied to Resources/paperclip-server/), not in dist/
@@ -108,7 +112,7 @@ files:
 # 钩子
 # ═══════════════════════════════════════
 # Fix Helper .app Info.plist to prevent 4 icons in Dock/Launchpad
-afterPack: "../../SuperNode-desktop/scripts/desktop/fix-helper-plist.cjs"
+afterPack: "scripts/desktop/fix-helper-plist.cjs"
 
 # ═══════════════════════════════════════
 # 发布配置

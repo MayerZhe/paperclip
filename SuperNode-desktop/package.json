@@ -11,17 +11,16 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "bundle": "npx tsx ../../SuperNode-desktop/scripts/desktop/bundle-desktop.ts",
-    "pack": "electron-builder --config electron-builder.yml",
-    "dist": "pnpm build && pnpm pack",
+    "electron:pack": "electron-builder --config electron-builder.yml",
+    "dist": "pnpm build && pnpm bundle && pnpm electron:pack",
     "icons": "node --experimental-strip-types ../../SuperNode-desktop/scripts/desktop/generate-icons.ts"
   },
   "dependencies": {
-    "electron-updater": "^6.3.9",
-    "embedded-postgres": "^18.1.0-beta.16"
+    "electron-updater": "^6.3.9"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "electron": "^39.4.0",
+    "electron": "39.4.0",
     "electron-builder": "^25.1.8",
     "typescript": "^5.9.0"
   }

@@ -225,6 +225,13 @@ export async function runDesktopMain(): Promise<void> {
 
   process.env.PAPERCLIP_DESKTOP_VERSION = DESKTOP_VERSION;
 
+  // Default to local_trusted mode when no cloud auth is configured.
+  // This enables offline/standalone use without requiring a login API at localhost:3000.
+  // Users with cloud auth can override via PAPERCLIP_DEPLOYMENT_MODE=authenticated.
+  if (!process.env.PAPERCLIP_DEPLOYMENT_MODE && !process.env.DEPLOYMENT_MODE) {
+    process.env.PAPERCLIP_DEPLOYMENT_MODE = "local_trusted";
+  }
+
   // ── Phase 1: 等待 Electron app 就绪，然后检查已有会话 ─────────────────
   // ⚠️ checkExistingSession() 在内部创建 BrowserWindow，必须在 app.whenReady() 之后调用，
   // 否则 Electron 抛出 "Session can only be received when app is ready"。
