@@ -135,7 +135,13 @@ function resolveSwiftCliPath(): string {
     return productionPath;
   }
 
-  // 3. Fallback: assume "supernode-vm" is on PATH
+  // 3. Try ~/.paperclip/vm/supernode-vm (home directory install)
+  const homeVmPath = path.join(os.homedir(), ".paperclip", "vm", "supernode-vm");
+  if (fs.existsSync(homeVmPath)) {
+    return homeVmPath;
+  }
+
+  // 4. Fallback: assume "supernode-vm" is on PATH
   return "supernode-vm";
 }
 
@@ -309,12 +315,17 @@ export async function startAgentHubsMode(
   console.log(`[AgentHubs] Swift CLI: ${swiftCliPath}`);
 
   // 5. Construct VmConfig
-  const kernelPath = path.join(getVmBundleDir(), "vmlinuz");
+  // Use raw Image (uncompressed, non-EFI) for VZLinuxBootLoader compatibility.
+  // initrd.custom.gz: minimal initramfs that force-mounts /dev/vda + switch_roots
+  // (Swift binary's kernel cmdline lacks root=, so custom initrd provides it).
+  const kernelPath = path.join(getVmBundleDir(), "Image");
+  const initrdPath = path.join(getVmBundleDir(), "initrd.custom.gz");
   const vmConfig = {
     kernelPath,
     rootfsImage: getRootfsPath(),
     sessionImage: sessionDisk.path,
     agentImage: getAgentImgPath(),
+    initrdPath: fs.existsSync(initrdPath) ? initrdPath : undefined,
     memoryMB: 2048,
     cpuCount: 2,
     vsockPort: 9999,
