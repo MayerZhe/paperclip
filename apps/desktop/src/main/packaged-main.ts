@@ -30,6 +30,7 @@ import { createAuthBridge, checkExistingSession, type LoginResult } from "./auth
 import {
   startBothModes,
   stopBothModes,
+  type ModeStartupResult,
 } from "./mode-manager.js";
 import { createSidebarManager, type SidebarManager } from "./sidebar-manager.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -292,6 +293,8 @@ export async function runDesktopMain(): Promise<void> {
   // sidebarMgr is assigned in Phase 4.
   let sidebarMgr: SidebarManager | null = null;
   const pendingStatusUpdates: Array<{ mode: "agent" | "agenthubs"; status: "online" | "offline" | "loading" }> = [];
+  let agentDaemonReady = false;
+  let agentDaemonPort: number | null = null;
 
   const applyStatusUpdate = (mode: "agent" | "agenthubs", status: "online" | "offline" | "loading") => {
     if (sidebarMgr) {
@@ -299,6 +302,14 @@ export async function runDesktopMain(): Promise<void> {
     } else {
       pendingStatusUpdates.push({ mode, status });
     }
+  };
+
+  /** Activate agent tab — call when daemon is confirmed ready */
+  const activateAgentMode = () => {
+    if (!sidebarMgr) return;
+    const port = agentDaemonPort ?? requestedPort;
+    sidebarMgr.updateAgentUrl(port);
+    sidebarMgr.switchToMode("agent");
   };
 
   // ── Phase 3: 并行启动两种模式（fire-and-continue — 不阻塞 Sidebar 创建）──
@@ -321,6 +332,13 @@ export async function runDesktopMain(): Promise<void> {
     onStatusChange: (mode, status, _error) => {
       const mapped = status === "running" ? "online" : status === "error" ? "offline" : "loading";
       applyStatusUpdate(mode, mapped);
+      // When agent daemon becomes ready, switch to agent tab immediately.
+      // Do NOT wait for AgentHubs VM — VM boot blocks for 120s in sandbox.
+      if (mode === "agent" && status === "running") {
+        agentDaemonReady = true;
+        agentDaemonPort = requestedPort;
+        activateAgentMode();
+      }
     },
   });
 
@@ -328,7 +346,7 @@ export async function runDesktopMain(): Promise<void> {
   // 立即创建，不等待 modeResult — 用户立即可见 sidebar UI
 
   sidebarMgr = createSidebarManager({
-    shellHtmlPath: path.join(__dirname, "..", "..", "src", "renderer", "shell.html"),
+    shellHtmlPath: path.join(__dirname, "..", "renderer", "shell.html"),
     shellPreloadPath: path.join(__dirname, "..", "renderer", "shell-preload.js"),
     jwtToken: token,
     agentPort: requestedPort,
@@ -343,6 +361,11 @@ export async function runDesktopMain(): Promise<void> {
     sidebarMgr.updateStatus(update.mode, update.status);
   }
   pendingStatusUpdates.length = 0;
+
+  // If agent daemon became ready before sidebarMgr was created, activate now
+  if (agentDaemonReady) {
+    activateAgentMode();
+  }
 
   const mainWindow = sidebarMgr.getWindow();
 
@@ -421,90 +444,94 @@ export async function runDesktopMain(): Promise<void> {
     });
   });
 
-  // ── Phase 7: 启动 Tray + App Menu ─────────────────────────────────────
+  // ── Phase 7: 启动 Tray + App Menu + Sidecar + Updater ──────────────────
+  // Do NOT await modeResultPromise here — AgentHubs VM boot takes ~120s
+  // in sandbox and blocking on it prevents the UI from loading. Instead,
+  // chain post-startup work on the promise and finish the critical path now.
 
-  // Await mode startup results now (agent daemon port needed for heartbeat + menu)
-  // AgentHubs may still be starting/failing, but we proceed with what we have
-  const modeResult = await modeResultPromise;
+  // Use defaults for agent port until modeResult resolves
+  const fallbackPort = requestedPort;
+  let stopHeartbeat = () => {};
 
-  // After daemon confirmed healthy, update agent URL and activate agent tab
-  if (modeResult.agent.success) {
-    sidebarMgr.updateAgentUrl(modeResult.agent.port);
-    sidebarMgr.switchToMode("agent");
-  } else {
-    // Agent daemon failed — show AgentHubs tab instead
-    console.warn("[SuperNode Desktop] Agent daemon failed; defaulting to AgentHubs tab");
-    sidebarMgr.switchToMode("agenthubs");
-  }
+  // Create tray + menu immediately (with fallback port)
+  const cliResultsPromise = scanCliAvailability();
 
-  // Start tray heartbeat (daemon health polling)
-  const stopHeartbeat = modeResult.agent.success
-    ? startTrayHeartbeat(modeResult.agent.port)
-    : (() => {});
-
-  // Scan CLI availability
-  const cliResults: CliScanResult[] = await scanCliAvailability();
-  console.log(
-    "[SuperNode Desktop] CLI scan:",
-    cliResults.filter((r) => r.found).map((r) => r.label),
-  );
-
-  // Mode switch callback (shared by tray and menu)
   const onSwitchMode = () => {
+    if (!sidebarMgr) return;
     const current = sidebarMgr.getCurrentMode();
     sidebarMgr.switchToMode(current === "agent" ? "agenthubs" : "agent");
   };
 
-  // Create tray with mode switch support
   createTray(mainWindow, onSwitchMode, "agenthubs");
 
-  // Create app menu with Mode submenu
   const menuOpts: MenuOptions = {
     mode: "agenthubs",
     onSwitchMode,
   };
-  createAppMenu(
-    mainWindow,
-    modeResult.agent.port,
-    cliResults.filter((r) => r.found).map((r) => r.label),
-    menuOpts,
-  );
+  // Menu & heartbeat use fallback port — updated once modeResult settles
+  createAppMenu(mainWindow, fallbackPort, [], menuOpts);
 
-  // ── Phase 8: Sidecar Server（daemon 通信） ──────────────────────────
-
+  // Sidecar Server
   const sidecarSocketPath = path.join(os.tmpdir(), "paperclip-desktop-sidecar.sock");
   const sidecarServer = createSidecarServer(sidecarSocketPath, (msg) => {
     handleSidecarMessage(msg, () => {
-      // Shutdown is handled by the before-quit handler
       console.log("[SuperNode Desktop] Sidecar requested shutdown — triggering app quit");
       app.quit();
     });
   });
 
-  // ── Phase 9: Updater ─────────────────────────────────────────────────
-
+  // Updater
   const updater: Updater = createUpdater(DESKTOP_VERSION, mainWindow);
 
-  // Send CLI scan results to renderer once loaded
-  mainWindow.webContents.on("did-finish-load", () => {
-    mainWindow.webContents.send("paperclip:cli-scan", cliResults);
+  // Resolve CLI scan in background — send results to renderer when ready
+  cliResultsPromise.then((cliResults) => {
+    console.log(
+      "[SuperNode Desktop] CLI scan:",
+      cliResults.filter((r) => r.found).map((r) => r.label),
+    );
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("paperclip:cli-scan", cliResults);
+    }
   });
 
-  // ── Phase 10: Shutdown Handler ────────────────────────────────────────
+  // ── Phase 8: Post-startup tasks (non-blocking) ──
+  // When modeResult settles, update tray/menu with actual port + start heartbeat
+
+  let modeResult: ModeStartupResult | null = null;
+
+  modeResultPromise.then((result) => {
+    modeResult = result;
+    if (result.agent.success) {
+      stopHeartbeat = startTrayHeartbeat(result.agent.port);
+      // Ensure sidebar is on agent mode (may already be from onStatusChange)
+      if (!agentDaemonReady) {
+        activateAgentMode();
+      }
+    }
+  }).catch((err) => {
+    console.error("[SuperNode Desktop] Mode startup error:", err);
+  });
+
+  // ── Phase 9: Shutdown Handler ────────────────────────────────────────
 
   app.on("before-quit", (event) => {
     event.preventDefault();
     console.log("[SuperNode Desktop] Shutting down...");
     stopHeartbeat();
-    Promise.allSettled([
-      stopBothModes(modeResult, stopAgentDaemon),
-      new Promise<void>((resolve) => {
-        sidecarServer?.close();
-        resolve();
-      }),
-    ]).finally(() => {
+    const cleanup = () => {
+      sidecarServer?.close();
+    };
+    if (modeResult) {
+      Promise.allSettled([
+        stopBothModes(modeResult, stopAgentDaemon),
+        Promise.resolve().then(cleanup),
+      ]).finally(() => {
+        setTimeout(() => app.exit(0), 1000);
+      });
+    } else {
+      cleanup();
       setTimeout(() => app.exit(0), 1000);
-    });
+    }
   });
 
   app.on("activate", () => mainWindow.show());
