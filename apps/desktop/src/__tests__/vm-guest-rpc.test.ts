@@ -627,7 +627,7 @@ describe("health-check", () => {
   describe("checkTcpPort()", () => {
     it("resolves true for open port (connect event)", async () => {
       // Wire up the mock Socket factory so connect() fires the connect event
-      __mockSocketFactory = function () {
+      __mockSocketFactory = function (this: any) {
         let onConnect: Function | null = null;
         Object.assign(this, {
           setTimeout: vi.fn(),
@@ -646,7 +646,7 @@ describe("health-check", () => {
     });
 
     it("resolves false for closed port (error event)", async () => {
-      __mockSocketFactory = function () {
+      __mockSocketFactory = function (this: any) {
         let onError: Function | null = null;
         Object.assign(this, {
           setTimeout: vi.fn(),
@@ -665,7 +665,7 @@ describe("health-check", () => {
     });
 
     it("resolves false on timeout", async () => {
-      __mockSocketFactory = function () {
+      __mockSocketFactory = function (this: any) {
         let onTimeout: Function | null = null;
         Object.assign(this, {
           setTimeout: vi.fn(),
@@ -688,7 +688,7 @@ describe("health-check", () => {
     it("resolves with correct structure when all services healthy", async () => {
       mockFetch.mockResolvedValue({ ok: true });
 
-      __mockSocketFactory = function () {
+      __mockSocketFactory = function (this: any) {
         let onConnect: Function | null = null;
         Object.assign(this, {
           setTimeout: vi.fn(),
@@ -714,7 +714,7 @@ describe("health-check", () => {
     it("reports false for services that fail", async () => {
       mockFetch.mockRejectedValue(new Error("Connection refused"));
 
-      __mockSocketFactory = function () {
+      __mockSocketFactory = function (this: any) {
         let onConnect: Function | null = null;
         Object.assign(this, {
           setTimeout: vi.fn(),

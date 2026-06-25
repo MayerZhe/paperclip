@@ -227,8 +227,8 @@ describe("createSidebarManager", () => {
 
     it("loads correct URLs for each view", () => {
       createDefaultManager();
-      expect(state.viewLoadURL).toHaveBeenNthCalledWith(1, "http://127.0.0.1:4000");
-      expect(state.viewLoadURL).toHaveBeenNthCalledWith(2, "http://127.0.0.1:3100");
+      expect(state.viewLoadURL).toHaveBeenNthCalledWith(1, "http://127.0.0.1:3000");
+      expect(state.viewLoadURL).toHaveBeenNthCalledWith(2, "http://127.0.0.1:3200");
     });
 
     it("adds both views to main window contentView", () => {

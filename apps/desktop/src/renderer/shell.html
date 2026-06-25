@@ -1,90 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PaperClip Sidebar</title>
-  <link rel="stylesheet" href="shell.css" />
-  <script src="shell.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SuperNode</title>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
-  <!-- Welcome Screen — shown on first load, hidden after mode selection -->
-  <div id="welcome-screen">
-    <div class="welcome-title">Welcome to Super Node</div>
-    <div class="welcome-cards">
-      <!-- Agent Mode Card -->
-      <div class="welcome-card" id="card-agent">
-        <div class="welcome-card-icon">🚀</div>
-        <div class="welcome-card-title">Agent Mode</div>
-        <div class="welcome-card-desc">Manage AI agents with no extra setup</div>
-        <button class="welcome-card-btn" id="btn-start-agent">Start Now</button>
-      </div>
+<div id="app">
+  <!-- Titlebar spacer for macOS hiddenInset traffic lights -->
+  <div id="titlebar"></div>
 
-      <!-- AgentHubs Mode Card -->
-      <div class="welcome-card" id="card-agenthubs">
-        <div class="welcome-card-icon">📦</div>
-        <div class="welcome-card-title">AgentHubs Mode</div>
-        <div class="welcome-card-desc">Orders + collaboration via VM (20MB)</div>
-        <button class="welcome-card-btn" id="btn-start-agenthubs">Enter AgentHubs</button>
-        <button class="welcome-card-btn" id="btn-download-agenthubs" style="display: none;">Download VM (20MB)</button>
-        <!-- VM Download Progress (hidden unless downloading) -->
-        <div class="vm-progress-area hidden" id="vm-progress-area">
-          <div class="vm-progress-bar">
-            <div class="vm-progress-bar-fill" id="vm-progress-fill"></div>
+  <!-- Unified content area — sidebar is part of the same surface -->
+  <div id="main">
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <!-- Claude-style tab navigation: text labels + underline indicator -->
+      <nav id="tabs">
+        <button class="tab active" data-mode="agent">Agent</button>
+        <button class="tab" data-mode="agenthubs">AgentHubs</button>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Organization info panel -->
+      <section id="org-panel">
+        <div id="org-name">AgentHubs</div>
+        <div id="org-role">Owner</div>
+        <div id="org-balance">Loading...</div>
+      </section>
+
+      <div class="sidebar-divider"></div>
+
+      <div id="sidebar-content">
+        <!-- Service status -->
+        <div id="services">
+          <div class="service-row" id="svc-agent">
+            <span class="dot loading"></span>
+            <span class="svc-label">Agent Daemon</span>
+            <span class="svc-meta" id="agent-port"></span>
           </div>
-          <div class="vm-progress-stats" id="vm-progress-stats">0% — 0 MB/s — --:--</div>
-          <div class="vm-progress-actions">
-            <button class="welcome-card-btn-secondary" id="btn-vm-retry">Retry</button>
-            <button class="welcome-card-btn-secondary" id="btn-vm-skip">Skip</button>
+          <div class="service-row" id="svc-agenthubs">
+            <span class="dot offline"></span>
+            <span class="svc-label">AgentHubs VM</span>
+            <span class="svc-meta" id="agenthubs-desc">not running</span>
+          </div>
+        </div>
+
+        <!-- AgentHubs VM empty state (hidden by default) -->
+        <div id="agenthubs-empty">
+          <p class="empty-title">VM Not Available</p>
+          <p class="empty-desc">Download the AgentHubs VM bundle to enable local AgentHubs mode.</p>
+          <button id="btn-download-vm">Download VM</button>
+          <div class="vm-progress hidden" id="vm-progress-area">
+            <div class="vm-progress-bar">
+              <div class="vm-progress-fill" id="vm-progress-fill"></div>
+            </div>
+            <div class="vm-progress-stats" id="vm-progress-stats">0%</div>
           </div>
         </div>
       </div>
-    </div>
+
+      <!-- Bottom bar -->
+      <div id="sidebar-footer">
+        <span id="user-email">...</span>
+        <button id="btn-signout">Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- Content placeholder (WebContentsView overlays this area) -->
+    <main id="content">
+      <div id="content-empty">
+        <svg width="48" height="48" viewBox="0 0 100 100" fill="none" opacity="0.12">
+          <path d="M15,80 L50,10 L85,80 Z" fill="currentColor" opacity="0.9"/>
+          <path d="M35,80 L65,80 L50,35 Z" fill="currentColor" opacity="1"/>
+        </svg>
+      </div>
+    </main>
   </div>
+</div>
 
-  <!-- Sidebar — hidden initially, shown after mode selection -->
-  <aside id="sidebar">
-    <!-- macOS traffic light titlebar spacer -->
-    <div class="titlebar"></div>
-
-    <!-- Tab navigation -->
-    <nav id="tab-nav">
-      <button class="tab active" data-mode="agenthubs">AgentHubs</button>
-      <button class="tab" data-mode="agent">Agent</button>
-    </nav>
-
-    <div class="sidebar-divider"></div>
-
-    <!-- Organization info panel -->
-    <section id="org-panel">
-      <div id="org-name">AgentHubs</div>
-      <div id="org-role">Owner</div>
-      <div id="org-balance">Loading...</div>
-    </section>
-
-    <div class="sidebar-divider"></div>
-
-    <!-- Status panel -->
-    <section id="status-panel">
-      <div class="status-item" id="daemon-status">
-        <span class="status-dot loading"></span>
-        <span class="status-label">Agent Daemon</span>
-      </div>
-      <div class="status-item" id="agenthubs-status">
-        <span class="status-dot loading"></span>
-        <span class="status-label">AgentHubs</span>
-      </div>
-      <div id="vm-download-area" style="display: none;">
-        <button id="btn-download-vm">Download VM (20MB)</button>
-        <div id="vm-download-progress" class="download-progress"></div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer id="sidebar-footer">
-      <div id="user-email">...</div>
-      <button id="btn-logout">Sign Out</button>
-    </footer>
-  </aside>
+<script src="shell.js"></script>
 </body>
 </html>

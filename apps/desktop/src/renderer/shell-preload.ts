@@ -86,4 +86,14 @@ contextBridge.exposeInMainWorld("sidebar", {
   ) => {
     ipcRenderer.on("sidebar:vm-download-progress", (_event, progress) => callback(progress));
   },
+
+  /**
+   * Receive: mode changed confirmation from main process.
+   * mode: "agent" | "agenthubs"
+   */
+  onModeChanged: (
+    callback: (data: { mode: string }) => void
+  ) => {
+    ipcRenderer.on("sidebar:mode-changed", (_event, data) => callback(data));
+  },
 });

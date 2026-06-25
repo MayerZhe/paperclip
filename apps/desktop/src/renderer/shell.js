@@ -1,398 +1,178 @@
-// State: current active tab mode
-var currentMode = "agenthubs";
+// SuperNode Shell — sidebar UI logic
+// Handles: tab switching, org info, status dots, sign out, VM download
 
-// Welcome screen state
-var welcomeState = {
-  vmDownloaded: false,
-  vmDownloading: false,
-  vmReady: false,
-  vmError: false,
-};
+(function () {
+  var currentMode = "agent";
 
-// Download speed tracking
-var downloadSpeedData = {
-  lastBytes: 0,
-  lastTimestamp: 0,
-  currentSpeed: 0,
-};
+  // ─── DOM helpers ───
+  var $ = function (s) { return document.querySelector(s); };
 
-// Initialize — set up event listeners and IPC handlers
-function init() {
-  // Check VM status on startup
-  checkVmStatus();
+  // ─── Tab switching ───
+  $("#tabs").addEventListener("click", function (e) {
+    var btn = e.target.closest(".tab");
+    if (!btn || btn.classList.contains("active")) return;
+    var mode = btn.dataset.mode;
+    currentMode = mode;
+    $("#tabs").querySelectorAll(".tab").forEach(function (b) {
+      b.classList.toggle("active", b === btn);
+    });
 
-  // Welcome screen buttons
-  initWelcomeScreen();
+    // Show/hide AgentHubs empty state
+    var agenthubsEmpty = $("#agenthubs-empty");
+    if (agenthubsEmpty) {
+      agenthubsEmpty.style.display = mode === "agenthubs" ? "block" : "none";
+    }
 
-  // Tab navigation buttons
-  var tabs = document.querySelectorAll(".tab");
-  tabs.forEach(function (tab) {
-    tab.addEventListener("click", function () {
-      var mode = tab.dataset.mode;
-      if (mode && mode !== currentMode) {
-        setActiveTab(mode);
-        // Send IPC to main process
-        if (window.sidebar && window.sidebar.switchMode) {
-          window.sidebar.switchMode(mode);
+    // Send IPC to main process
+    if (window.sidebar && window.sidebar.switchMode) {
+      window.sidebar.switchMode(mode);
+    }
+  });
+
+  // ─── IPC: org info ───
+  if (window.sidebar && window.sidebar.onOrgInfo) {
+    window.sidebar.onOrgInfo(function (info) {
+      if (!info) return;
+      if (info.name) {
+        var el = $("#org-name");
+        if (el) el.textContent = info.name;
+      }
+      if (info.role) {
+        var el = $("#org-role");
+        if (el) el.textContent = info.role;
+      }
+      if (info.balance) {
+        var el = $("#org-balance");
+        if (el) el.textContent = info.balance;
+      }
+      if (info.email) {
+        var el = $("#user-email");
+        if (el) el.textContent = info.email;
+      }
+    });
+  }
+
+  // ─── IPC: service status ───
+  if (window.sidebar && window.sidebar.onStatus) {
+    window.sidebar.onStatus(function (status) {
+      if (!status) return;
+      var mode = status.mode;
+      var state = status.status; // "online" | "offline" | "loading"
+
+      // Update service dot
+      var row = $("#svc-" + mode);
+      if (row) {
+        var dot = row.querySelector(".dot");
+        if (dot) dot.className = "dot " + state;
+        var meta = row.querySelector(".svc-meta");
+        if (meta) {
+          if (state === "online") meta.textContent = "running";
+          else if (state === "loading") meta.textContent = "starting...";
+          else meta.textContent = state;
+        }
+      }
+
+      // AgentHubs: show empty state when offline, hide when online
+      if (mode === "agenthubs") {
+        var agenthubsEmpty = $("#agenthubs-empty");
+        if (agenthubsEmpty) {
+          agenthubsEmpty.style.display = state === "online" ? "none" : "block";
         }
       }
     });
-  });
+  }
 
-  // Listen for org info updates from main process
-  if (window.sidebar && window.sidebar.onOrgInfo) {
-    window.sidebar.onOrgInfo(function (info) {
-      updateOrgInfo(info);
+  // Listen for mode-changed from main process (confirms mode switch)
+  if (window.sidebar && window.sidebar.onModeChanged) {
+    window.sidebar.onModeChanged(function (data) {
+      if (data && data.mode) {
+        currentMode = data.mode;
+        $("#tabs").querySelectorAll(".tab").forEach(function (b) {
+          b.classList.toggle("active", b.dataset.mode === data.mode);
+        });
+      }
     });
   }
 
-  // Listen for status updates from main process
-  if (window.sidebar && window.sidebar.onStatus) {
-    window.sidebar.onStatus(function (status) {
-      updateStatus(status.mode, status.status);
-    });
-  }
-
-  // Sign out button
-  var logoutBtn = document.getElementById("btn-logout");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", function () {
+  // ─── Sign out ───
+  var btnSignout = $("#btn-signout");
+  if (btnSignout) {
+    btnSignout.addEventListener("click", function () {
       if (window.sidebar && window.sidebar.signOut) {
         window.sidebar.signOut();
       }
     });
   }
 
-  // Download VM button (in sidebar status panel)
-  initDownloadButton();
+  // ─── VM Download ───
+  var btnDownload = $("#btn-download-vm");
+  if (btnDownload) {
+    btnDownload.addEventListener("click", function () {
+      if (window.sidebar && window.sidebar.downloadVm) {
+        window.sidebar.downloadVm();
+        btnDownload.disabled = true;
+        btnDownload.textContent = "Downloading...";
 
-  // Listen for VM download progress from main process
-  if (window.sidebar && window.sidebar.onVmDownloadProgress) {
-    window.sidebar.onVmDownloadProgress(function (progress) {
-      handleVmProgress(progress);
+        // Show progress area
+        var progressArea = $("#vm-progress-area");
+        if (progressArea) progressArea.classList.remove("hidden");
+      }
     });
   }
-}
 
-// ─── Welcome Screen ───
+  // Listen for VM download progress
+  if (window.sidebar && window.sidebar.onVmDownloadProgress) {
+    window.sidebar.onVmDownloadProgress(function (progress) {
+      var progressFill = $("#vm-progress-fill");
+      var progressStats = $("#vm-progress-stats");
+      var btn = $("#btn-download-vm");
 
-function checkVmStatus() {
+      if (progressFill) {
+        progressFill.style.width = (progress.percent || 0) + "%";
+      }
+
+      if (progressStats) {
+        var downloaded = (progress.downloadedMB || 0).toFixed(1);
+        var total = (progress.totalMB || 0).toFixed(1);
+        progressStats.textContent = (progress.percent || 0) + "% — " + downloaded + "MB / " + total + "MB";
+      }
+
+      if (progress.stage === "complete") {
+        if (btn) { btn.textContent = "Download complete"; btn.disabled = true; }
+        var progressArea = $("#vm-progress-area");
+        if (progressArea) {
+          setTimeout(function () { progressArea.classList.add("hidden"); }, 2000);
+        }
+        // Hide empty state since VM is now ready
+        var empty = $("#agenthubs-empty");
+        if (empty) empty.style.display = "none";
+      } else if (progress.stage === "error") {
+        if (btn) { btn.textContent = "Retry Download"; btn.disabled = false; }
+        if (progressStats) progressStats.textContent = "Download failed";
+      }
+    });
+  }
+
+  // Check VM status on startup
   if (window.sidebar && window.sidebar.checkVmStatus) {
     window.sidebar.checkVmStatus().then(function (result) {
       if (result && result.downloaded) {
-        welcomeState.vmDownloaded = true;
-        welcomeState.vmReady = true;
-        updateAgentHubsCardButton();
+        // VM already downloaded — show AgentHubs as ready
+        var empty = $("#agenthubs-empty");
+        if (empty) empty.style.display = "none";
+        if (btnDownload) {
+          btnDownload.textContent = "VM ready";
+          btnDownload.disabled = true;
+        }
+      } else {
+        // VM not downloaded — show empty state when AgentHubs tab is active
+        if (currentMode === "agenthubs") {
+          var empty = $("#agenthubs-empty");
+          if (empty) empty.style.display = "block";
+        }
       }
     }).catch(function () {
-      // IPC not available or error — keep default state
+      // IPC not available, ignore
     });
   }
-}
-
-function initWelcomeScreen() {
-  var btnStartAgent = document.getElementById("btn-start-agent");
-  var btnStartAgenthubs = document.getElementById("btn-start-agenthubs");
-  var btnDownloadAgenthubs = document.getElementById("btn-download-agenthubs");
-  var btnVmRetry = document.getElementById("btn-vm-retry");
-  var btnVmSkip = document.getElementById("btn-vm-skip");
-
-  // Agent Mode: "Start Now" → switch to agent mode and hide welcome
-  if (btnStartAgent) {
-    btnStartAgent.addEventListener("click", function () {
-      enterMode("agent");
-    });
-  }
-
-  // AgentHubs Mode: "Enter AgentHubs" → switch to agenthubs mode and hide welcome
-  if (btnStartAgenthubs) {
-    btnStartAgenthubs.addEventListener("click", function () {
-      enterMode("agenthubs");
-    });
-  }
-
-  // AgentHubs Mode: "Download VM (20MB)" → trigger download
-  if (btnDownloadAgenthubs) {
-    btnDownloadAgenthubs.addEventListener("click", function () {
-      startVmDownload();
-    });
-  }
-
-  // Retry button in progress area
-  if (btnVmRetry) {
-    btnVmRetry.addEventListener("click", function () {
-      retryVmDownload();
-    });
-  }
-
-  // Skip button in progress area
-  if (btnVmSkip) {
-    btnVmSkip.addEventListener("click", function () {
-      skipVmDownload();
-    });
-  }
-}
-
-function updateAgentHubsCardButton() {
-  var btnEnter = document.getElementById("btn-start-agenthubs");
-  var btnDownload = document.getElementById("btn-download-agenthubs");
-
-  if (!btnEnter || !btnDownload) return;
-
-  if (welcomeState.vmDownloaded || welcomeState.vmReady) {
-    btnEnter.style.display = "block";
-    btnDownload.style.display = "none";
-  } else {
-    btnEnter.style.display = "none";
-    btnDownload.style.display = "block";
-  }
-}
-
-function enterMode(mode) {
-  // Hide welcome screen, show sidebar
-  var welcomeScreen = document.getElementById("welcome-screen");
-  var sidebar = document.getElementById("sidebar");
-
-  if (welcomeScreen) {
-    welcomeScreen.style.display = "none";
-  }
-  if (sidebar) {
-    sidebar.style.display = "flex";
-  }
-
-  // Switch to the requested mode
-  if (mode === "agent" || mode === "agenthubs") {
-    setActiveTab(mode);
-    if (window.sidebar && window.sidebar.switchMode) {
-      window.sidebar.switchMode(mode);
-    }
-  }
-}
-
-// ─── VM Download ───
-
-function startVmDownload() {
-  if (!window.sidebar || !window.sidebar.downloadVm) return;
-
-  welcomeState.vmDownloading = true;
-  welcomeState.vmError = false;
-
-  // Show progress area, hide buttons
-  var progressArea = document.getElementById("vm-progress-area");
-  var btnEnter = document.getElementById("btn-start-agenthubs");
-  var btnDownload = document.getElementById("btn-download-agenthubs");
-
-  if (progressArea) progressArea.classList.remove("hidden");
-  if (btnEnter) btnEnter.style.display = "none";
-  if (btnDownload) btnDownload.style.display = "none";
-
-  // Reset progress UI
-  var progressFill = document.getElementById("vm-progress-fill");
-  var progressStats = document.getElementById("vm-progress-stats");
-  if (progressFill) progressFill.style.width = "0%";
-  if (progressStats) progressStats.textContent = "0% — 0 MB/s — --:--";
-
-  // Reset speed tracking
-  downloadSpeedData.lastBytes = 0;
-  downloadSpeedData.lastTimestamp = Date.now();
-  downloadSpeedData.currentSpeed = 0;
-
-  // Trigger download via IPC
-  window.sidebar.downloadVm();
-}
-
-function retryVmDownload() {
-  welcomeState.vmError = false;
-  welcomeState.vmDownloading = false;
-  startVmDownload();
-}
-
-function skipVmDownload() {
-  // Hide progress, go straight to AgentHubs mode
-  welcomeState.vmDownloading = false;
-  welcomeState.vmError = false;
-  enterMode("agenthubs");
-}
-
-function cancelVmDownload() {
-  if (window.sidebar && window.sidebar.cancelVmDownload) {
-    window.sidebar.cancelVmDownload();
-  }
-  welcomeState.vmDownloading = false;
-  welcomeState.vmError = false;
-
-  // Reset UI
-  var progressArea = document.getElementById("vm-progress-area");
-  if (progressArea) progressArea.classList.add("hidden");
-  updateAgentHubsCardButton();
-}
-
-function handleVmProgress(progress) {
-  // Update progress bar in welcome screen (if visible)
-  var progressFill = document.getElementById("vm-progress-fill");
-  var progressStats = document.getElementById("vm-progress-stats");
-
-  // Calculate download speed
-  var now = Date.now();
-  var downloadedMB = progress.downloadedMB || 0;
-  var totalMB = progress.totalMB || 0;
-
-  if (downloadSpeedData.lastTimestamp > 0 && now > downloadSpeedData.lastTimestamp) {
-    var timeDelta = (now - downloadSpeedData.lastTimestamp) / 1000; // seconds
-    var bytesDelta = downloadedMB - downloadSpeedData.lastBytes;
-    if (timeDelta > 0.5 && bytesDelta > 0) {
-      downloadSpeedData.currentSpeed = bytesDelta / timeDelta; // MB/s
-    }
-    downloadSpeedData.lastBytes = downloadedMB;
-    downloadSpeedData.lastTimestamp = now;
-  } else if (downloadSpeedData.lastTimestamp === 0) {
-    downloadSpeedData.lastBytes = downloadedMB;
-    downloadSpeedData.lastTimestamp = now;
-  }
-
-  // Calculate ETA
-  var speedMBps = downloadSpeedData.currentSpeed;
-  var remainingMB = totalMB - downloadedMB;
-  var etaText = "--:--";
-  if (speedMBps > 0 && remainingMB > 0) {
-    var etaSeconds = Math.round(remainingMB / speedMBps);
-    var etaMins = Math.floor(etaSeconds / 60);
-    var etaSecs = etaSeconds % 60;
-    etaText = etaMins + ":" + (etaSecs < 10 ? "0" : "") + etaSecs;
-  }
-
-  // Update progress bar
-  if (progressFill) {
-    progressFill.style.width = progress.percent + "%";
-  }
-
-  // Update stats text
-  if (progressStats) {
-    var speedText = speedMBps > 0 ? speedMBps.toFixed(1) + " MB/s" : "0 MB/s";
-    progressStats.textContent = progress.percent + "% — " + speedText + " — " + etaText;
-  }
-
-  // Handle terminal stages
-  if (progress.stage === "complete") {
-    welcomeState.vmDownloading = false;
-    welcomeState.vmDownloaded = true;
-    welcomeState.vmReady = true;
-    welcomeState.vmError = false;
-
-    var progressArea = document.getElementById("vm-progress-area");
-    if (progressArea) progressArea.classList.add("hidden");
-    updateAgentHubsCardButton();
-  } else if (progress.stage === "error") {
-    welcomeState.vmDownloading = false;
-    welcomeState.vmError = true;
-
-    if (progressStats) {
-      progressStats.textContent = "Download failed — try again or skip";
-      progressStats.style.color = "#F85149";
-    }
-
-    // Reset stats color for next attempt
-    setTimeout(function () {
-      if (progressStats) progressStats.style.color = "#8B949E";
-    }, 5000);
-  }
-
-  // Also update the sidebar download progress (existing UI)
-  var sidebarProgressEl = document.getElementById("vm-download-progress");
-  if (sidebarProgressEl) {
-    sidebarProgressEl.textContent = "Downloading... " + progress.percent + "% (" +
-      progress.downloadedMB + "MB / " + progress.totalMB + "MB)";
-  }
-
-  // Update sidebar download button state
-  var sidebarBtn = document.getElementById("btn-download-vm");
-  if (progress.stage === "downloading" || progress.stage === "fetching_manifest" || progress.stage === "verifying" || progress.stage === "decompressing") {
-    if (sidebarBtn) {
-      sidebarBtn.disabled = true;
-      sidebarBtn.textContent = "Downloading...";
-    }
-  } else if (progress.stage === "complete") {
-    if (sidebarBtn) {
-      sidebarBtn.textContent = "Download complete - restart to activate";
-      sidebarBtn.disabled = true;
-    }
-  } else if (progress.stage === "error") {
-    if (sidebarBtn) {
-      sidebarBtn.textContent = "Download VM (retry)";
-      sidebarBtn.disabled = false;
-    }
-  }
-}
-
-// ─── Sidebar UI ───
-
-function setActiveTab(mode) {
-  currentMode = mode;
-  document.querySelectorAll(".tab").forEach(function (t) {
-    t.classList.toggle("active", t.dataset.mode === mode);
-  });
-}
-
-function updateOrgInfo(info) {
-  if (info.name) {
-    var nameEl = document.getElementById("org-name");
-    if (nameEl) nameEl.textContent = info.name;
-  }
-  if (info.role) {
-    var roleEl = document.getElementById("org-role");
-    if (roleEl) roleEl.textContent = info.role;
-  }
-  if (info.balance) {
-    var balanceEl = document.getElementById("org-balance");
-    if (balanceEl) balanceEl.textContent = info.balance;
-  }
-  if (info.email) {
-    var emailEl = document.getElementById("user-email");
-    if (emailEl) emailEl.textContent = info.email;
-  }
-}
-
-function updateStatus(mode, status) {
-  var elId = mode === "agent" ? "daemon-status" : "agenthubs-status";
-  var el = document.getElementById(elId);
-  if (!el) return;
-
-  var dot = el.querySelector(".status-dot");
-  if (!dot) return;
-
-  dot.className = "status-dot " + status; // online, offline, loading
-
-  var label = mode === "agent" ? "Agent Daemon" : "AgentHubs";
-  var labelEl = el.querySelector(".status-label");
-  if (labelEl) {
-    labelEl.textContent = label;
-  }
-
-  // Show download button when AgentHubs is offline (VM not ready)
-  if (mode === "agenthubs") {
-    var downloadArea = document.getElementById("vm-download-area");
-    if (downloadArea) {
-      downloadArea.style.display = status === "offline" ? "block" : "none";
-    }
-  }
-}
-
-function initDownloadButton() {
-  var btn = document.getElementById("btn-download-vm");
-  if (!btn) return;
-
-  btn.addEventListener("click", function () {
-    if (window.sidebar && window.sidebar.downloadVm) {
-      window.sidebar.downloadVm();
-      btn.disabled = true;
-      btn.textContent = "Downloading...";
-    }
-  });
-}
-
-// Initialize when DOM is ready
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
-}
+})();
