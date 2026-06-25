@@ -1,12 +1,13 @@
 // sdk-daemon is the PaperClip VM guest agent.
 //
-// It provides a vsock RPC server with 5 methods for managing child processes
-// and health checking services inside a VM.
+// It connects to the host's vsock listener at CID=2 and processes RPC
+// requests for spawning/killing child processes and health checks.
 //
 // Usage:
 //
-//	sdk-daemon --version    Print version and exit
-//	sdk-daemon               Start the vsock RPC server on port 1024
+//	sdk-daemon --version          Print version and exit
+//	sdk-daemon                     Connect to host on vsock port 1024 (default)
+//	sdk-daemon --port 9999         Connect to host on vsock port 9999
 package main
 
 import (
@@ -22,10 +23,11 @@ import (
 	"github.com/paperclipai/sdk-daemon/internal/server"
 )
 
-const version = "v0.1.0"
+const version = "v0.2.0"
 
 func main() {
 	showVersion := flag.Bool("version", false, "print version and exit")
+	port := flag.Uint("port", uint(server.DefaultVsockPort), "vsock port to connect to on host (CID=2)")
 	flag.Parse()
 
 	if *showVersion {
@@ -33,19 +35,57 @@ func main() {
 		return
 	}
 
+	vsockPort := uint32(*port)
 	log.Printf("[sdk-daemon] starting %s", version)
 
-	srv := server.New(server.DefaultVsockPort)
+	srv := server.New(vsockPort)
 
 	// Configure the health checker with a reasonable timeout
 	srv.Context().Checker.Host = "127.0.0.1"
 	srv.Context().Checker.Timeout = 2 * time.Second
 
-	// Listen on vsock port (Linux only; testable via SetListener on other platforms)
-	if err := srv.Listen(); err != nil {
-		log.Fatalf("[sdk-daemon] failed to listen: %v", err)
+	// Connect to host's vsock listener at CID=2
+	// Retry up to 3 times with a 2-second delay (the host vsock listener
+	// may not be ready immediately after VM boot).
+	var connErr error
+	for attempt := 1; attempt <= 3; attempt++ {
+		connErr = srv.Connect()
+		if connErr == nil {
+			break
+		}
+		if attempt < 3 {
+			log.Printf("[sdk-daemon] connect attempt %d/3 failed: %v — retrying in 2s", attempt, connErr)
+			time.Sleep(2 * time.Second)
+		}
 	}
-	log.Printf("[sdk-daemon] listening on vsock port %d", server.DefaultVsockPort)
+	if connErr != nil {
+		log.Fatalf("[sdk-daemon] failed to connect to host after 3 attempts: %v", connErr)
+	}
+	log.Printf("[sdk-daemon] connected to host on vsock port %d", vsockPort)
+
+	// Immediately send Ready event with guest IP so the host knows how
+	// to reach VM services (HTTP health checks need the guest IP).
+	conn := srv.Connection()
+	if conn == nil {
+		log.Fatalf("[sdk-daemon] connection not available after Connect")
+	}
+	// Detect guest IP — DHCP may not have completed yet.
+	// Try a few times with a short delay to get the non-loopback address.
+	var guestIP string
+	for attempt := 1; attempt <= 10; attempt++ {
+		guestIP = server.DetectGuestIP()
+		if guestIP != "127.0.0.1" {
+			break
+		}
+		if attempt < 10 {
+			time.Sleep(500 * time.Millisecond)
+		}
+	}
+	log.Printf("[sdk-daemon] guest IP: %s", guestIP)
+	if err := srv.SendReadyEvent(conn, guestIP); err != nil {
+		log.Fatalf("[sdk-daemon] failed to send Ready event: %v", err)
+	}
+	log.Printf("[sdk-daemon] Ready event sent to host")
 
 	// Setup signal handling for graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())
@@ -59,10 +99,9 @@ func main() {
 		cancel()
 	}()
 
-	// Report readiness
 	log.Printf("[sdk-daemon] ready")
 
-	// Serve until cancelled
+	// Serve RPC requests until cancelled
 	if err := srv.Serve(ctx); err != nil {
 		log.Printf("[sdk-daemon] server exited: %v", err)
 	}

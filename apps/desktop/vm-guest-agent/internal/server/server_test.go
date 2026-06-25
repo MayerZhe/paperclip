@@ -12,12 +12,11 @@ import (
 )
 
 // mockConn implements io.ReadWriteCloser using in-memory buffers.
-// This lets us test the server connection handling without real vsock.
 type mockConn struct {
 	reader    *bytes.Buffer
 	writer    *bytes.Buffer
 	closed    bool
-	readDelay chan struct{} // optional delay for testing concurrent scenarios
+	readDelay chan struct{}
 }
 
 func newMockConn() *mockConn {
@@ -63,7 +62,6 @@ func TestServerHandleConnSingleMessage(t *testing.T) {
 
 	s.handleConn(conn)
 
-	// Parse the response
 	msgType, methodID, body, err := wire.Decode(conn.writer.Bytes())
 	if err != nil {
 		t.Fatalf("invalid response: %v", err)
@@ -86,13 +84,10 @@ func TestServerHandleConnInvalidMessage(t *testing.T) {
 	s := New(1024)
 
 	conn := newMockConn()
-	// Write garbage that doesn't meet the wire format
 	conn.reader.Write([]byte{0x00, 0x00, 0x00, 0x07, 0xAB})
 
 	s.handleConn(conn)
 
-	// The connection should close gracefully without writing a response
-	// because the message can't be decoded
 	if conn.writer.Len() > 0 {
 		t.Logf("writer has %d bytes after invalid message", conn.writer.Len())
 	}
@@ -101,19 +96,16 @@ func TestServerHandleConnInvalidMessage(t *testing.T) {
 func TestServerHandleConnClosesOnEOF(t *testing.T) {
 	s := New(1024)
 	conn := newMockConn()
-	// Write nothing — Read returns 0, io.EOF
 	conn.Close()
 
 	s.handleConn(conn)
-
-	// Should exit without panic
 }
 
 func TestServerSendReadyEvent(t *testing.T) {
 	s := New(1024)
 	var buf bytes.Buffer
 
-	err := s.SendReadyEvent(&buf)
+	err := s.SendReadyEvent(&buf, "10.0.2.15")
 	if err != nil {
 		t.Fatalf("SendReadyEvent() error = %v", err)
 	}
@@ -128,8 +120,15 @@ func TestServerSendReadyEvent(t *testing.T) {
 	if methodID != 0 {
 		t.Errorf("methodID = %d, want 0", methodID)
 	}
-	if string(body) != `"Ready"` {
-		t.Errorf("body = %s, want \"Ready\"", body)
+	var readyPayload map[string]interface{}
+	if err := json.Unmarshal(body, &readyPayload); err != nil {
+		t.Fatalf("failed to parse Ready payload: %v", err)
+	}
+	if readyPayload["type"] != "Ready" {
+		t.Errorf("body = %s, want {\"type\":\"Ready\"}", body)
+	}
+	if readyPayload["ip"] != "10.0.2.15" {
+		t.Errorf("ip = %v, want 10.0.2.15", readyPayload["ip"])
 	}
 }
 
@@ -171,20 +170,15 @@ func TestServerContextCancelsServe(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	// Start a goroutine to cancel after a short delay
 	go func() {
 		time.Sleep(50 * time.Millisecond)
 		cancel()
 	}()
 
-	// Listen on a real vsock port won't work in non-Linux environments,
-	// but the cancellation path in Serve should handle the context check.
-	// For now, verify the server is created correctly.
 	_ = ctx
 	_ = s
 }
 
-// Test pipe-based message handling simulates connection behavior
 func TestServerHandleHealthCheckViaMockConn(t *testing.T) {
 	s := New(1024)
 
@@ -207,17 +201,9 @@ func TestServerHandleHealthCheckViaMockConn(t *testing.T) {
 	}
 }
 
-// mockNetConn wraps our mockConn with net.Conn methods we don't need
-type readWriteCloser struct {
-	io.Reader
-	io.Writer
-	io.Closer
-}
-
 func TestPipelinedMessages(t *testing.T) {
 	s := New(1024)
 
-	// Write two messages in a single buffer (pipelining)
 	payload1, _ := json.Marshal(map[string]string{"name": "test1", "command": "/bin/true"})
 	msg1, _ := wire.Encode(wire.MsgTypeRequest, 1, payload1)
 
@@ -229,12 +215,10 @@ func TestPipelinedMessages(t *testing.T) {
 
 	s.handleConn(conn)
 
-	// The first message should have been processed and a response written
 	if conn.writer.Len() == 0 {
 		t.Error("no response written for first message")
 	}
 
-	// Verify first response is valid
 	_, _, body, _ := wire.Decode(conn.writer.Bytes())
 	var result map[string]interface{}
 	json.Unmarshal(body, &result)
@@ -244,8 +228,6 @@ func TestPipelinedMessages(t *testing.T) {
 }
 
 func TestGracefulShutdown(t *testing.T) {
-	// Verify that the server's shutdown handler returns the expected response
-	// (real vsock shutdown tests require Linux)
 	ctx := newTestContext()
 	payload, _ := json.Marshal(map[string]string{})
 	response := Dispatch(ctx, wire.MsgTypeRequest, 3, payload)
@@ -259,5 +241,4 @@ func TestGracefulShutdown(t *testing.T) {
 	}
 }
 
-// Interface compliance check — mockConn implements io.ReadWriteCloser
 var _ io.ReadWriteCloser = (*mockConn)(nil)

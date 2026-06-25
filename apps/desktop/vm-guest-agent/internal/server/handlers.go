@@ -119,18 +119,36 @@ func handleHealthCheck(ctx *HandlerContext, payload []byte) []byte {
 }
 
 // handleSetSecurityPolicy (method_id=5) stores security configuration.
-// Payload: {"token": "secret", "host_info": "host-id"}
+// Accepts both formats:
+//   - {"token": "secret", "host_info": "host-id"}  (simple)
+//   - {"allowNetwork": true, "token": "...", "orgId": "..."}  (from TypeScript)
 func handleSetSecurityPolicy(ctx *HandlerContext, payload []byte) []byte {
 	var req SecurityPolicy
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return errorResponse(1, 5, "invalid payload: "+err.Error())
 	}
+	// Token is optional — allowNetwork without auth is fine for local dev.
+	// The host's SetSecurityPolicy call is non-fatal; missing token just
+	// means cloud auth won't work inside the VM.
 	if req.Token == "" {
-		return errorResponse(1, 5, "token is required")
+		// Also try parsing as "orgId" format from TypeScript wrapper
+		var alt struct {
+			Token string `json:"token"`
+		}
+		if err := json.Unmarshal(payload, &alt); err == nil && alt.Token != "" {
+			req.Token = alt.Token
+		}
 	}
-
+	// Store policy even without token (allowNetwork still takes effect)
 	ctx.Policy = &req
-
+	if req.Token == "" {
+		body, _ := json.Marshal(map[string]interface{}{
+			"status": "policy_stored",
+			"warning": "no token provided — cloud auth will be unavailable",
+		})
+		response, _ := wire.Encode(wire.MsgTypeResponse, 5, body)
+		return response
+	}
 	body, _ := json.Marshal(map[string]interface{}{
 		"status": "policy_stored",
 	})

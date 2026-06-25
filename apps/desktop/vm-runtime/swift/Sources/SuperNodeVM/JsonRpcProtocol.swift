@@ -42,6 +42,14 @@ struct JsonRpcResponse: Codable {
         self.result = nil
         self.error = error
     }
+
+    /// Create a response preserving whatever was set by the forwarding layer.
+    init(id: Int?, result: JsonRpcValue?, error: JsonRpcError?) {
+        self.jsonrpc = "2.0"
+        self.id = id
+        self.result = result
+        self.error = error
+    }
 }
 
 /// JSON-RPC 2.0 error object.

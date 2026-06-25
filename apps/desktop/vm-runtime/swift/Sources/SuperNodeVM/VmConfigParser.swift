@@ -140,18 +140,17 @@ struct VmConfigParser {
         vzConfig.memorySize = min(config.memoryBytes, VZVirtualMachineConfiguration.maximumAllowedMemorySize)
 
         // ── Boot loader: Linux kernel + optional initrd ──
+        // Note: macOS 26 (SDK 15.2+) removed `initialRamdiskURL` from the
+        // VZLinuxBootLoader initializer.  The initrd is now set via the
+        // `.initialRamdiskURL` property after construction.
         let kernelURL = URL(fileURLWithPath: config.kernelPath)
-        let bootLoader: VZBootLoader
+        let bootLoader = VZLinuxBootLoader(kernelURL: kernelURL)
         if let initrdPath = config.initrdPath, !initrdPath.isEmpty {
             let initrdURL = URL(fileURLWithPath: initrdPath)
-            bootLoader = VZLinuxBootLoader(kernelURL: kernelURL, initialRamdiskURL: initrdURL)
-        } else {
-            bootLoader = VZLinuxBootLoader(kernelURL: kernelURL)
+            bootLoader.initialRamdiskURL = initrdURL
         }
         // Set kernel command line for vsock and console
-        if let linuxLoader = bootLoader as? VZLinuxBootLoader {
-            linuxLoader.commandLine = "console=hvc0 earlyprintk=serial"
-        }
+        bootLoader.commandLine = "console=hvc0 earlyprintk=serial"
         vzConfig.bootLoader = bootLoader
 
         // ── Storage devices: VZVirtioBlockDeviceConfiguration for each disk image ──
@@ -186,14 +185,17 @@ struct VmConfigParser {
         // ── Entropy device ──
         vzConfig.entropyDevices = [VZVirtioEntropyDeviceConfiguration()]
 
-        // ── Serial port for console output ──
+        // ── Serial port: guest console to host stderr ──
+        // macOS 26 SDK: VZFileHandleSerialPortAttachment rejects
+        // FileHandle.standardInput as a reading handle.  We pass nil for
+        // reading (guest serial input not needed) and stderr for writing
+        // so kernel messages are visible in the host's log stream.
         let serialPort = VZVirtioConsoleDeviceSerialPortConfiguration()
-        // Attach to stdout for console logging
-        let stdioAttachment = VZFileHandleSerialPortAttachment(
-            fileHandleForReading: FileHandle.standardInput,
+        let serialAttachment = VZFileHandleSerialPortAttachment(
+            fileHandleForReading: nil,
             fileHandleForWriting: FileHandle.standardError
         )
-        serialPort.attachment = stdioAttachment
+        serialPort.attachment = serialAttachment
         vzConfig.serialPorts = [serialPort]
 
         // ── Network: virtio (NAT) for internet access ──

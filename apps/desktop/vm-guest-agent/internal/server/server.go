@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 
 	"github.com/paperclipai/sdk-daemon/internal/health"
 	"github.com/paperclipai/sdk-daemon/internal/process"
@@ -13,8 +14,7 @@ import (
 )
 
 const (
-	// DefaultVsockPort is the vsock port the daemon listens on.
-	// CID=3 is the standard host CID for VM-to-host communication.
+	// DefaultVsockPort is the vsock port the daemon connects to on the host (CID=2).
 	DefaultVsockPort = 1024
 )
 
@@ -26,13 +26,14 @@ type Server struct {
 }
 
 // Listener is the interface for accepting connections.
-// On Linux, this is backed by github.com/mdlayher/vsock.
+// On Linux, this is backed by a single vsock connection to CID=2.
 type Listener interface {
 	Accept() (io.ReadWriteCloser, error)
 	Close() error
 }
 
-// New creates a new vsock RPC server with default dependencies.
+// New creates a new vsock RPC client with default dependencies.
+// The client connects to the host (CID=2) on the given port.
 func New(port uint32) *Server {
 	return &Server{
 		port: port,
@@ -55,17 +56,34 @@ func NewWithContext(port uint32, ctx *HandlerContext) *Server {
 }
 
 // SetListener sets a custom listener for the server (used for testing or
-// for binding the real vsock listener prior to Serve).
+// for binding the real vsock connection prior to Serve).
 func (s *Server) SetListener(ln Listener) {
 	s.ln = ln
 }
 
+// Connection returns the underlying vsock connection for sending events
+// (e.g., the Ready event) before or during Serve().
+// Returns nil if the server hasn't connected yet (Connect() not called).
+func (s *Server) Connection() io.Writer {
+	if s.ln == nil {
+		return nil
+	}
+	// Both vsockConnListener and test mocks can implement this via type assertion
+	type connProvider interface {
+		Connection() io.Writer
+	}
+	if cp, ok := s.ln.(connProvider); ok {
+		return cp.Connection()
+	}
+	return nil
+}
+
 // Serve accepts connections in a loop. Blocks until ctx is cancelled or
 // an irrecoverable error occurs.
-// The caller must call SetListener before Serve.
+// The caller must call Connect, SetListener, or Listen before Serve.
 func (s *Server) Serve(ctx context.Context) error {
 	if s.ln == nil {
-		return fmt.Errorf("listener not set; call SetListener or Listen first")
+		return fmt.Errorf("listener not set; call Connect or SetListener first")
 	}
 
 	for {
@@ -116,22 +134,22 @@ func (s *Server) handleConn(conn io.ReadWriteCloser) {
 		}
 
 		// If there's remaining data in the buffer (pipelined messages),
-		// process it instead of waiting for the next read.
+		// copy it to the start of buf for the next iteration.
 		if len(remainder) > 0 {
 			copy(buf[:len(remainder)], remainder)
-			// For simplicity and to avoid infinite loop edge cases,
-			// we queue the remainder for the next read cycle.
-			// In practice, we copy remainder back to the start of buf
-			// but need the full read loop to handle it.
-			// Simple approach: write remainder to a temp buffer for next iteration
-			// The next Read will overwrite buf, but we need to handle partial reads.
+			// Continue reading to process the pipelined message
+			continue
 		}
 	}
 }
 
 // SendReadyEvent sends a "Ready" event to the given writer.
-func (s *Server) SendReadyEvent(conn io.Writer) error {
-	payload, err := json.Marshal("Ready")
+// The guestIP is included so the host knows how to reach VM services.
+func (s *Server) SendReadyEvent(conn io.Writer, guestIP string) error {
+	payload, err := json.Marshal(map[string]string{
+		"type": "Ready",
+		"ip":   guestIP,
+	})
 	if err != nil {
 		return fmt.Errorf("marshal ready event: %w", err)
 	}
@@ -141,6 +159,20 @@ func (s *Server) SendReadyEvent(conn io.Writer) error {
 	}
 	_, err = conn.Write(data)
 	return err
+}
+
+// DetectGuestIP returns the primary non-loopback IPv4 address of the guest.
+func DetectGuestIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "127.0.0.1"
+	}
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
+			return ipnet.IP.String()
+		}
+	}
+	return "127.0.0.1"
 }
 
 // Context returns the handler context (for testing).

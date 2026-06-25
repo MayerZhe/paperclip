@@ -37,7 +37,15 @@ signal(SIGPIPE, SIG_IGN)
 func handleRequest(_ request: JsonRpcRequest) -> JsonRpcResponse {
     switch request.method {
     case "start":
-        return handleStart(request)
+        // macOS 26 SDK: VZVirtualMachine.start() asserts the caller is on the
+        // main queue.  Since our stdin loop runs on a background queue, we
+        // must synchronously hand off to the main queue for this method.
+        // dispatchMain() keeps the main run loop alive to service these blocks.
+        var response: JsonRpcResponse!
+        DispatchQueue.main.sync {
+            response = handleStart(request)
+        }
+        return response
     case "stop":
         return handleStop(request)
     case "status":
@@ -45,6 +53,30 @@ func handleRequest(_ request: JsonRpcRequest) -> JsonRpcResponse {
     case "ping":
         return JsonRpcResponse(id: request.id, result: .string("pong"))
     default:
+        // Forward to guest agent via vsock (SetSecurityPolicy, HealthCheck, Spawn, Kill, Shutdown)
+        // Serialize params to JSON Data for binary wire forwarding
+        let paramsData: Data
+        if let params = request.params {
+            let encoder = JSONEncoder()
+            if let encoded = try? encoder.encode(params) {
+                paramsData = encoded
+            } else {
+                paramsData = "{}".data(using: .utf8)!
+            }
+        } else {
+            paramsData = "{}".data(using: .utf8)!
+        }
+
+        if let forwarded = vmManager.forwardToGuest(method: request.method, paramsJSON: paramsData) {
+            if let reqId = request.id {
+                return JsonRpcResponse(
+                    id: reqId,
+                    result: forwarded.result,
+                    error: forwarded.error
+                )
+            }
+            return forwarded
+        }
         return JsonRpcResponse(
             id: request.id,
             error: JsonRpcError(
@@ -138,67 +170,89 @@ func emitEvent(_ event: JsonRpcEvent) {
 }
 
 // ─── Main loop: read JSON-RPC lines from stdin ───
+//
+// CRITICAL: The stdin read loop MUST NOT run on the main thread.
+// VZVirtualMachine delivers its delegate callbacks and the vm.start()
+// completion handler on its delegateQueue, which defaults to
+// DispatchQueue.main.  If the main thread is blocked in fread()
+// (FileHandle.read blocks the kernel thread synchronously), those
+// callbacks are never dequeued and the VM never transitions to "running".
+//
+// We run the stdin loop on a high-priority background queue and let the
+// main thread stay idle so it can service DispatchQueue.main blocks.
+// VmManager also explicitly sets vm.delegateQueue to a dedicated queue
+// as a second line of defence.
 
 fputs("[supernode-vm] Starting JSON-RPC listener on stdin/stdout\n", stderr)
 
-let stdin = FileHandle.standardInput
-var buffer = ""
+let stdinQueue = DispatchQueue(label: "com.supernode.stdin", qos: .userInitiated)
+stdinQueue.async {
+    let stdin = FileHandle.standardInput
+    var buffer = ""
 
-while true {
-    guard let availableData = try? stdin.read(upToCount: 4096) else {
-        // EOF or read error — parent process closed pipe
-        fputs("[supernode-vm] stdin closed, shutting down\n", stderr)
-        vmManager.stop()
-        exit(0)
-    }
-
-    guard !availableData.isEmpty else {
-        // Graceful EOF
-        vmManager.stop()
-        exit(0)
-    }
-
-    buffer.append(contentsOf: String(decoding: availableData, as: UTF8.self))
-
-    // Process complete lines
-    while let newlineIndex = buffer.firstIndex(of: "\n") {
-        let line = String(buffer[..<newlineIndex])
-        buffer.removeSubrange(...newlineIndex)
-
-        guard !line.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
-
-        // Parse JSON-RPC request
-        guard let lineData = line.data(using: .utf8) else {
-            fputs("[supernode-vm] Invalid UTF-8 in input line\n", stderr)
-            continue
+    while true {
+        guard let availableData = try? stdin.read(upToCount: 4096) else {
+            // EOF or read error — parent process closed pipe
+            fputs("[supernode-vm] stdin closed, shutting down\n", stderr)
+            DispatchQueue.main.sync { vmManager.stop() }
+            exit(0)
         }
 
-        do {
-            let decoder = JSONDecoder()
-            let request = try decoder.decode(JsonRpcRequest.self, from: lineData)
+        guard !availableData.isEmpty else {
+            // Graceful EOF
+            DispatchQueue.main.sync { vmManager.stop() }
+            exit(0)
+        }
 
-            // Dispatch on background queue so VM operations don't block stdin reads
-            let response = handleRequest(request)
+        buffer.append(contentsOf: String(decoding: availableData, as: UTF8.self))
 
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = []
-            let responseData = try encoder.encode(response)
-            if let responseLine = String(data: responseData, encoding: .utf8) {
-                print(responseLine)
-                fflush(stdout)
+        // Process complete lines
+        while let newlineIndex = buffer.firstIndex(of: "\n") {
+            let line = String(buffer[..<newlineIndex])
+            buffer.removeSubrange(...newlineIndex)
+
+            guard !line.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
+
+            // Parse JSON-RPC request
+            guard let lineData = line.data(using: .utf8) else {
+                fputs("[supernode-vm] Invalid UTF-8 in input line\n", stderr)
+                continue
             }
-        } catch {
-            fputs("[supernode-vm] Failed to parse request: \(error)\n", stderr)
-            // Send parse error response if we can extract an id
-            let parseError = JsonRpcResponse(
-                id: nil,
-                error: JsonRpcError(code: -32700, message: "Parse error: \(error.localizedDescription)")
-            )
-            if let errorData = try? JSONEncoder().encode(parseError),
-               let errorLine = String(data: errorData, encoding: .utf8) {
-                print(errorLine)
-                fflush(stdout)
+
+            do {
+                let decoder = JSONDecoder()
+                let request = try decoder.decode(JsonRpcRequest.self, from: lineData)
+
+                let response = handleRequest(request)
+
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = []
+                let responseData = try encoder.encode(response)
+                if let responseLine = String(data: responseData, encoding: .utf8) {
+                    // print() writes to stdout — must be serialized; the
+                    // stdin queue is the only writer so interleaving is
+                    // not a concern.
+                    print(responseLine)
+                    fflush(stdout)
+                }
+            } catch {
+                fputs("[supernode-vm] Failed to parse request: \(error)\n", stderr)
+                // Send parse error response if we can extract an id
+                let parseError = JsonRpcResponse(
+                    id: nil,
+                    error: JsonRpcError(code: -32700, message: "Parse error: \(error.localizedDescription)")
+                )
+                if let errorData = try? JSONEncoder().encode(parseError),
+                   let errorLine = String(data: errorData, encoding: .utf8) {
+                    print(errorLine)
+                    fflush(stdout)
+                }
             }
         }
     }
 }
+
+// Keep the main thread alive and running its run loop so that
+// DispatchQueue.main callbacks (and any frameworks that expect the
+// main queue to be alive) are serviced.
+dispatchMain()

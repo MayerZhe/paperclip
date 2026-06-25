@@ -3,29 +3,30 @@ import Foundation
 // GuestComms — handles guest IP detection and protocol framing for host↔guest communication.
 //
 // The guest VM communicates with the host via vsock (CID=2 on host, CID=3 on guest).
-// After the VM boots and the guest agent (sdk-daemon) starts, it sends a "Ready" event
-// over vsock indicating all services are up.
+// After the VM boots and the guest agent (sdk-daemon) starts, it connects to CID=2:9999
+// and sends a "Ready" event over vsock indicating all services are up.
 //
-// Binary wire format used by the guest agent:
-//   [4 bytes msg_len (big-endian)] [1 byte msg_type] [2 bytes method_id (big-endian)] [JSON payload]
+// Binary wire format used by the guest agent (Go wire.Encode):
+//   [4 bytes msg_len (big-endian, TOTAL frame size = 7 + payload_len)]
+//   [1 byte msg_type (0=request, 1=response, 2=event)]
+//   [2 bytes method_id (big-endian)]
+//   [JSON payload]
 //
-// This module:
-//   1. Detects when the guest is ready by watching for the "Ready" message
-//   2. Handles protocol framing (extracting complete messages from the vsock stream)
-//   3. Provides guest IP detection (reads from DHCP lease or kernel log if needed)
+// IMPORTANT: msg_len is the total frame size including the 7-byte header.
+//             It is NOT the payload-only length.
 
 struct GuestComms {
 
     /// Frame types used in the binary wire protocol between host and guest.
     enum MessageType: UInt8 {
-        case request = 0x01
-        case response = 0x02
-        case event = 0x03
+        case request = 0x00
+        case response = 0x01
+        case event = 0x02
         case error = 0x04
     }
 
     /// Protocol constants.
-    enum Protocol {
+    enum WireProtocol {
         /// Length of the frame header in bytes (4 bytes length + 1 byte type + 2 bytes method_id).
         static let headerLength = 7
 
@@ -40,45 +41,47 @@ struct GuestComms {
         var messages: [(MessageType, UInt16, Data)] = []
         var offset = 0
 
-        while offset + Protocol.headerLength <= buffer.count {
-            // Read 4-byte big-endian message length
+        while offset + WireProtocol.headerLength <= buffer.count {
+            // Read 4-byte big-endian message length (TOTAL frame size = header + payload)
             let msgLength = Int(buffer.withUnsafeBytes { ptr in
                 UInt32(bigEndian: ptr.load(fromByteOffset: offset, as: UInt32.self))
             })
 
-            guard msgLength > 0 && msgLength <= Protocol.maxPayloadLength else {
-                // Invalid message length — skip this byte and try again
+            // Validate: must be at least header length, at most header + maxPayload
+            guard msgLength >= WireProtocol.headerLength,
+                  msgLength <= WireProtocol.maxPayloadLength + WireProtocol.headerLength else {
                 fputs("[supernode-vm] Invalid message length: \(msgLength), discarding byte\n", stderr)
                 offset += 1
                 continue
             }
 
-            let totalFrameLength = Protocol.headerLength + msgLength
-            guard offset + totalFrameLength <= buffer.count else {
+            // msgLength IS the total frame length (Go wire.Encode semantics)
+            guard offset + msgLength <= buffer.count else {
                 // Incomplete message — wait for more data
                 break
             }
 
-            // Read message type
-            let msgType = buffer[offset + 4]
+            // Read message type (byte 4 in the frame)
+            let msgTypeRaw = buffer[offset + 4]
+            let msgType = MessageType(rawValue: msgTypeRaw)
 
-            // Read 2-byte big-endian method ID
+            // Read 2-byte big-endian method ID (bytes 5-6)
             let methodId = buffer.withUnsafeBytes { ptr in
                 UInt16(bigEndian: ptr.load(fromByteOffset: offset + 5, as: UInt16.self))
             }
 
-            // Extract payload
-            let payloadStart = offset + Protocol.headerLength
-            let payloadEnd = offset + totalFrameLength
+            // Extract payload (everything after 7-byte header)
+            let payloadStart = offset + WireProtocol.headerLength
+            let payloadEnd = offset + msgLength
             let payload = buffer.subdata(in: payloadStart..<payloadEnd)
 
-            if let type = MessageType(rawValue: msgType) {
+            if let type = msgType {
                 messages.append((type, methodId, payload))
             } else {
-                fputs("[supernode-vm] Unknown message type: \(msgType)\n", stderr)
+                fputs("[supernode-vm] Unknown message type: \(msgTypeRaw)\n", stderr)
             }
 
-            offset += totalFrameLength
+            offset += msgLength
         }
 
         let remainder = buffer.subdata(in: offset..<buffer.count)
@@ -87,10 +90,11 @@ struct GuestComms {
 
     /// Encode a message into the binary wire format.
     static func encodeMessage(type: MessageType, methodId: UInt16, payload: Data) -> Data {
-        var data = Data(capacity: Protocol.headerLength + payload.count)
+        let totalLen = WireProtocol.headerLength + payload.count
+        var data = Data(capacity: totalLen)
 
-        // 4 bytes: message length (big-endian)
-        var length = UInt32(payload.count).bigEndian
+        // 4 bytes: TOTAL message length (big-endian), including header
+        var length = UInt32(totalLen).bigEndian
         data.append(Data(bytes: &length, count: 4))
 
         // 1 byte: message type
@@ -159,23 +163,14 @@ struct GuestComms {
             return nil
         }
 
-        // Parse standard DHCP lease file format:
-        // {
-        //     name=...
-        //     ip_address=10.0.2.15
-        //     hw_address=1,aa:bb:cc:dd:ee:ff
-        //     ...
-        // }
         let leases = content.components(separatedBy: "}\n")
         for lease in leases {
             guard lease.contains("ip_address=") else { continue }
 
             if let mac = macAddress {
-                // Only return IP for matching MAC
                 guard lease.localizedCaseInsensitiveContains(mac) else { continue }
             }
 
-            // Extract ip_address value
             for line in lease.components(separatedBy: "\n") {
                 let trimmed = line.trimmingCharacters(in: .whitespaces)
                 if trimmed.hasPrefix("ip_address=") {
@@ -209,14 +204,11 @@ struct GuestComms {
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         guard let output = String(data: data, encoding: .utf8) else { return nil }
 
-        // Parse ARP table lines:
-        // ? (10.0.2.15) at aa:bb:cc:dd:ee:ff on bridge100 ifscope [bridge]
         for line in output.components(separatedBy: "\n") {
             if let mac = macAddress, !line.localizedCaseInsensitiveContains(mac) {
                 continue
             }
 
-            // Extract IP from parentheses
             if let parenStart = line.firstIndex(of: "("),
                let parenEnd = line[parenStart...].firstIndex(of: ")") {
                 let ipStart = line.index(after: parenStart)

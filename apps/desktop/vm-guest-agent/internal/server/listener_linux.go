@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 	"syscall"
 
 	"golang.org/x/sys/unix"
@@ -26,14 +27,50 @@ func (c *vsockConn) Read(p []byte) (int, error)  { return c.file.Read(p) }
 func (c *vsockConn) Write(p []byte) (int, error) { return c.file.Write(p) }
 func (c *vsockConn) Close() error                { return c.file.Close() }
 
-// vsockListener implements our Listener interface using AF_VSOCK sockets.
-type vsockListener struct {
-	fd   int
-	file *os.File
+// vsockConnListener wraps a single connected vsock socket as a Listener.
+// Accept() returns the same connection on the first call, then blocks indefinitely
+// (or until Close() is called). This allows Serve() to work unchanged with a
+// client-side connection.
+type vsockConnListener struct {
+	conn     io.ReadWriteCloser
+	accepted bool
+	mu       sync.Mutex
+	closed   bool
 }
 
-// Listen creates a vsock listener on the given port.
-func (s *Server) Listen() error {
+func (l *vsockConnListener) Accept() (io.ReadWriteCloser, error) {
+	l.mu.Lock()
+	if l.closed {
+		l.mu.Unlock()
+		return nil, fmt.Errorf("listener closed")
+	}
+	if l.accepted {
+		// Already returned the connection once — block until closed.
+		// In practice the host only opens one connection, so Serve()
+		// processes the first Accept and loops. We block here to
+		// prevent a tight Accept loop.
+		l.mu.Unlock()
+		select {} // block forever (Serve() will cancel via ctx)
+	}
+	l.accepted = true
+	l.mu.Unlock()
+	return l.conn, nil
+}
+
+func (l *vsockConnListener) Close() error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.closed = true
+	if l.conn != nil {
+		return l.conn.Close()
+	}
+	return nil
+}
+
+// Connect connects to the host's vsock listener at CID=2 on the given port.
+// On success the connection is stored as the server's listener so Serve()
+// can accept and process RPC requests from the host.
+func (s *Server) Connect() error {
 	if s.ln != nil {
 		return fmt.Errorf("listener already set")
 	}
@@ -43,40 +80,21 @@ func (s *Server) Listen() error {
 		return fmt.Errorf("socket(AF_VSOCK): %w", err)
 	}
 
-	// Allow address reuse
-	if err := unix.SetsockoptInt(fd, unix.SOL_SOCKET, unix.SO_REUSEADDR, 1); err != nil {
-		unix.Close(fd)
-		return fmt.Errorf("setsockopt(SO_REUSEADDR): %w", err)
-	}
-
-	// Bind to VMADDR_CID_ANY on the specified port
+	// Connect to CID=2 (VMADDR_CID_HOST) — the host is the vsock server.
 	addr := &unix.SockaddrVM{
-		CID:  unix.VMADDR_CID_ANY,
+		CID:  2,
 		Port: s.port,
 	}
-	if err := unix.Bind(fd, addr); err != nil {
+	if err := unix.Connect(fd, addr); err != nil {
 		unix.Close(fd)
-		return fmt.Errorf("bind(vsock:%d): %w", s.port, err)
+		return fmt.Errorf("connect(vsock CID=2 port=%d): %w", s.port, err)
 	}
 
-	// Listen with a reasonable backlog
-	if err := unix.Listen(fd, 128); err != nil {
-		unix.Close(fd)
-		return fmt.Errorf("listen(vsock:%d): %w", s.port, err)
-	}
-
-	s.ln = &vsockListener{fd: fd, file: os.NewFile(uintptr(fd), "vsock-listener")}
+	s.ln = &vsockConnListener{conn: newVsockConn(fd)}
 	return nil
 }
 
-func (vl *vsockListener) Accept() (io.ReadWriteCloser, error) {
-	nfd, _, err := unix.Accept(vl.fd)
-	if err != nil {
-		return nil, err
-	}
-	return newVsockConn(nfd), nil
-}
-
-func (vl *vsockListener) Close() error {
-	return vl.file.Close()
+// Connection implements the connProvider interface from server.go.
+func (l *vsockConnListener) Connection() io.Writer {
+	return l.conn
 }

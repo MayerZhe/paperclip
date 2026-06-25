@@ -225,8 +225,12 @@ func TestHandleSetSecurityPolicyMissingToken(t *testing.T) {
 	response := Dispatch(ctx, wire.MsgTypeRequest, 5, payload)
 	_, _, result := decodeResponse(t, response)
 
-	if result["error"] == nil {
-		t.Error("expected error for missing token")
+	// Token is now optional — policy_stored with a warning
+	if result["status"] != "policy_stored" {
+		t.Errorf("status = %v, want policy_stored", result["status"])
+	}
+	if result["warning"] == nil {
+		t.Error("expected warning for missing token")
 	}
 }
 
