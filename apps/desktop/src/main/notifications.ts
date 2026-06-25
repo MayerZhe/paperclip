@@ -26,7 +26,7 @@ export function showNotification(title: string, body: string): void {
     const notification = new Notification({ title, body });
     notification.show();
   } catch (err) {
-    console.error("[PaperClip Desktop] Notification failed:", err);
+    console.error("[SuperNode Desktop] Notification failed:", err);
   }
 }
 
@@ -50,7 +50,7 @@ export function showAdvancedNotification(options: ShowNotificationOptions): void
     });
     notification.show();
   } catch (err) {
-    console.error("[PaperClip Desktop] Advanced notification failed:", err);
+    console.error("[SuperNode Desktop] Advanced notification failed:", err);
   }
 }
 
@@ -67,25 +67,25 @@ export function notifyDaemonStatusChange(
   try {
     if (nextHealth === "shuttingDown" && previousHealth === "running") {
       showAdvancedNotification({
-        title: "PaperClip is shutting down",
+        title: "SuperNode is shutting down",
         body: "The daemon is shutting down gracefully. Please wait...",
         level: "warning",
       });
     } else if (nextHealth === "unreachable" && previousHealth === "running") {
       showAdvancedNotification({
-        title: "PaperClip daemon unreachable",
-        body: "Connection to PaperClip daemon was lost. Check if the server is still running.",
+        title: "SuperNode daemon unreachable",
+        body: "Connection to SuperNode daemon was lost. Check if the server is still running.",
         level: "error",
       });
     } else if (nextHealth === "running" && previousHealth !== "running") {
       showAdvancedNotification({
-        title: "PaperClip daemon connected",
-        body: "PaperClip daemon is now running and healthy.",
+        title: "SuperNode daemon connected",
+        body: "SuperNode daemon is now running and healthy.",
         level: "info",
         silent: true,
       });
     }
   } catch (err) {
-    console.error("[PaperClip Desktop] Status change notification failed:", err);
+    console.error("[SuperNode Desktop] Status change notification failed:", err);
   }
 }

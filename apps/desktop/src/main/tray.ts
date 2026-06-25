@@ -101,7 +101,7 @@ async function pollDaemonHealth(serverPort: number): Promise<DaemonHealth> {
  */
 function updateTrayTooltip(tray: Tray): void {
   const modeLabel = currentMode === "agenthubs" ? "AgentHubs Mode" : "Agent Mode";
-  tray.setToolTip(`PaperClip · ${modeLabel}`);
+  tray.setToolTip(`SuperNode · ${modeLabel}`);
 }
 
 /**
@@ -129,7 +129,7 @@ function updateTrayUI(tray: Tray, health: DaemonHealth): void {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: "Show PaperClip",
+      label: "Show SuperNode",
       click: () => {
         if (mainWindow) {
           mainWindow.show();
@@ -170,7 +170,7 @@ function updateTrayUI(tray: Tray, health: DaemonHealth): void {
 export function startTrayHeartbeat(serverPort: number): () => void {
   // AgentHubs mode — 没有 daemon，不轮询
   if (currentMode === "agenthubs") {
-    console.log("[PaperClip Desktop] Tray heartbeat skipped (AgentHubs mode)");
+    console.log("[SuperNode Desktop] Tray heartbeat skipped (AgentHubs mode)");
     return () => {};
   }
 
@@ -181,7 +181,7 @@ export function startTrayHeartbeat(serverPort: number): () => void {
       if (trayInstance) updateTrayUI(trayInstance, health);
     })
     .catch((err) => {
-      console.error("[PaperClip Desktop] Initial tray health poll failed:", err);
+      console.error("[SuperNode Desktop] Initial tray health poll failed:", err);
     });
 
   // 每 15 秒轮询
@@ -189,13 +189,13 @@ export function startTrayHeartbeat(serverPort: number): () => void {
     try {
       const health = await pollDaemonHealth(serverPort);
       if (health !== currentHealth) {
-        console.log(`[PaperClip Desktop] Tray health change: ${currentHealth} → ${health}`);
+        console.log(`[SuperNode Desktop] Tray health change: ${currentHealth} → ${health}`);
         notifyDaemonStatusChange(currentHealth, health);
         currentHealth = health;
         if (trayInstance) updateTrayUI(trayInstance, health);
       }
     } catch (err) {
-      console.error("[PaperClip Desktop] Tray health poll error:", err);
+      console.error("[SuperNode Desktop] Tray health poll error:", err);
     }
   }, 15000);
 
@@ -250,7 +250,7 @@ export function createTray(
   trayInstance = tray;
 
   const modeLabel = mode === "agenthubs" ? "AgentHubs Mode" : "Agent Mode";
-  tray.setToolTip(`PaperClip · ${modeLabel}`);
+  tray.setToolTip(`SuperNode · ${modeLabel}`);
 
   // 模式切换标签：AgentHubs mode 下显示 "Switch to Agent Mode"，反之亦然
   const switchLabel =
@@ -258,7 +258,7 @@ export function createTray(
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: "Show PaperClip",
+      label: "Show SuperNode",
       click: () => {
         mainWindow.show();
         mainWindow.focus();

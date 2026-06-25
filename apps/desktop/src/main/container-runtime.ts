@@ -84,7 +84,7 @@ function scanRuntimes(): { available: string[]; primary: string | null; command:
   }
 
   if (available.length === 0) {
-    console.log("[PaperClip Desktop] No container runtime detected");
+    console.log("[SuperNode Desktop] No container runtime detected");
     return { available: [], primary: null, command: null };
   }
 
@@ -93,7 +93,7 @@ function scanRuntimes(): { available: string[]; primary: string | null; command:
   const command = primaryDef?.paths.find((p) => fs.existsSync(p)) ?? null;
 
   console.log(
-    `[PaperClip Desktop] Container runtimes: ${available.join(", ")} (primary: ${primary})`,
+    `[SuperNode Desktop] Container runtimes: ${available.join(", ")} (primary: ${primary})`,
   );
 
   return { available, primary, command };
@@ -114,7 +114,7 @@ function writeCache(info: ContainerRuntimeInfo): void {
     };
     fs.writeFileSync(cachePath, JSON.stringify(cache, null, 2));
   } catch (err) {
-    console.warn("[PaperClip Desktop] Failed to write container runtime cache:", err);
+    console.warn("[SuperNode Desktop] Failed to write container runtime cache:", err);
   }
 }
 
@@ -129,7 +129,7 @@ function readCache(): ContainerRuntimeInfo | null {
     const cache: CachedRuntimeInfo = JSON.parse(raw);
 
     if (cache.os !== process.platform) {
-      console.log("[PaperClip Desktop] Container runtime cache: OS mismatch, invalidating");
+      console.log("[SuperNode Desktop] Container runtime cache: OS mismatch, invalidating");
       return null;
     }
 
@@ -142,7 +142,7 @@ function readCache(): ContainerRuntimeInfo | null {
         : null,
     };
   } catch (err) {
-    console.warn("[PaperClip Desktop] Failed to read container runtime cache:", err);
+    console.warn("[SuperNode Desktop] Failed to read container runtime cache:", err);
     return null;
   }
 }

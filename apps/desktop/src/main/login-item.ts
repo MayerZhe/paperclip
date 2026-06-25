@@ -15,9 +15,9 @@ export function setAutoLaunch(enabled: boolean): void {
       // macOS: 仅在 /Applications 中时生效；开发模式静默跳过
       args: ["--hidden"], // 启动时隐藏窗口（可选）
     });
-    console.log(`[PaperClip Desktop] Auto-launch ${enabled ? "enabled" : "disabled"}`);
+    console.log(`[SuperNode Desktop] Auto-launch ${enabled ? "enabled" : "disabled"}`);
   } catch (err) {
-    console.error("[PaperClip Desktop] Failed to set auto-launch:", err);
+    console.error("[SuperNode Desktop] Failed to set auto-launch:", err);
   }
 }
 
@@ -30,7 +30,7 @@ export function getAutoLaunchState(): boolean {
     const settings = app.getLoginItemSettings();
     return settings.openAtLogin;
   } catch (err) {
-    console.error("[PaperClip Desktop] Failed to get auto-launch state:", err);
+    console.error("[SuperNode Desktop] Failed to get auto-launch state:", err);
     return false;
   }
 }

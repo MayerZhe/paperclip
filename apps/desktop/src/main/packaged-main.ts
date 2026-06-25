@@ -128,7 +128,7 @@ function resolveDaemonEntry(): string {
   ];
   for (const c of candidates) {
     if (fs.existsSync(c)) {
-      console.log(`[PaperClip Desktop] Daemon entry: ${c}`);
+      console.log(`[SuperNode Desktop] Daemon entry: ${c}`);
       return c;
     }
   }
@@ -145,7 +145,7 @@ async function startAgentDaemon(): Promise<{ daemon: ChildProcess; serverPort: n
     instanceId: PAPERCLIP_INSTANCE_ID,
   });
 
-  // Phase 1: 启动 PaperClip Server
+  // Phase 1: 启动 SuperNode Server
   const daemonEntry = resolveDaemonEntry();
   const serverPort = findAvailablePort();
 
@@ -167,7 +167,7 @@ async function startAgentDaemon(): Promise<{ daemon: ChildProcess; serverPort: n
     PAPERCLIP_ONBOARDING_ASSETS_DIR: path.join(daemonRoot, "onboarding-assets"),
   };
 
-  console.log(`[PaperClip Desktop] Starting daemon on port ${serverPort}...`);
+  console.log(`[SuperNode Desktop] Starting daemon on port ${serverPort}...`);
 
   const daemon: ChildProcess = fork(daemonEntry, [], {
     env: serverEnv,
@@ -182,21 +182,21 @@ async function startAgentDaemon(): Promise<{ daemon: ChildProcess; serverPort: n
     process.stderr.write(`[daemon] ${data}`);
   });
   daemon.on("exit", (code, signal) => {
-    console.log(`[PaperClip Desktop] Daemon exited (code=${code}, signal=${signal})`);
+    console.log(`[SuperNode Desktop] Daemon exited (code=${code}, signal=${signal})`);
   });
 
   const ready = await waitForServerReady(serverPort, 60000);
   if (!ready) {
     daemon.kill("SIGTERM");
-    throw new Error("PaperClip Server did not become ready within 60 seconds");
+    throw new Error("SuperNode Server did not become ready within 60 seconds");
   }
-  console.log("[PaperClip Desktop] Daemon ready");
+  console.log("[SuperNode Desktop] Daemon ready");
   return { daemon, serverPort };
 }
 
 // ─── Agent Mode daemon 停止（提取为可复用的回调，供 mode-manager 调用） ───
 async function stopAgentDaemon(daemon: ChildProcess, serverPort: number): Promise<void> {
-  console.log("[PaperClip Desktop] Stopping agent daemon...");
+  console.log("[SuperNode Desktop] Stopping agent daemon...");
 
   await fetch(`http://127.0.0.1:${serverPort}/api/desktop/shutdown`, {
     method: "POST",
@@ -206,7 +206,7 @@ async function stopAgentDaemon(daemon: ChildProcess, serverPort: number): Promis
     daemon.kill("SIGTERM");
     await new Promise<void>((resolve) => {
       const timeout = setTimeout(() => {
-        console.warn("[PaperClip Desktop] Daemon didn't exit in time, force killing");
+        console.warn("[SuperNode Desktop] Daemon didn't exit in time, force killing");
         daemon.kill("SIGKILL");
         resolve();
       }, 20000);
@@ -216,7 +216,7 @@ async function stopAgentDaemon(daemon: ChildProcess, serverPort: number): Promis
       });
     });
   }
-  console.log("[PaperClip Desktop] Agent daemon stopped");
+  console.log("[SuperNode Desktop] Agent daemon stopped");
 }
 
 // ─── 主启动流程 ───
@@ -243,7 +243,7 @@ export async function runDesktopMain(): Promise<void> {
             resolve(result);
           },
           onLoginFailed: (err) => {
-            console.error("[PaperClip Desktop] Login failed:", err.message);
+            console.error("[SuperNode Desktop] Login failed:", err.message);
             loginWindow.close();
             resolve(null);
           },
@@ -253,13 +253,13 @@ export async function runDesktopMain(): Promise<void> {
           resolve(null);
         });
       } catch (err) {
-        console.error("[PaperClip Desktop] Failed to create login window:", err);
+        console.error("[SuperNode Desktop] Failed to create login window:", err);
         resolve(null);
       }
     });
 
     if (!loginResult) {
-      console.log("[PaperClip Desktop] Login cancelled or failed — quitting");
+      console.log("[SuperNode Desktop] Login cancelled or failed — quitting");
       app.quit();
       return;
     }
@@ -324,6 +324,7 @@ export async function runDesktopMain(): Promise<void> {
     shellHtmlPath: path.join(__dirname, "..", "..", "src", "renderer", "shell.html"),
     shellPreloadPath: path.join(__dirname, "..", "renderer", "shell-preload.js"),
     jwtToken: token,
+    agentPort: requestedPort,
     onSignOut: async () => {
       // Clear session and restart login by quitting
       app.quit();
@@ -387,7 +388,7 @@ export async function runDesktopMain(): Promise<void> {
           },
         });
       } catch (err) {
-        console.error("[PaperClip Desktop] VM download failed:", err);
+        console.error("[SuperNode Desktop] VM download failed:", err);
         if (!mainWindow.isDestroyed()) {
           mainWindow.webContents.send("sidebar:vm-download-progress", {
             percent: 0,
@@ -401,7 +402,7 @@ export async function runDesktopMain(): Promise<void> {
 
     // shell:vm-download-cancel — cancel VM download (noop for now)
     ipcMain.on("shell:vm-download-cancel", () => {
-      console.log("[PaperClip Desktop] VM download cancel requested (noop)");
+      console.log("[SuperNode Desktop] VM download cancel requested (noop)");
     });
 
     // shell:vm-status — check if VM bundle is ready
@@ -419,6 +420,16 @@ export async function runDesktopMain(): Promise<void> {
   // AgentHubs may still be starting/failing, but we proceed with what we have
   const modeResult = await modeResultPromise;
 
+  // After daemon confirmed healthy, update agent URL and activate agent tab
+  if (modeResult.agent.success) {
+    sidebarMgr.updateAgentUrl(modeResult.agent.port);
+    sidebarMgr.switchToMode("agent");
+  } else {
+    // Agent daemon failed — show AgentHubs tab instead
+    console.warn("[SuperNode Desktop] Agent daemon failed; defaulting to AgentHubs tab");
+    sidebarMgr.switchToMode("agenthubs");
+  }
+
   // Start tray heartbeat (daemon health polling)
   const stopHeartbeat = modeResult.agent.success
     ? startTrayHeartbeat(modeResult.agent.port)
@@ -427,7 +438,7 @@ export async function runDesktopMain(): Promise<void> {
   // Scan CLI availability
   const cliResults: CliScanResult[] = await scanCliAvailability();
   console.log(
-    "[PaperClip Desktop] CLI scan:",
+    "[SuperNode Desktop] CLI scan:",
     cliResults.filter((r) => r.found).map((r) => r.label),
   );
 
@@ -458,7 +469,7 @@ export async function runDesktopMain(): Promise<void> {
   const sidecarServer = createSidecarServer(sidecarSocketPath, (msg) => {
     handleSidecarMessage(msg, () => {
       // Shutdown is handled by the before-quit handler
-      console.log("[PaperClip Desktop] Sidecar requested shutdown — triggering app quit");
+      console.log("[SuperNode Desktop] Sidecar requested shutdown — triggering app quit");
       app.quit();
     });
   });
@@ -476,7 +487,7 @@ export async function runDesktopMain(): Promise<void> {
 
   app.on("before-quit", (event) => {
     event.preventDefault();
-    console.log("[PaperClip Desktop] Shutting down...");
+    console.log("[SuperNode Desktop] Shutting down...");
     stopHeartbeat();
     Promise.allSettled([
       stopBothModes(modeResult, stopAgentDaemon),
@@ -491,7 +502,7 @@ export async function runDesktopMain(): Promise<void> {
 
   app.on("activate", () => mainWindow.show());
 
-  console.log("[PaperClip Desktop] Startup complete");
+  console.log("[SuperNode Desktop] Startup complete");
 }
 
 // 直接入口判断

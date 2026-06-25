@@ -54,7 +54,7 @@ export function loadWindowState(): WindowState {
 
     return state;
   } catch (err) {
-    console.error("[PaperClip Desktop] Failed to load window state:", err);
+    console.error("[SuperNode Desktop] Failed to load window state:", err);
     return { ...DEFAULT_STATE };
   }
 }
@@ -83,7 +83,7 @@ export function saveWindowState(win: BrowserWindow): void {
 
     fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), "utf-8");
   } catch (err) {
-    console.error("[PaperClip Desktop] Failed to save window state:", err);
+    console.error("[SuperNode Desktop] Failed to save window state:", err);
   }
 }
 

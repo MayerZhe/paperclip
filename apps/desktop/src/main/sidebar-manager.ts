@@ -26,6 +26,7 @@ export interface OrgInfo {
 
 export interface SidebarManager {
   switchToMode(mode: "agent" | "agenthubs"): void;
+  updateAgentUrl(port: number): void;
   updateOrgInfo(info: Partial<OrgInfo>): void;
   updateStatus(mode: "agent" | "agenthubs", status: "online" | "offline" | "loading"): void;
   getWindow(): BrowserWindow;
@@ -53,8 +54,10 @@ export function createSidebarManager(opts: {
   shellPreloadPath: string;
   jwtToken: string;
   onSignOut: () => void;
+  agentPort?: number;
 }): SidebarManager {
-  const { shellHtmlPath, shellPreloadPath, jwtToken, onSignOut } = opts;
+  const { shellHtmlPath, shellPreloadPath, jwtToken, onSignOut, agentPort } = opts;
+  let agentUrl = agentPort ? `http://127.0.0.1:${agentPort}` : "http://127.0.0.1:3200";
 
   // ─── 内部状态 ───
   let currentMode: "agent" | "agenthubs" = "agenthubs";
@@ -97,7 +100,7 @@ export function createSidebarManager(opts: {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: "PaperClip",
+    title: "SuperNode",
     show: false,
     ...(isMac && {
       titleBarStyle: "hiddenInset",
@@ -132,9 +135,9 @@ export function createSidebarManager(opts: {
     },
   });
 
-  agenthubsView.webContents.loadURL("http://127.0.0.1:4000");
+  // ⚠️ Deferred: loadURL called on first switchToMode to avoid ERR_CONNECTION_REFUSED
 
-  // ─── 4. Create WebContentsView for Agent (:3100) ───
+  // ─── 4. Create WebContentsView for Agent ───
 
   const agentView = new WebContentsView({
     webPreferences: {
@@ -144,7 +147,7 @@ export function createSidebarManager(opts: {
     },
   });
 
-  agentView.webContents.loadURL("http://127.0.0.1:3100");
+  // ⚠️ Deferred: loadURL called on first switchToMode
 
   // ─── 5. Add views to main window (both hidden initially) ───
 
@@ -187,13 +190,24 @@ export function createSidebarManager(opts: {
 
   // ─── 7. switchToMode implementation ───
 
+  let agentLoaded = false;
+  let agenthubsLoaded = false;
+
   function switchToModeImpl(mode: "agent" | "agenthubs"): void {
     if (destroyed || currentMode === mode) return;
 
     if (mode === "agent") {
+      if (!agentLoaded) {
+        agentView.webContents.loadURL(agentUrl);
+        agentLoaded = true;
+      }
       agentView.setVisible(true);
       agenthubsView.setVisible(false);
     } else {
+      if (!agenthubsLoaded) {
+        agenthubsView.webContents.loadURL("http://127.0.0.1:4000");
+        agenthubsLoaded = true;
+      }
       agenthubsView.setVisible(true);
       agentView.setVisible(false);
     }
@@ -252,12 +266,18 @@ export function createSidebarManager(opts: {
   }
 
   // Activate default mode (agenthubs visible on startup)
-  switchToModeImpl("agenthubs");
+  // switchToModeImpl deferred — called from packaged-main after daemon ready
 
   // ─── Return public API ───
 
   return {
     switchToMode: switchToModeImpl,
+    updateAgentUrl: (port: number) => {
+      agentUrl = `http://127.0.0.1:${port}`;
+      if (agentLoaded) {
+        agentView.webContents.loadURL(agentUrl);
+      }
+    },
     updateOrgInfo: updateOrgInfoImpl,
     updateStatus: updateStatusImpl,
     getWindow: () => mainWindow,

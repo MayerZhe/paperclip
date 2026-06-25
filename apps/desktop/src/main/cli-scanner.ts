@@ -124,7 +124,7 @@ function getVersion(command: string, versionFlag: string): string | undefined {
 }
 
 export async function scanCliAvailability(): Promise<CliScanResult[]> {
-  console.log("[PaperClip Desktop] Scanning for installed AI Agent CLIs...");
+  console.log("[SuperNode Desktop] Scanning for installed AI Agent CLIs...");
 
   return CLI_WHITELIST.map((entry) => {
     const binPath = which(entry.command);

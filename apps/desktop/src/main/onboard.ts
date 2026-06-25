@@ -16,11 +16,11 @@ export async function ensureFirstRunConfig(options: OnboardOptions): Promise<voi
   const envPath = path.resolve(instanceRoot, ".env");
 
   if (fs.existsSync(configPath) && fs.existsSync(envPath)) {
-    console.log("[PaperClip Desktop] Config already exists, skipping onboard");
+    console.log("[SuperNode Desktop] Config already exists, skipping onboard");
     return;
   }
 
-  console.log("[PaperClip Desktop] First run detected — generating config...");
+  console.log("[SuperNode Desktop] First run detected — generating config...");
   fs.mkdirSync(instanceRoot, { recursive: true });
 
   // Option A: paperclipai onboard -y（首选）
@@ -31,10 +31,10 @@ export async function ensureFirstRunConfig(options: OnboardOptions): Promise<voi
       `npx paperclipai onboard -y`,
       { stdio: "inherit", timeout: 60000 },
     );
-    console.log("[PaperClip Desktop] Config generated via paperclipai onboard");
+    console.log("[SuperNode Desktop] Config generated via paperclipai onboard");
     return;
   } catch (err) {
-    console.warn("[PaperClip Desktop] paperclipai onboard failed, generating manually");
+    console.warn("[SuperNode Desktop] paperclipai onboard failed, generating manually");
   }
 
   // Option B: 手动生成 — 必须严格匹配 Zod paperclipConfigSchema
@@ -91,9 +91,9 @@ export async function ensureFirstRunConfig(options: OnboardOptions): Promise<voi
     if (errors.length > 0) {
       throw new Error(`Config validation failed: ${errors.join("; ")}`);
     }
-    console.log("[PaperClip Desktop] Config validated ✅");
+    console.log("[SuperNode Desktop] Config validated ✅");
   } catch (validationError) {
-    console.error("[PaperClip Desktop] Config validation failed!", validationError);
+    console.error("[SuperNode Desktop] Config validation failed!", validationError);
     // 删除无效配置，下次重启重试
     fs.unlinkSync(configPath);
     throw new Error("Generated config failed Zod validation");

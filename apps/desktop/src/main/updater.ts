@@ -55,23 +55,23 @@ export function createUpdater(
     // ─── 事件监听 ───
 
     autoUpdater.on("checking-for-update", () => {
-      console.log("[PaperClip Desktop] Checking for updates...");
+      console.log("[SuperNode Desktop] Checking for updates...");
     });
 
     autoUpdater.on("update-available", (info) => {
-      console.log(`[PaperClip Desktop] Update available: ${info.version}`);
+      console.log(`[SuperNode Desktop] Update available: ${info.version}`);
       if (mainWindow) {
         mainWindow.webContents.send("paperclip:update-available", info.version);
       }
     });
 
     autoUpdater.on("update-not-available", () => {
-      console.log("[PaperClip Desktop] No update available");
+      console.log("[SuperNode Desktop] No update available");
     });
 
     autoUpdater.on("download-progress", (progress) => {
       const percent = Math.round(progress.percent);
-      console.log(`[PaperClip Desktop] Download progress: ${percent}%`);
+      console.log(`[SuperNode Desktop] Download progress: ${percent}%`);
       config?.onDownloadProgress?.(percent);
       if (mainWindow) {
         mainWindow.webContents.send("paperclip:update-download-progress", percent);
@@ -79,7 +79,7 @@ export function createUpdater(
     });
 
     autoUpdater.on("update-downloaded", () => {
-      console.log("[PaperClip Desktop] Update downloaded — prompting to restart");
+      console.log("[SuperNode Desktop] Update downloaded — prompting to restart");
       if (mainWindow) {
         dialog
           .showMessageBox({
@@ -96,17 +96,17 @@ export function createUpdater(
             }
           })
           .catch((err) => {
-            console.error("[PaperClip Desktop] Failed to show update dialog:", err);
+            console.error("[SuperNode Desktop] Failed to show update dialog:", err);
           });
       }
     });
 
     autoUpdater.on("error", (error) => {
-      console.error("[PaperClip Desktop] Update error:", error.message);
+      console.error("[SuperNode Desktop] Update error:", error.message);
       config?.onError?.(error);
     });
   } catch (err) {
-    console.error("[PaperClip Desktop] Failed to initialize autoUpdater:", err);
+    console.error("[SuperNode Desktop] Failed to initialize autoUpdater:", err);
   }
 
   return {
@@ -117,7 +117,7 @@ export function createUpdater(
     checkForUpdates(): void {
       try {
         void autoUpdater.checkForUpdates().catch((err) => {
-          console.error("[PaperClip Desktop] Update check failed:", err.message);
+          console.error("[SuperNode Desktop] Update check failed:", err.message);
           if (mainWindow) {
             dialog
               .showMessageBox({
@@ -131,7 +131,7 @@ export function createUpdater(
           }
         });
       } catch (err) {
-        console.error("[PaperClip Desktop] Update check threw:", err);
+        console.error("[SuperNode Desktop] Update check threw:", err);
       }
     },
 

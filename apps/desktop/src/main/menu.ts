@@ -90,7 +90,7 @@ async function collectDiagnostics(serverPort: number): Promise<Record<string, un
       external: `${Math.round(memUsage.external / 1024 / 1024)} MB`,
     },
     env: paperclipEnv,
-    paperclipHome: (process.env.PAPERCLIP_HOME ?? "unknown").replace(process.env.HOME ?? "", "~"),
+    supernodeHome: (process.env.PAPERCLIP_HOME ?? "unknown").replace(process.env.HOME ?? "", "~"),
     timestamp: new Date().toISOString(),
   };
 }
@@ -98,7 +98,7 @@ async function collectDiagnostics(serverPort: number): Promise<Record<string, un
 /** 导出诊断信息的共享处理函数 */
 async function handleExportDiagnostics(serverPort: number): Promise<void> {
   const { filePath } = await dialog.showSaveDialog({
-    defaultPath: `paperclip-diagnostics-${new Date().toISOString().slice(0, 10)}.json`,
+    defaultPath: `supernode-diagnostics-${new Date().toISOString().slice(0, 10)}.json`,
     filters: [{ name: "JSON", extensions: ["json"] }],
   });
   if (!filePath) return;
@@ -108,7 +108,7 @@ async function handleExportDiagnostics(serverPort: number): Promise<void> {
     fs.writeFileSync(filePath, JSON.stringify(diag, null, 2));
     dialog.showMessageBox({ message: `Diagnostics saved to ${filePath}` });
   } catch (err) {
-    console.error("[PaperClip Desktop] Failed to export diagnostics:", err);
+    console.error("[SuperNode Desktop] Failed to export diagnostics:", err);
     dialog.showErrorBox("Export Failed", `Could not save diagnostics: ${err}`);
   }
 }
@@ -143,7 +143,7 @@ export function createAppMenu(
     ...(isMac
       ? [
           {
-            label: "PaperClip",
+            label: "SuperNode",
             submenu: [
               { role: "about" as const },
               { type: "separator" as const },

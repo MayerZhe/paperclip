@@ -81,15 +81,15 @@ export function getInitialMode(paperclipHome: string): AppMode {
     if (fs.existsSync(prefPath)) {
       const raw = JSON.parse(fs.readFileSync(prefPath, "utf-8"));
       if (typeof raw?.mode === "string" && (raw.mode === "agent" || raw.mode === "agenthubs")) {
-        console.log(`[PaperClip Desktop] Mode preference: ${raw.mode}`);
+        console.log(`[SuperNode Desktop] Mode preference: ${raw.mode}`);
         return raw.mode as AppMode;
       }
     }
   } catch (err) {
-    console.warn("[PaperClip Desktop] Failed to read mode preference, defaulting to agent:", err);
+    console.warn("[SuperNode Desktop] Failed to read mode preference, defaulting to agent:", err);
   }
 
-  console.log("[PaperClip Desktop] No mode preference — defaulting to agent");
+  console.log("[SuperNode Desktop] No mode preference — defaulting to agent");
   return "agent";
 }
 
@@ -99,9 +99,9 @@ export function getInitialMode(paperclipHome: string): AppMode {
 function setModeManagerState(partial: Partial<ModeManagerState>): void {
   modeState = { ...modeState, ...partial };
   if (partial.currentMode) {
-    console.log(`[PaperClip Desktop] Mode: ${partial.currentMode}, State: ${modeState.state}`);
+    console.log(`[SuperNode Desktop] Mode: ${partial.currentMode}, State: ${modeState.state}`);
   } else {
-    console.log(`[PaperClip Desktop] Mode state: ${modeState.state}`);
+    console.log(`[SuperNode Desktop] Mode state: ${modeState.state}`);
   }
 }
 
@@ -130,7 +130,7 @@ export async function startBothModes(config: StartBothModesConfig): Promise<Mode
       return { success: true, port, daemon };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error(`[PaperClip Desktop] Agent daemon startup failed: ${message}`);
+      console.error(`[SuperNode Desktop] Agent daemon startup failed: ${message}`);
       config.onStatusChange("agent", "error", message);
       return { success: false, error: message, port: config.agentConfig.serverPort, daemon: null };
     }
@@ -144,7 +144,7 @@ export async function startBothModes(config: StartBothModesConfig): Promise<Mode
       const { isVmBundleReady } = await import("./vm-bundle.js");
       if (!isVmBundleReady()) {
         const msg = "VM image not downloaded";
-        console.warn(`[PaperClip Desktop] AgentHubs: ${msg}`);
+        console.warn(`[SuperNode Desktop] AgentHubs: ${msg}`);
         config.onStatusChange("agenthubs", "error", msg);
         return { success: false, error: msg };
       }
@@ -153,13 +153,13 @@ export async function startBothModes(config: StartBothModesConfig): Promise<Mode
       const result = await startAgentHubsMode({
         paperclipHome: config.paperclipHome,
         onProgress: (msg: string) => {
-          console.log(`[PaperClip Desktop] AgentHubs: ${msg}`);
+          console.log(`[SuperNode Desktop] AgentHubs: ${msg}`);
         },
       });
 
       if (result.status === "error") {
         const errMsg = result.error ?? "AgentHubs mode returned error status";
-        console.error(`[PaperClip Desktop] AgentHubs startup failed: ${errMsg}`);
+        console.error(`[SuperNode Desktop] AgentHubs startup failed: ${errMsg}`);
         config.onStatusChange("agenthubs", "error", errMsg);
         return { success: false, error: errMsg };
       }
@@ -168,7 +168,7 @@ export async function startBothModes(config: StartBothModesConfig): Promise<Mode
       return { success: true };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error(`[PaperClip Desktop] AgentHubs startup failed: ${message}`);
+      console.error(`[SuperNode Desktop] AgentHubs startup failed: ${message}`);
       config.onStatusChange("agenthubs", "error", message);
       return { success: false, error: message };
     }
@@ -217,9 +217,9 @@ export async function stopBothModes(
   if (result.agent.daemon) {
     try {
       await stopAgentDaemon(result.agent.daemon, result.agent.port);
-      console.log("[PaperClip Desktop] Agent daemon stopped");
+      console.log("[SuperNode Desktop] Agent daemon stopped");
     } catch (err) {
-      console.error("[PaperClip Desktop] Error stopping agent daemon:", err);
+      console.error("[SuperNode Desktop] Error stopping agent daemon:", err);
     }
   }
 
@@ -230,12 +230,12 @@ export async function stopBothModes(
       await stopAgentHubsMode({
         timeout: 60,
       });
-      console.log("[PaperClip Desktop] AgentHubs mode stopped");
+      console.log("[SuperNode Desktop] AgentHubs mode stopped");
     } catch (err) {
-      console.error("[PaperClip Desktop] Error stopping AgentHubs mode:", err);
+      console.error("[SuperNode Desktop] Error stopping AgentHubs mode:", err);
     }
   }
 
   setModeManagerState({ state: "idle", error: undefined });
-  console.log("[PaperClip Desktop] Both modes stopped");
+  console.log("[SuperNode Desktop] Both modes stopped");
 }
