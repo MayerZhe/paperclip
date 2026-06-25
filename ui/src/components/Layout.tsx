@@ -18,6 +18,7 @@ import { MobileBottomNav } from "./MobileBottomNav";
 import { WorktreeBanner } from "./WorktreeBanner";
 import { DevRestartBanner } from "./DevRestartBanner";
 import { StandaloneBrowserControls } from "./StandaloneBrowserControls";
+import { ThemeToggle } from "./ThemeToggle";
 import { ResizableSidebarPane } from "./ResizableSidebarPane";
 import { SidebarAccountMenu } from "./SidebarAccountMenu";
 import { useDialogActions } from "../context/DialogContext";
@@ -43,6 +44,7 @@ import { scheduleMainContentFocus } from "../lib/main-content-focus";
 import { cn } from "../lib/utils";
 import { NotFoundPage } from "../pages/NotFound";
 import { PluginSlotMount, resolveRouteSidebarSlot, usePluginSlots } from "../plugins/slots";
+import { ModeProvider, useMode } from "../context/ModeContext";
 
 const INSTANCE_SETTINGS_MEMORY_KEY = "paperclip.lastInstanceSettingsPath";
 
@@ -92,6 +94,7 @@ export function Layout() {
   const [instanceSettingsTarget, setInstanceSettingsTarget] = useState<string>(() => readRememberedInstanceSettingsPath());
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [isMacPlatform, setIsMacPlatform] = useState(false);
+  const { mode } = useMode();
   const matchedCompany = useMemo(() => {
     if (!companyPrefix) return null;
     const requestedPrefix = companyPrefix.toUpperCase();
@@ -386,6 +389,7 @@ export function Layout() {
   }, []);
 
   return (
+    <ModeProvider>
     <GeneralSettingsProvider value={{ keyboardShortcutsEnabled }}>
       <div
       className={cn(
@@ -471,7 +475,12 @@ export function Layout() {
             )}
           >
             <StandaloneBrowserControls mobile={isMobile} />
-            <BreadcrumbBar />
+            <div className="flex items-center justify-between">
+              <BreadcrumbBar />
+              <div className="pr-4">
+                <ThemeToggle />
+              </div>
+            </div>
             {isMobile && isCompanySettingsRoute ? (
               <div className="border-b border-border px-4 pb-3">
                 <NodeOrgSettingsNav />
@@ -479,27 +488,37 @@ export function Layout() {
             ) : null}
           </div>
           <div className={cn(isMobile ? "block" : "flex flex-1 min-h-0")}>
-            <main
-              id="main-content"
-              ref={mainContentRef}
-              tabIndex={-1}
-              className={cn(
-                "flex-1 p-4 outline-none md:p-6",
-                isMobile ? "overflow-visible pb-[calc(5rem+env(safe-area-inset-bottom))]" : "overflow-auto",
-              )}
-            >
-              {hasUnknownCompanyPrefix ? (
-                <NotFoundPage
-                  scope="invalid_company_prefix"
-                  requestedPrefix={companyPrefix ?? selectedCompany?.issuePrefix}
-                />
-              ) : (
-                <div key={location.pathname} className="page-transition-enter">
-                  <Outlet />
+            {mode === "agent" ? (
+              <>
+                <main
+                  id="main-content"
+                  ref={mainContentRef}
+                  tabIndex={-1}
+                  className={cn(
+                    "flex-1 p-4 outline-none md:p-6",
+                    isMobile ? "overflow-visible pb-[calc(5rem+env(safe-area-inset-bottom))]" : "overflow-auto",
+                  )}
+                >
+                  {hasUnknownCompanyPrefix ? (
+                    <NotFoundPage
+                      scope="invalid_company_prefix"
+                      requestedPrefix={companyPrefix ?? selectedCompany?.issuePrefix}
+                    />
+                  ) : (
+                    <div key={location.pathname} className="page-transition-enter">
+                      <Outlet />
+                    </div>
+                  )}
+                </main>
+                <PropertiesPanel />
+              </>
+            ) : (
+              <div className="flex flex-1 items-center justify-center min-h-0">
+                <div className="text-center p-8">
+                  <p className="text-muted-foreground">AgentHubs mode will be available here.</p>
                 </div>
-              )}
-            </main>
-            <PropertiesPanel />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -513,5 +532,6 @@ export function Layout() {
       <ToastViewport />
       </div>
     </GeneralSettingsProvider>
+    </ModeProvider>
   );
 }

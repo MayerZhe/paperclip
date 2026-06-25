@@ -14,6 +14,11 @@ import {
   Package,
   Settings,
   FolderOpen,
+  Terminal,
+  ShoppingCart,
+  Server,
+  Monitor,
+  Wallet,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { NavLink } from "@/lib/router";
@@ -31,10 +36,13 @@ import { Button } from "@/components/ui/button";
 import { PluginSlotOutlet } from "@/plugins/slots";
 import { PluginLauncherOutlet } from "@/plugins/launchers";
 import { SidebarNodeOrgMenu } from "./SidebarNodeOrgMenu";
+import { useMode } from "../context/ModeContext";
+import { SidebarModeTabs } from "./SidebarModeTabs";
 
 export function Sidebar() {
   const { openNewIssue } = useDialogActions();
   const { selectedCompanyId, selectedCompany } = useNodeOrg();
+  const { mode, setMode } = useMode();
   const inboxBadge = useInboxBadge(selectedCompanyId);
   const { data: experimentalSettings } = useQuery({
     queryKey: queryKeys.instance.experimentalSettings,
@@ -78,75 +86,97 @@ export function Sidebar() {
         </Button>
       </div>
 
-      <nav className="flex-1 min-h-0 overflow-y-auto scrollbar-auto-hide flex flex-col gap-4 pointer-coarse:gap-3 px-3 py-2">
-        <div className="flex flex-col gap-0.5">
-          {/* New Task button aligned with nav items */}
-          <button
-            onClick={() => openNewIssue()}
-            data-slot="icon-button"
-            className="flex items-center gap-2.5 px-3 py-2 pointer-coarse:py-1.5 text-[13px] font-medium text-foreground/80 hover:bg-accent/50 hover:text-foreground transition-colors"
-          >
-            <SquarePen className="h-4 w-4 shrink-0" />
-            <span className="truncate">New Task</span>
-          </button>
-          <SidebarNavItem to="/dashboard" label="Dashboard" icon={LayoutDashboard} liveCount={liveRunCount} />
-          <SidebarNavItem
-            to="/inbox"
-            label="Inbox"
-            icon={Inbox}
-            badge={inboxBadge.inbox}
-            badgeTone={inboxBadge.failedRuns > 0 ? "danger" : "default"}
-            alert={inboxBadge.failedRuns > 0}
-          />
-        </div>
+      {/* Mode tabs: Agent / AgentHubs — Claude Desktop style */}
+      <SidebarModeTabs activeMode={mode} onSwitch={setMode} />
 
-        <SidebarSection label="Work">
-          <SidebarNavItem to="/issues" label="Tasks" icon={CircleDot} />
-          <SidebarNavItem to="/routines" label="Routines" icon={Repeat} />
-          <SidebarNavItem to="/goals" label="Goals" icon={Target} />
-          <SidebarNavItem to="/artifacts" label="Artifacts" icon={Package} />
-          {showWorkspacesLink ? (
-            <SidebarNavItem to="/workspaces" label="Workspaces" icon={GitBranch} />
-          ) : null}
-          {streamlined ? (
-            <SidebarNavItem to="/projects" label="Projects" icon={FolderOpen} />
-          ) : null}
+      {mode === "agent" ? (
+        <nav className="flex-1 min-h-0 overflow-y-auto scrollbar-auto-hide flex flex-col gap-4 pointer-coarse:gap-3 px-3 py-2">
+          <div className="flex flex-col gap-0.5">
+            {/* New Task button aligned with nav items */}
+            <button
+              onClick={() => openNewIssue()}
+              data-slot="icon-button"
+              className="flex items-center gap-2.5 px-3 py-2 pointer-coarse:py-1.5 text-[13px] font-medium text-foreground/80 hover:bg-accent/50 hover:text-foreground transition-colors"
+            >
+              <SquarePen className="h-4 w-4 shrink-0" />
+              <span className="truncate">New Task</span>
+            </button>
+            <SidebarNavItem to="/dashboard" label="Dashboard" icon={LayoutDashboard} liveCount={liveRunCount} />
+            <SidebarNavItem
+              to="/inbox"
+              label="Inbox"
+              icon={Inbox}
+              badge={inboxBadge.inbox}
+              badgeTone={inboxBadge.failedRuns > 0 ? "danger" : "default"}
+              alert={inboxBadge.failedRuns > 0}
+            />
+          </div>
+
+          <SidebarSection label="Work">
+            <SidebarNavItem to="/issues" label="Tasks" icon={CircleDot} />
+            <SidebarNavItem to="/routines" label="Routines" icon={Repeat} />
+            <SidebarNavItem to="/goals" label="Goals" icon={Target} />
+            <SidebarNavItem to="/artifacts" label="Artifacts" icon={Package} />
+            {showWorkspacesLink ? (
+              <SidebarNavItem to="/workspaces" label="Workspaces" icon={GitBranch} />
+            ) : null}
+            {streamlined ? (
+              <SidebarNavItem to="/projects" label="Projects" icon={FolderOpen} />
+            ) : null}
+            <PluginSlotOutlet
+              slotTypes={["sidebar"]}
+              context={pluginContext}
+              className="flex flex-col gap-0.5"
+              itemClassName="text-[13px] font-medium"
+              missingBehavior="placeholder"
+            />
+            <PluginLauncherOutlet
+              placementZones={["sidebar"]}
+              context={pluginContext}
+              className="flex flex-col gap-0.5"
+              itemClassName="text-[13px] font-medium"
+            />
+          </SidebarSection>
+
+          {/* Classic mode restores the per-project collapsible below Work. */}
+          {streamlined ? null : <SidebarProjects />}
+
+          <SidebarAgents streamlined={streamlined} />
+
+          <SidebarSection label="Node Org">
+            <SidebarNavItem to="/org" label="Org" icon={Network} />
+            <SidebarNavItem to="/skills" label="Skills" icon={Boxes} />
+            <SidebarNavItem to="/costs" label="Costs" icon={DollarSign} />
+            <SidebarNavItem to="/activity" label="Activity" icon={History} />
+            <SidebarNavItem to="/company/settings" label="Settings" icon={Settings} />
+          </SidebarSection>
+
           <PluginSlotOutlet
-            slotTypes={["sidebar"]}
+            slotTypes={["sidebarPanel"]}
             context={pluginContext}
-            className="flex flex-col gap-0.5"
-            itemClassName="text-[13px] font-medium"
+            className="flex flex-col gap-3"
+            itemClassName="rounded-none border border-border p-3"
             missingBehavior="placeholder"
           />
-          <PluginLauncherOutlet
-            placementZones={["sidebar"]}
-            context={pluginContext}
-            className="flex flex-col gap-0.5"
-            itemClassName="text-[13px] font-medium"
-          />
-        </SidebarSection>
-
-        {/* Classic mode restores the per-project collapsible below Work. */}
-        {streamlined ? null : <SidebarProjects />}
-
-        <SidebarAgents streamlined={streamlined} />
-
-        <SidebarSection label="Node Org">
-          <SidebarNavItem to="/org" label="Org" icon={Network} />
-          <SidebarNavItem to="/skills" label="Skills" icon={Boxes} />
-          <SidebarNavItem to="/costs" label="Costs" icon={DollarSign} />
-          <SidebarNavItem to="/activity" label="Activity" icon={History} />
-          <SidebarNavItem to="/company/settings" label="Settings" icon={Settings} />
-        </SidebarSection>
-
-        <PluginSlotOutlet
-          slotTypes={["sidebarPanel"]}
-          context={pluginContext}
-          className="flex flex-col gap-3"
-          itemClassName="rounded-none border border-border p-3"
-          missingBehavior="placeholder"
-        />
-      </nav>
+        </nav>
+      ) : (
+        <nav className="flex-1 min-h-0 overflow-y-auto scrollbar-auto-hide flex flex-col gap-4 pointer-coarse:gap-3 px-3 py-2">
+          <div className="flex flex-col gap-0.5">
+            <SidebarNavItem to="/dashboard" label="Dashboard" icon={LayoutDashboard} liveCount={liveRunCount} />
+          </div>
+          <SidebarSection label="AgentHubs">
+            <SidebarNavItem to="#" label="Console" icon={Terminal} />
+            <SidebarNavItem to="#" label="Orders" icon={ShoppingCart} />
+            <SidebarNavItem to="#" label="Services" icon={Server} />
+            <SidebarNavItem to="#" label="Mirror" icon={Monitor} />
+            <SidebarNavItem to="#" label="Wallet" icon={Wallet} />
+          </SidebarSection>
+          <SidebarSection label="Node Org">
+            <SidebarNavItem to="/activity" label="Activity" icon={History} />
+            <SidebarNavItem to="/company/settings" label="Settings" icon={Settings} />
+          </SidebarSection>
+        </nav>
+      )}
     </aside>
   );
 }

@@ -26,7 +26,17 @@ export interface ModeManagerState {
 /** 模式启动结果 */
 export interface ModeStartupResult {
   agent: { success: boolean; error?: string; port: number; daemon: ChildProcess | null };
-  agenthubs: { success: boolean; error?: string };
+  agenthubs: {
+    success: boolean;
+    degraded: boolean;
+    bootMethod?: "vm" | "fallback_spawn";
+    error?: string;
+    health?: {
+      cloudApi: boolean;
+      paperclip: boolean;
+      minio: boolean;
+    };
+  };
 }
 
 /** 模式运行时状态（用于 onStatusChange 回调） */
@@ -146,7 +156,7 @@ export async function startBothModes(config: StartBothModesConfig): Promise<Mode
         const msg = "VM image not downloaded";
         console.warn(`[SuperNode Desktop] AgentHubs: ${msg}`);
         config.onStatusChange("agenthubs", "error", msg);
-        return { success: false, error: msg };
+        return { success: false, degraded: true, error: msg };
       }
 
       const { startAgentHubsMode } = await import("./agenthubs-mode.js");
@@ -161,16 +171,21 @@ export async function startBothModes(config: StartBothModesConfig): Promise<Mode
         const errMsg = result.error ?? "AgentHubs mode returned error status";
         console.error(`[SuperNode Desktop] AgentHubs startup failed: ${errMsg}`);
         config.onStatusChange("agenthubs", "error", errMsg);
-        return { success: false, error: errMsg };
+        return { success: false, degraded: true, error: errMsg };
       }
 
       config.onStatusChange("agenthubs", "running");
-      return { success: true };
+      return {
+        success: true,
+        degraded: false,
+        bootMethod: "vm" as const,
+        health: result.healthCheckResults,
+      };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.error(`[SuperNode Desktop] AgentHubs startup failed: ${message}`);
       config.onStatusChange("agenthubs", "error", message);
-      return { success: false, error: message };
+      return { success: false, degraded: true, error: message };
     }
   };
 
@@ -187,7 +202,7 @@ export async function startBothModes(config: StartBothModesConfig): Promise<Mode
 
   const agenthubs = agenthubsResult.status === "fulfilled"
     ? agenthubsResult.value
-    : { success: false, error: String(agenthubsResult.reason) };
+    : { success: false, degraded: true, error: String(agenthubsResult.reason) };
 
   // 至少一种模式启动成功 → state = 'running'
   // 两种模式都失败 → state = 'error'
