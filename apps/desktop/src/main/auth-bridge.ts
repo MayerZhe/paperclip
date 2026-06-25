@@ -22,8 +22,8 @@ export interface LoginResult {
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const LOGIN_URL = "https://agenthubs.dev/login";
-const ORGS_API_URL = "https://agenthubs.dev/api/v1/orgs";
+const LOGIN_URL = "http://localhost:3000/login";
+const ORGS_API_URL = "http://localhost:4000/api/v1/orgs";
 const PARTITION_NAME = "persist:agenthubs";
 const TOKEN_KEY = "agenthubs_token";
 const LOGIN_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
@@ -138,7 +138,7 @@ export function createAuthBridge(opts: {
   const win = new BrowserWindow({
     width: 800,
     height: 700,
-    title: "PaperClip - Login",
+    title: "SuperNode - Login",
     show: false,
     webPreferences: {
       session: ses,
@@ -287,9 +287,9 @@ export function createAuthBridge(opts: {
     // Intercept localhost redirects — these happen during the OAuth-like flow
     // when the server wants to redirect back to a local client.  Instead of
     // navigating away from our login window, extract the token and proceed.
-    if (parsed.hostname === "localhost" && parsed.port === "4000") {
+    if (parsed.hostname === "localhost" && (parsed.port === "3000" || parsed.port === "4000")) {
       event.preventDefault();
-      console.log("[auth-bridge] Intercepted localhost:4000 redirect, extracting token");
+      console.log("[auth-bridge] Intercepted localhost:${parsed.port} redirect, extracting token");
 
       // Try query param token first, then fall back to localStorage.
       let token = parsed.searchParams.get("token");
@@ -350,6 +350,22 @@ export function createAuthBridge(opts: {
  * The temporary window is always destroyed before this function resolves.
  */
 export async function checkExistingSession(): Promise<LoginResult | null> {
+  // Agent Mode (local_trusted): skip cloud login — return a local session
+  // that lets the user go straight to the SuperNode Agent UI.
+  // No AgentHubs cloud API calls are made.
+  if (process.env.PAPERCLIP_DEPLOYMENT_MODE === "local_trusted" ||
+      process.env.DEPLOYMENT_MODE === "local_trusted") {
+    const localUser = { id: "agent-local", email: "agent@local.paperclip", name: "Agent User" };
+    const localOrgs = [{ id: "agent-org", name: "Local Agent", type: "personal" as const, slug: "local" }];
+    console.log("[auth-bridge] Agent mode (local_trusted) — skipping cloud login");
+    return {
+      token: "agent-local-token",
+      user: localUser,
+      orgs: localOrgs,
+      selectedOrgId: "agent-org",
+    } satisfies LoginResult;
+  }
+
   const ses = session.fromPartition(PARTITION_NAME);
 
   // A minimal hidden window is the only way to access localStorage for a
