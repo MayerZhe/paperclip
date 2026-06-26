@@ -973,7 +973,7 @@ function actorHasActiveUserMembership(req: Request, companyId: string) {
     typeof req.actor.userId === "string" &&
     Array.isArray(req.actor.memberships) &&
     req.actor.memberships.some(
-      (membership) =>
+      (membership: { companyId: string; status: string }) =>
         membership.companyId === companyId && membership.status === "active",
     )
   );
@@ -1417,7 +1417,7 @@ async function loadUserCompanyAccessResponse(
           isInstanceAdmin,
         }
       : null,
-    companyAccess: memberships.map((membership) => {
+    companyAccess: memberships.map((membership: { companyId: string; status: string; createdAt: Date; updatedAt: Date }) => {
       const company = companyMap.get(membership.companyId) ?? null;
       return {
         ...membership,
@@ -1683,7 +1683,7 @@ export function buildInviteOnboardingTextDocument(
   };
 
   appendBlock(`
-    # Super Node Agent Onboarding
+    # Paperclip Agent Onboarding
 
     This document is meant to be readable by both humans and agents.
 
@@ -1707,7 +1707,7 @@ export function buildInviteOnboardingTextDocument(
   appendBlock(`
     ## Step 0
 
-    Decide which Super Node adapter type matches your runtime.
+    Decide which Paperclip adapter type matches your runtime.
 
     Use adapterType only when there is a matching Super Node adapter. Put runtime-specific settings in agentDefaultsPayload.
 
@@ -1794,7 +1794,7 @@ export function buildInviteOnboardingTextDocument(
     : [];
 
   if (connectionCandidates.length > 0) {
-    lines.push("## Suggested Super Node base URLs to try");
+    lines.push("## Suggested Paperclip base URLs to try");
     for (const candidate of connectionCandidates) {
       lines.push(`- ${candidate}`);
     }
@@ -1825,7 +1825,7 @@ export function buildInviteOnboardingTextDocument(
     ${onboarding.registrationEndpoint.path}
     ${onboarding.claimEndpointTemplate.path}
     ${onboarding.skill.path}
-    ${manifest.invite.onboardingPath}
+    ${manifest.invite.onboardingTextPath}
   `);
 
   return `${lines.join("\n")}\n`;
